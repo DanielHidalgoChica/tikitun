@@ -1,4 +1,4 @@
-tikitun_demo/
+tikitun/
   src/
     app.py
     db/
