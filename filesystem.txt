@@ -1,0 +1,25 @@
+tikitun_demo/
+  src/
+    app.py
+    db/
+      __init__.py
+      db_app.py
+    repositories/
+      __init__.py
+      productos_repo.py
+      chats_repo.py
+      mensajes_repo.py
+      usuarios_repo.py
+    services/
+      __init__.py
+      productos_service.py
+      chats_service.py
+      mensajes_service.py
+      usuarios_service.py
+    ui/
+      __init__.py
+      main_window.py
+      publicar_producto_window.py
+      buscar_productos_window.py
+      abrir_chat_window.py
+      enviar_mensaje_window.py
