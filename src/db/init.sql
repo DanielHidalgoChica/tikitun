@@ -1,67 +1,68 @@
 CREATE TABLE Usuario(
-    username
-    correo
-    nombre_completo
-    password
-    ubicacion
-    rango
-    saldo
-    valoracion_media
-    cuenta_eliminada
+    username VARCHAR2(128),
+    correo VARCHAR2(128),
+    nombre_completo VARCHAR2(128),
+    contrasenia VARCHAR2(128),
+    ubi_latitud FLOAT(2),
+    ubi_longitud FLOAT(2),
+    rango FLOAT(3),
+    saldo FLOAT(2),
+    valoracion_media FLOAT(1),
+    cuenta_eliminada INT
 );
 
 CREATE TABLE Categoria(
-    nombre
+    nombre VARCHAR2(128)
 );
 
 CREATE TABLE Producto(
-    id_producto
-    username
-    nombre_categoria
-    titulo
-    descripcion
-    precio
-    imagen
-    promocion
-    disponible
+    id_producto INT,
+    username VARCHAR2(128),
+    nombre_categoria VARCHAR2(128),
+    titulo VARCHAR2(128),
+    descripcion VARCHAR2(512),
+    precio FLOAT(2),
+    imagen BLOB,
+    promocion FLOAT(2),
+    disponible INT
 );
 
 CREATE TABLE Chat(
-    id_chat
-    id_producto
-    username
-    archivado
+    id_chat INT,
+    id_producto INT,
+    username VARCHAR2(128),
+    archivado INT
 );
 
 CREATE TABLE Mensaje(
-    id_chat
-    fecha
-    username
-    texto
-    adjunto
-    leido
+    id_chat INT,
+    fecha TIMESTAMP(6),
+    username VARCHAR2(128),
+    texto VARCHAR2(512),
+    adjunto BLOB,
+    leido INT
 );
 
 CREATE TABLE Favorito(
-    id_producto
-    username
+    id_producto INT,
+    username VARCHAR2(128)
 );
 
 CREATE TABLE Contraoferta(
-    id_producto
-    username
-    precio
+    id_producto INT,
+    username VARCHAR2(128),
+    precio FLOAT(2)
 );
 
 CREATE TABLE Preferidos(
-    username
-    nombre
+    username VARCHAR(128),
+    nombre VARCHAR2(128)
 );
 
 CREATE TABLE Vendido(
-    id_producto
-    username
-    recepcion_confirmada
-    precio_final
-    valoracion
+    id_producto INT,
+    username VARCHAR2(128),
+    recepcion_confirmada INT,
+    precio_final FLOAT(2),
+    valoracion INT
 );
