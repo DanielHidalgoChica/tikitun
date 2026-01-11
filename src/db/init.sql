@@ -3,11 +3,11 @@ CREATE TABLE Usuario(
     correo VARCHAR2(128) UNIQUE,
     nombre_completo VARCHAR2(128),
     contrasenia VARCHAR2(128),
-    ubi_latitud FLOAT(2),
-    ubi_longitud FLOAT(2),
-    rango FLOAT(3),
-    saldo FLOAT(2),
-    valoracion_media FLOAT(1),
+    ubi_latitud FLOAT(6),
+    ubi_longitud FLOAT(6),
+    rango FLOAT(6),
+    saldo FLOAT(10),
+    valoracion_media FLOAT(3),
     cuenta_eliminada INT
 );
 
@@ -21,7 +21,7 @@ CREATE TABLE Producto(
     nombre_categoria VARCHAR2(128),
     titulo VARCHAR2(128) NOT NULL,
     descripcion VARCHAR2(512),
-    precio FLOAT(2) NOT NULL,
+    precio FLOAT(10) NOT NULL,
     imagen BLOB,
     promocion FLOAT(2),
     disponible INT,
@@ -58,7 +58,7 @@ CREATE TABLE Favorito(
 CREATE TABLE Contraoferta(
     id_producto INT,
     username VARCHAR2(128),
-    precio FLOAT(2) NOT NULL,
+    precio FLOAT(10) NOT NULL,
     CONSTRAINT PK_Contraoferta PRIMARY KEY (id_producto,username),
     CONSTRAINT FK_ContraofertaProducto FOREIGN KEY (id_producto) REFERENCES Producto(id_producto),
     CONSTRAINT FK_ContraofertaContraofertante FOREIGN KEY (username) REFERENCES Usuario(username)
@@ -76,10 +76,8 @@ CREATE TABLE Vendido(
     id_producto INT PRIMARY KEY,
     username VARCHAR2(128),
     recepcion_confirmada INT,
-    precio_final FLOAT(2),
+    precio_final FLOAT(10),
     valoracion INT,
     CONSTRAINT FK_VendidoProducto FOREIGN KEY (id_producto) REFERENCES Producto(id_producto),
     CONSTRAINT FK_VendidoComprador FOREIGN KEY (username) REFERENCES Usuario(username)
 );
-
-SELECT * FROM USER_TABLES;
