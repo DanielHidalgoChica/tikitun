@@ -6,7 +6,7 @@ from src.ui.mensajes.mensajes_window import show_mensajes_view
 from src.ui.favoritos.favoritos_window import show_favoritos_view
 
 
-def run_app(username="usuario_demo"):
+def run_app(username="bob"):
     """
     Ventana principal de TikiTun con menú lateral y vista central.
     

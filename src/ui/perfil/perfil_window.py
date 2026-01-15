@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 
-def show_perfil_view(parent_frame, username="usuario_demo"):
+def show_perfil_view(parent_frame, username="bob"):
     """
     Muestra la vista de gestión de perfil en el frame principal.
     

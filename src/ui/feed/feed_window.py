@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 
-def show_feed_view(parent_frame, username="usuario_demo"):
+def show_feed_view(parent_frame, username="bob"):
     """
     Muestra el feed de recomendaciones en el frame principal.
     
