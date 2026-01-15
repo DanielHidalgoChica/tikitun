@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from src.db.db_app import connect
+from src.db.db_app import connect, begin_transaction, commit, rollback
 from src.services.feed_busqueda_favs.favoritos_service import (
     consultar_favoritos,
     quitar_favorito
@@ -119,13 +119,17 @@ def show_favoritos_view(parent_frame, username="bob"):
             def crear_quitar_handler(id_prod, user):
                 """Factory para crear handler del botón Quitar."""
                 def on_quitar():
+                    cn = None
                     try:
-                        with connect() as cn:
-                            quitar_favorito(cn, user, id_prod)
+                        cn = begin_transaction()
+                        quitar_favorito(cn, user, id_prod)
+                        commit(cn)
                         messagebox.showinfo("OK", "Producto eliminado de favoritos")
                         # Recarga automática: re-renderiza la vista
                         show_favoritos_view(parent_frame, user)
                     except Exception as ex:
+                        if cn:
+                            rollback(cn)
                         messagebox.showerror("Error", str(ex))
                 return on_quitar
             
