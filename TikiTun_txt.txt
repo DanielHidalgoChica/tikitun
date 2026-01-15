@@ -1,0 +1,1769 @@
+Escuela Técnica Superior de Ingeniería Informática y																									
+Telecomunicaciones   UGR																									
+TikiTún																									
+DISEÑO Y DESARROLLO DE SISTEMAS DE INFORMACIÓN																									
+Curso 2025/2026																									
+Práctica 2:																									
+Diseño de datos en un Sistema de Información																									
+Autores:																									
+Aitor de la Iglesia García Juan Manuel Fernández García																									
+Daniel Hidalgo Chica																									
+Roberto González Lugo Eisa Rodríguez Macmichael																									
+Índice																									
+1. Descripción del 51.                                                                                                                  3																									
+2. Requisitos Funcionales                                                                                                          7																									
+2.1. Gestión de perfiles (Eisa Rodríguez)                                                                               7																									
+2.2. Gestión de productos (Roberto González)                                                                    12																									
+"2.3. Feed de recomendaciones, búsquedas y favoritos (Daniel Hidalgo)                           16"																									
+2.4. Gestión de ventas (Juan Manuel Fernández)                                                               20																									
+2.5. Gestión de mensajes (Aitor de la Iglesia)                                                                      24																									
+3. Restricciones semánticas                                                                                                     28																									
+3.1. Gestión de perfiles (Eisa Rodríguez)                                                                             28																									
+3.2. Gestión de productos (Roberto González)                                                                    30																									
+"3.3. Feed de recomendaciones, búsquedas y favoritos (Daniel Hidalgo)                          33"																									
+3.4. Gestión de ventas (Juan Manuel Fernández)                                                               33																									
+3.5. Gestión de mensajes (Aitor de la Iglesia)                                                                      34																									
+4. Diagramas y paso a tablas                                                                                                   36																									
+4.1. Caja Negra                                                                                                                      36																									
+4.2. Armazón                                                                                                                          36																									
+4.3. DFD1s                                                                                                                             37																									
+4.4. Esquemas externos                                                                                                        41																									
+4.5. Paso a tablas                                                                                                                  55																									
+4.6. Fusión de tablas                                                                                                             56																									
+4.7. Dependencias funcionales                                                                                             57																									
+4.8. Normalización                                                                                                                 58																									
+1. Descripción del SI																									
+TikiTún es un sistema de información multiusuario orientado a la compraventa de																									
+"productos entre particulares. Su funcionamiento se basa en la publicación de artículos por parte de los usuarios, la consulta de dichos artículos a través de un sistema de búsqueda y recomendaciones, y la interacción directa entre compradores y vendedores para llegar a"																									
+acuerdos de transacción.																									
+El sistema está estructurado en varios subsistemas que se integran:																									
+"•  Gestión de perfiles (Eisa Rodríguez): Incluye el registro, modificación y baja de"																									
+"usuarios, así como la gestión de preferencias y de un monedero virtual. También la consulta de usuarios (tanto el propio como otros)."																									
+"• Gestión de productos (Roberto González): Permite dar de alta, modificar, eliminar,"																									
+consultar y promocionar artículos.																									
+"•  Feed de recomendaciones, búsquedas y favoritos (Daniel Hidalgo): Muestra al"																									
+"usuario productos que podrían serle de interés, permite la búsqueda con filtrado por cadena de caracteres y categoría, y controla productos guardados como favoritos."																									
+•  Gestión  de ventas  (Juan Manuel  Fernández):  Regula los procesos de compra																									
+directa y negociación mediante contraofertas.																									
+• Mensajería (Aitor de la Iglesia): Facilita la comunicación entre usuarios vinculada a																									
+los productos.																									
+De  cada  usuario  se  almacena  un  nombre  completo  (en  una  cadena  de  60																									
+"caracteres), nombre de usuario (en una cadena de 15 caracteres), contraseña (serie de entre 8 y 15 caracteres con obligatoriedad de contener una mayúscula, una minúscula, un número y un carácter especial, y sin espacios), correo electrónico (cadena de caracteres con el formato usual), ubicación (tupla latitud, longitud), rango en kilómetros (número real positivo con dos cifras decimales), saldo del monedero en euros (número real positivo con dos cifras decimales), productos ofertados (lista de identificadores de productos), productos favoritos (lista de identificadores de productos), preferencias de categorías (lista de entre 1 y 6 cadenas de caracteres escogidas de entre un conjunto de categorías preestablecidas por el sistema), valoración media (número real entre 1 y 5 con un decimal, con saltos de 0.5 en 0.5), y un campo cuenta_ eliminada (booleano, true si el usuario se"																									
+ha dado de baja).																									
+"Para dar de alta a cada usuario se le pedirá que introduzca nombre, nombre de"																									
+"usuario (único), contraseña, correo electrónico (único); que seleccione su ubicación y rango de interés (en km); que marque entre 1 y 6 categorías de preferencia; que confirme su mayoría  de  edad;  y  que  acepte  la política de privacidad y condiciones  de uso de la"																									
+plataforma.																									
+Un usuario podrá acceder a la información de su perfil y editarla (datos personales y																									
+"preferencias), añadir saldo a su monedero o transferirlo a una cuenta bancaria, visitar otros"																									
+"perfiles, y por último, darse de baja de la plataforma. En este último caso, se actualizan a valores nulos todos sus campos personales excepto el nombre de usuario (clave primaria) y"																									
+"este  deja  de  poder  acceder  a  la  plataforma,  además  de  anularse  todos  sus  productos"																									
+"ofertados.  Darse  de  baja  sólo  será  posible  si  no  tiene  ventas  activas,  esto  es,  no es"																									
+"vendedor  ni comprador  de un producto comprado del que todavía no se ha confirmado  su recepción, ni tampoco ha realizado ninguna contraoferta que siga activa."																									
+Un producto es un artículo en venta publicado por un usuario. De cada producto se																									
+"almacenará un ld_producto (unsigned int), título (cadena de hasta  80  caracteres), descripción (cadena de hasta 500  caracteres),  precio en euros  (número  real  positivo  con dos cifras decimales), categoría (elemento perteneciente a una estructura jerárquica de categorías), grado de promoción  (número  real entre O y  1 con dos decimales),  e imágen (1 fichero en formato  .jpg de  1024x1024 píxeles) Además  de un valor  booleano que indica si el   producto   está   disponible   para  su  venta   (no   ha  sido  solicitada   eliminación   ni  se  ha"																									
+vendido).																									
+"Para dar de alta un producto, el usuario deberá introducir su título, descripción,"																									
+"precio, categoría (que se elegirá de una lista cerrada de opciones) y adjuntar una imagen. El sistema   validará   que   el   precio   sea   mayor   que   cero.   El   identificador   del   producto"																									
+(ld_producto) se asignará automáticamente y no será visible ni editable por el usuario.																									
+El usuario podrá modificar los datos de un producto que él mismo haya publicado																									
+"(título, descripción, precio, categoría e imágen adjunta) o eliminarlo (marcarlo como no disponible y hacerlo invisible a efectos prácticos) cuando  lo  desee.  Los  productos publicados  podrán  ser  consultados  por  otros  usuarios  a  través  del  feed,  búsquedas  y"																									
+perfiles de vendedores.																									
+"Opcionalmente, el usuario podrá promocionar un producto. El sistema incrementará"																									
+la visibilidad  del producto en el feed en función del valor registrado en el campo grado de																									
+"promoción. Para establecer este valor, el usuario deberá abonar una cantidad de dinero de su monedero, proporcional al nivel de promoción seleccionado."																									
+"El  grado  de  promoción  se  reducirá automáticamente  en O, 1 unidades cada 24"																									
+"horas. Esto  implica  que  la visibilidad  del  producto  también  disminuirá  progresivamente  con el paso de los días. Un producto  que  se  promocione  con el valor  máximo  (1,0 en  la escala de O a 1) alcanzará el nivel mínimo (O) en diez días, perdiendo visibilidad  de manera gradual"																									
+"durante ese periodo. Respecto al coste de la promoción, se calculará de la siguiente forma: Coste_promoción = grado_promoción_deseado * O, 1 * precio_producto"																									
+Para desencadenar  la compra de un producto el mismo se le presentará al usuario o																									
+bien  en una pestaña de  recomendaciones  ( feed) o tras  hacer una búsqueda en otra pestaña dedicada.																									
+"Para la gestión de la pestaña de recomendaciones,  se tendrán en cuenta algunos"																									
+"datos ya presentados como las categoría de los productos,  las categorías asociadas como preferidas al perfil del usuario, además de su ubicación (como latitud y longitud) y su rango"																									
+de disponibilidad (en km)  y la puntuación del perfil de los vendedores.																									
+"Cuando   el   usuario   abra   la  pestaña  de  recomendaciones,   se   mostrarán  sólo"																									
+productos cuyo vendedor esté lo bastante cerca del usuario (en tanto que la distancia entre vendedor y usuario sea menor que la suma de los rangos de disponibilidad de éstos) y que																									
+"además estén bajo alguna de las categorías seleccionadas como ""preferidas"" por el usuario"																									
+"ordenados según el siguiente criterio: se muestran primero los productos que pertenezcan a alguna de las categorías ""preferidas"" por el usuario, ordenando por grado de promoción de los  productos,  si  hay  empate,     se  ordena  por  puntuación  del  perfil  del  vendedor"																									
+"(descendentemente), y en caso de doble empate, aleatoriamente."																									
+Por otro lado también se controlarán los productos que el usuario haya marcado																									
+"como ""favoritos"". De cada usuario se guarda una lista de productos que son considerados sus ""favoritos"". En particular, tras consultar un producto, un usuario puede decidir marcarlo como favorito o quitarlo de entre sus favoritos, quedando esto reflejado en la base de datos. Además, un usuario podrá consultar qué productos figuran entre sus favoritos. Naturalmente, solo aparecerán en la consulta de los favoritos, y solo podrán marcarse como favoritos  los  productos  que  en  ese  momento  estén  ""disponibles""  (que no hayan sido"																									
+vendidos ni eliminados).																									
+"En cuanto  a  la gestión  de  las búsquedas, tan solo se requieren  los datos ya"																									
+"presentados en el documento del nombre, el precio, la promoción, y la categoría de cada producto; y la puntuación de cada perfil, además de la ubicación y rango de disponibilidad de cada usuario (al potencial comprador se le mostrarán solo productos que estén ""lo"																									
+"bastante cerca"" según el mismo criterio detallado en la pestaña de recomendaciones)."																									
+"Para  buscar,  el  usuario  puede  seleccionar  (opcionalmente)   la  categoría  de"																									
+"búsqueda, y una cadena de caracteres para filtrar los productos por nombre de producto. Así, en cuanto desencadene la acción de buscar (con un botón) se realiza en la base de datos una consulta de la que resultan los productos cuyos nombres contengan la cadena de caracteres buscada ( fuzzy search) y que sean de la categoría seleccionada."																									
+Hay dos opciones en cuanto al orden en el que se presentan los productos. El																									
+"establecido por defecto, es el siguiente: los productos que coincidan con la búsqueda, ordenados por puntuación de perfil. En caso de que se seleccione explícitamente, también se  podrán  mostrar  los  productos  por  precio,  ascendente   o  descendentemente,   y"																									
+desempatando por puntuación de perfil en orden descendente.																									
+"De una venta almacenamos  la clave del producto, los identificadores de los"																									
+"usuarios implicados, la fecha de la venta, el precio final de la venta y el estado de recepción del producto (booleano que indica si se ha recibido el producto)."																									
+"Además, también se almacenan las contraofertas asociadas a cada producto,"																									
+"guardando  la clave del vendedor,  la clave del producto y el precio ofrecido en la contraoferta  realizada."																									
+Bajo la descripción de la información de cada producto se encuentran dos botones:																									
+El primero de ellos permite realizar la compra del producto directamente por el																									
+"precio establecido por el vendedor. Al pulsar dicho botón se pide la confirmación del usuario para realizar dicha compra, y en caso disponer de saldo suficiente se retira del monedero del comprador. El producto pasa a un estado pendiente de confirmación hasta que el comprador recibe el producto, siendo ese el momento en el que se transfiere el dinero al"																									
+monedero del vendedor.																									
+Si el comprador no tuviera saldo suficiente la compra se cancela y se notifica al																									
+usuario que no tiene saldo suficiente para realizar la compra.																									
+El  segundo  de  ellos  permite  al  comprador  realizar  una  contraoferta  por  el																									
+"producto por un precio estrictamente inferior al estipulado por el vendedor. Además, no se podrán hacer contraofertas por un precio que supere el saldo disponible en el monedero del comprador."																									
+Una  vez  establecida  la contraoferta  se  pide  la confirmación  del  usuario  y  se																									
+"comprueba si la contraoferta es viable, y en caso de que lo sea, se notifica el éxito de la operación al comprador y de la nueva contraoferta al vendedor."																									
+"En caso de no cumplirse el requisito anterior, se cancela la operación y se notifica al"																									
+comprador que su contraoferta no puede realizarse.																									
+"Una  vez  recibida  la  contraoferta,  el  vendedor  puede  decidir  si  aceptarla  o"																									
+"rechazarla. Si la acepta, la compra se efectúa en los términos descritos antes, y si la rechaza se notifica al comprador que la contraoferta ha sido rechazada y se elimina dicha contraoferta de las asociadas al producto."																									
+"En cualquier caso, una vez que se ha efectuado la compra se notifica tanto al"																									
+"comprador como al vendedor que se ha realizado dicha compra. Además, al usuario se le pedirá  que  evalúe  el  artículo  comprado  mediante  un sistema  de puntajes de O a 5"																									
+estrellas con saltos de media estrella.																									
+"En  caso  del  vendedor,  éste  dispone  de  la capacidad  de consultar  todas  las"																									
+contraofertas recibidas para cada uno de los productos que tenga en venta.																									
+Para facilitar la comunicación entre comprador y vendedor en relación a la venta de																									
+"un producto se almacena una conversación (lista de mensajes, nombres de usuario del vendedor y comprador, id del producto), compuesta por mensajes ( cadenas de 200 caracteres, fichero (opcional), emisor), que tienen asociados una fecha de envío ( tipo Date"																									
+) y una marca para indicar si el mensaje se ha leído ( booleano ). Los mensajes entrantes																									
+se notifican al correo del usuario.																									
+El usuario podrá enviar un mensaje a otro usuario siempre en relación a la compra																									
+de un producto. Cuando la compra finalice y sea confirmada la conversación pasará a ser archivada. El usuario también podrá consultar todas las conversaciones que tenga abiertas. También se podrán buscar mensajes concretos entre todas las conversaciones que tenga el usuario. A cada mensaje se le puede añadir un archivo adjunto. Cuando un																									
+"usuario recibe un mensaje, se le notifica a su correo electrónico."																									
+2.  Requisitos Funcionales																									
+2.1.  Gestión de perfiles (Eisa Rodríguez)																									
+RF1.1: Dar de alta al usuario.																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: solicitar inserción.																									
+• Requisito de datos de entrada: RDE1.1.																									
+BD: Requisito de datos de escritura: RDW1.1.																									
+Salida:																									
+• Agente externo: usuario.																									
+• Acción: confirmación de registro o mensaje de error.																									
+• Requisito de datos de salida: ninguno.																									
+RDE1.1: Datos de entrada de alta de usuario																									
+• Nombre completo: cadena de caracteres (60)																									
+"• Nombre de usuario: cadena de caracteres (15), único"																									
+"•  Contraseña: cadena de entre 8 y 15 caracteres (con al menos una mayúscula, una minúscula, un número y un carácter especial, sin espacios)"																									
+"• Correo electrónico: cadena con formato válido, único"																									
+"• Ubicación: tupla (latitud, longitud)"																									
+•  Rango en kilómetros: número real positivo con dos decimales																									
+•  Categorías  de preferencia:  lista de entre  1 y 6 elementos de una jerarquía  de categorías.																									
+• Confirmación de mayoría de edad: booleano																									
+• Aceptación de política de privacidad y condiciones de uso: booleano																									
+RDW1.1: Datos almacenados de usuario																									
+"Los mismos datos que RDE1.1 excepto la confirmación de mayoría de edad y la aceptación de política de privacidad, más los siguientes campos:"																									
+"•  Saldo monedero: número real positivo con dos decimales (por defecto 0,00)"																									
+•  Valoración media: real entre 1 y 5 con un decimal (por defecto sin valor o O)																									
+• cuent a_el minada: booleano (por defecto fa/se)																									
+RF1.2: Consultar peñil de usuario.																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: solicitar consulta de perfil (propio o ajeno).																									
+• Requisito de datos de entrada: RDE1.2.																									
+BD: Requisito de datos de lectura: RDR1.2.																									
+Salida:																									
+• Agente externo: usuario.																									
+•  Acción:  mostrar  información  del  perfil  o  error  (si  usuario  no  existe  o  cuenta eliminada).																									
+• Requisito de datos de salida: RDS1.2.																									
+RDE1.2: Datos de entrada de consulta de perfil																									
+• Nombre de usuario: cadena de caracteres (15).																									
+RDR1.2.1: Datos leídos del perfil de usuario																									
+• Nombre de usuario: cadena de caracteres (15)																									
+"•  Saldo monedero: número real positivo con dos decimales (por defecto 0,00)"																									
+•  Valoración media: real entre 1 y 5 con un decimal (por defecto sin valor o O)																									
+• cuent a_el minada: booleano (por defecto fa/se)																									
+RDR1.2.2: Datos leídos de sus productos ofertados																									
+• Nombre de usuario: cadena de caracteres (15).																									
+"•  Lista  de  resúmenes  de  productos  disponibles  del  usuario  (id_producto,  título, imagen, precio, disponible)"																									
+•  Lista de id_productos de sus productos no disponibles (para tomar los que se hayan																									
+vendido)																									
+RDR1.2.3: Datos leídos de sus productos vendidos																									
+• Lista de ids_productos (no disponibles)																									
+•  Número total de valoraciones recibidas: número natural o O																									
+RDS1.2: Datos mostrados en pantalla																									
+"•  Nombre completo, nombre de usuario, valoración media, número de valoraciones y"																									
+resúmenes de productos ofertados.																									
+RF1.3: Modificar perfil de usuario.																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: solicitar modificación.																									
+• Requisito de datos de entrada: RDE1.3.																									
+BD: Requisito de datos de escritura: RDW1.3.																									
+Salida:																									
+• Agente externo: usuario.																									
+• Acción: confirmación de modificación o error.																									
+RDE1.3: Datos de entrada de modificación de perfil																									
+• Nombre de usuario: cadena de caracteres (15)																									
+•  Nombre completo (opcional)																									
+"• Correo electrónico (opcional, formato válido y único)"																									
+"• Ubicación (opcional: latitud, longitud)"																									
+• Rango (opcional)																									
+• Categorías de preferencia (entre 1 y 6)																									
+RDR1.3: Datos leídos del perfil de usuario																									
+• Nombre de usuario: cadena de caracteres (15)																									
+•  cuent a_el  minada: booleano																									
+RDW1.3: Datos actualizados en la BD																									
+"•  Los mismos datos que RDE1.3, actualizados en el perfil correspondiente."																									
+RF1.4: Añadir saldo al monedero.																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: solicitar incremento de saldo.																									
+• Requisito de datos de entrada: RDE1.4.																									
+BD: Requisito de datos de escritura: RDW1.4.																									
+Salida:																									
+• Agente externo: usuario.																									
+• Acción: confirmación del nuevo saldo o error de transacción.																									
+RDE1.4: Datos de entrada de recarga																									
+• Nombre de usuario: cadena de caracteres (15)																									
+• Cantidad: número real positivo con dos decimales.																									
+RDR1.4: Datos leídos del perfil de usuario																									
+• Nombre de usuario: cadena (15)																									
+•  cuent a_el minada: booleano																									
+• Saldo monedero: número real positivo con dos decimales																									
+RDW1.4: Datos almacenados																									
+• Nombre de usuario: cadena (15)																									
+• Nuevo saldo = saldo anterior + cantidad añadida.																									
+RF1.5: Transferir saldo a cuenta bancaria.																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: solicitar retirada de saldo.																									
+• Requisito de datos de entrada: RDE1.5.																									
+BD: Requisito de datos de escritura: RDW1.5.																									
+Salida:																									
+• Agente externo: usuario.																									
+•  Acción:  confirmación  de  transferencia  o  error  (saldo  insuficiente  o  contraseña incorrecta).																									
+RDE1.5: Datos de entrada de transferencia																									
+• Nombre de usuario: cadena de caracteres (15)																									
+• Cantidad: número real positivo con dos decimales																									
+• Contraseña: cadena de entre 8 y 15 caracteres																									
+RDR1.5: Datos leídos del perfil de usuario																									
+• Nombre de usuario: cadena (15)																									
+•  cuent a_el minada: booleano																									
+• Saldo monedero: número real positivo con dos decimales																									
+•  Contraseña: cadena de entre 8 y 15 caracteres																									
+RDW1.5: Datos de escritura en la BD																									
+• Nombre de usuario: cadena (15)																									
+• Nuevo saldo = saldo anterior - cantidad transferida (si saldo ;::: cantidad y contraseña correcta)																									
+RF1.6: Dar de baja al usuario.																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: solicitar eliminación de cuenta.																									
+• Requisito de datos de entrada: RDE1.6																									
+BD: Requisito de datos de escritura: RDW1.6.																									
+Salida:																									
+• Agente externo: usuario																									
+"• Acción: confirmación de baja o error (si hay ventas en curso, por ejemplo)"																									
+RDE1.6: Datos de entrada de baja																									
+• Nombre de usuario: cadena (15)																									
+• Contraseña: cadena de entre 8 y 15 caracteres																									
+RDR1.6.1: Datos leídos del usuario.																									
+• Nombre de usuario: cadena (15)																									
+•  cuent a_el minada: booleano																									
+• Contraseña: cadena de entre 8 y 15 caracteres																									
+RDR1.6.2: Datos leídos del almacén de productos.																									
+• Nombre de usuario: cadena (15)																									
+• ld_producto de los productos ofertados por el usuario																									
+RDR1.6.3: Datos leídos del almacén de ventas.																									
+• Nombre de usuario: cadena (15)																									
+• ld_producto de los productos ofertados por el usuario																									
+"•  Booleano que indique si tiene ventas activas, es decir, si es vendedor o comprador"																									
+"de un producto vendido aún no confirmado, o si ha realizado alguna contraoferta que no ha sido aceptada ni rechazada."																									
+RDW1.6: Datos de escritura en la BD																									
+• Nombre de usuario: cadena (15)																									
+•  Se actualiza el campo cuent a_el minada a true																									
+"•  Se eliminan (vuelven a valores nulos o vacíos) todos los campos personales del usuario, excepto el nombre de usuario (clave primaria, se conserva)"																									
+"•  De los productos disponibles del usuario, se modifica su atributo disponible a"																									
+fa/se.																									
+2.2.  Gestión de productos (Roberto González)																									
+RF2.1: Dar de alta producto																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: solicitar inserción de producto.																									
+• Requisito de datos de entrada: RDE2.1.																									
+BD: Requisito de datos de escritura: RDW2.1.																									
+Salida:																									
+• Agente externo: usuario.																									
+• Acción: confirmación de alta o mensaje de error.																									
+• Requisito de datos de salida: RDS2.1																									
+RDE2.1: Datos de entrada de alta de producto																									
+• Título: cadena (máx. 80 caracteres)																									
+• Descripción: cadena (máx. 500 caracteres)																									
+• Precio: número real positivo con dos decimales (>O)																									
+• Categoría: elemento de una jerarquía de categorías																									
+• lmágen: 1 fichero .j pg de 1024x1024 píxeles																									
+RDW2.1: Datos almacenados en la BD																									
+"•  ld_producto: entero sin signo, generado automáticamente (único, no editable)"																									
+• Username_vendedor: referencia al usuario creador del producto																									
+• Título: cadena (máx. 80 caracteres)																									
+• Descripción: cadena (máx. 500 caracteres)																									
+• Precio: número real positivo con dos decimales (>O)																									
+• Categoría: elemento de jerarquía de categorías																									
+• lmágen: 1 fichero .j pg de 1024x1024 píxeles																									
+•  Grado de promoción: número real entre O y 1 con dos decimales (por defecto O)																									
+•  Disponible: bool que indica si el producto está disponible (por defecto true)																									
+RDS2.1: Datos de salida																									
+•   ld_producto: identificador único del producto generado automáticamente																									
+RF2.2: Modificar producto																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: solicitar modificación de un producto propio.																									
+• Requisito de datos de entrada: RDE2.2.																									
+BD: Requisito de datos de escritura: RDW2.2.																									
+Salida:																									
+• Agente externo: usuario.																									
+• Acción: confirmación de modificación o mensaje de error.																									
+RDE2.2: Datos de entrada de modificación de producto																									
+"•  ld_producto: entero sin signo (identificador del producto a modificar, obtenido al"																									
+seleccionar el producto de forma visual en la aplicación)																									
+"• Título: cadena (máx. 80 caracteres, opcional)"																									
+"• Descripción: cadena (máx. 500 caracteres, opcional)"																									
+"• Precio: número real positivo con dos decimales (>O, opcional)"																									
+• Categoría: elemento de entre las disponibles categorías (opcional)																									
+• lmágen: 1 fichero .jpg de 1024x1024 píxeles (opcional)																									
+RDW2.2: Datos actualizados en la BD																									
+• Título: cadena (máx. 80 caracteres)																									
+• Descripción: cadena (máx. 500 caracteres)																									
+• Precio: número real positivo con dos decimales (>O)																									
+• Categoría: elemento de entre las disponibles categorías																									
+• lmágen: 1 fichero .jpg de 1024x1024 píxeles																									
+• Username_vendedor: referencia al usuario creador del producto (No se actualiza pero hace falta para realizar la operación)																									
+•  Disponible: bool que indica si el producto está disponible (por defecto true)																									
+RF2.3: Eliminar producto																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: solicitar la eliminación de un producto propio.																									
+• Requisito de datos de entrada: RDE2.3.																									
+BD: Requisito de datos de escritura: RDW2.3.																									
+Salida:																									
+• Agente externo: usuario.																									
+"•  Acción: confirmación de eliminación o mensaje de error (por ejemplo, si el producto ya está en proceso de venta)."																									
+RDE2.3: Datos de entrada de eliminación de producto																									
+• ld_producto: entero sin signo																									
+RDW2.3: Datos modificados en la BD																									
+"• El estado ""disponible"" (pasa a false)"																									
+RF2.4: Consultar producto																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: solicitar consulta de un producto.																									
+• Requisito de datos de entrada: RDE2.4.																									
+BD: Requisito de datos de lectura: RDR2.4.																									
+Salida:																									
+• Agente externo: usuario.																									
+• Acción: mostrar información detallada del producto o mensaje de error si no existe.																									
+RDE2.4: Datos de entrada de consulta de producto																									
+• ld_producto: entero sin signo																									
+RDR2.4: Datos leídos de la BD																									
+• ld_producto: entero sin signo																									
+• Username_vendedor: referencia al usuario creador del producto																									
+• Título: cadena (máx. 80 caracteres)																									
+• Descripción: cadena (máx. 500 caracteres)																									
+• Precio: número real positivo con dos decimales (>O)																									
+• Categoría																									
+•  Localización del vendedor																									
+• lmágen: 1 fichero .jpg de 1024x1024 píxeles																									
+•  Grado de promoción: número real entre O y 1 con dos decimales																									
+•  Disponible: bool que indica si el producto está disponible (por defecto true)																									
+"•  Valoración  media del vendedor:  número real entre O y 5 con un decimal (saltos de 0,5)"																									
+RDS2.4: Datos mostrados en pantalla																									
+• Título																									
+• Descripción																									
+• Precio																									
+• Categoría																									
+• Localización																									
+• lmágen																									
+• Nombre de usuario del vendedor																									
+• Valoración media del vendedor																									
+RF2.5: Promocionar producto																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: solicitar promoción de un producto propio.																									
+• Requisito de datos de entrada: RDE2.5.																									
+BD: Requisito de datos de escritura: RDW2.5.																									
+Salida:																									
+• Agente externo: usuario.																									
+•  Acción: confirmación de promoción o mensaje de error (saldo insuficiente o valor no válido).																									
+RDE2.5: Datos de entrada de promoción																									
+• ld_producto: entero sin signo																									
+• Grado de promoción deseado: número real entre O y 1																									
+RDW2.5: Datos almacenados en la BD																									
+•  Grado de promoción: número real entre O y 1 con dos decimales																									
+• Disponible: bool que indica si el producto está disponible																									
+Notas:																									
+"•   El  grado   de  promoción   disminuye  automáticamente   en  O, 1  cada  24  horas  hasta"																									
+"alcanzar O.  (Esto sería un requisito funcional,  pero por simplicidad de este ejercicio no se implementa)."																									
+•  Un grado de promoción 1 implica visibilidad máxima durante 1O días.																									
+"2.3.  Feed de recomendaciones, búsquedas y favoritos"																									
+(Daniel Hidalgo)																									
+RF3.1: Mostrar las recomendaciones																									
+Entrada:																									
+• Agente externo: usuario.																									
+• Acción: abrir pestaña de recomendaciones.																									
+• Requisito de datos de entrada RDE3.1																									
+BD: Requisito de datos de lectura RDR3.1																									
+Salida:																									
+• Agente externo: usuario.																									
+• Acción: confirmación de los resultados.																									
+• Requisito de datos de salida: RDS3.1																									
+RDE3.1:																									
+"• ""username"" del usuario que visualiza sus recomendaciones."																									
+RDR3.1:																									
+"RDR3.1.1: RDE3.1, además de los siguientes:"																									
+• Categorías preferidas del usuario.																									
+• Ubicación y rango de disponibilidad del usuario.																									
+• Ubicación y rango de disponibilidad de los vendedores.																									
+• Puntuación de los perfiles de vendedores.																									
+• username de los vendedores																									
+RDR3.1.2:																									
+• id_producto de los recomendados																									
+•  Disponibilidad de los productos																									
+• Categorías preferidas del usuario buscador (para filtrado)																									
+• Categorías de los productos recomendados																									
+• promoción de los productos recomendados																									
+• Título de los susodichos productos																									
+•  Imagen de los susodichos productos																									
+•  Precio de los susodichos productos																									
+RDR3.1.3:																									
+• username de los vendedores																									
+• id_producto de los recomendados																									
+RDS3.1:  Listado  de  productos  que  cumplan  con  las  restricciones  de  rango y  categoría																									
+"mencionadas  en  RDR3.1 y  ordenados  según el criterio detallado  en la sección ""Feed de recomendaciones,  búsquedas y favoritos"", mostrando para cada producto:"																									
+• Título de producto.																									
+• Imagen del producto.																									
+• Precio del producto.																									
+RF3.2: Marcar un producto como favorito																									
+Entrada:																									
+• Agente externo: usuario.																									
+"• Acción: visualizando un producto, pulsar el botón de ""Añadir a favoritos""."																									
+• Requisito de datos de entrada RDE3.2																									
+BD: Requisito de datos de escritura RDW3.2 y requisito de datos de lectura RDR3.2																									
+Salida:																									
+• Agente externo: usuario.																									
+• Acción: confirmación resultado.																									
+• Requisito de datos de salida: ninguno.																									
+RDE3.2:																									
+"•  ""Nombre de usuario"" del usuario que añade un producto a sus favoritos."																									
+• id_producto del producto que se añade a favoritos.																									
+"RDW3.2: RDE3.2, además de"																									
+"• Lista de id_prducto, los ""favoritos"" del usuario."																									
+"RDR3.2: RDE3.2, además de"																									
+•  Disponibilidad del producto																									
+"RF3.3: Quitar un producto de ""favoritos"""																									
+Entrada:																									
+• Agente externo: usuario.																									
+"• Acción: visualizando un producto, pulsar el botón de ""Quitar de favoritos""."																									
+• Requisito de datos de entrada RDE3.3																									
+BD: Requisito de datos de escritura RDW3.2																									
+Salida:																									
+• Agente externo: usuario.																									
+• Acción: confirmación resultado.																									
+• Requisito de datos de salida: ninguno.																									
+RDE3.3: Los mismo que RDE3.2																									
+RDW3.3: Los mismos que en RDW3.2																									
+RF3.4: Consultar los favoritos																									
+Entrada:																									
+• Agente externo: usuario.																									
+"• Acción: abrir la pestaña de ""Favoritos""."																									
+• Requisito de datos de entrada RDE3.4																									
+BD: Requisito de datos de lectura RDR3.4																									
+Salida:																									
+• Agente externo: usuario.																									
+• Acción: confirmación de resultados.																									
+• Requisitos de datos de salida: RDS3.4																									
+RDE3.4:																									
+•  Nombre de usuario del usuario que consulta sus favoritos.																									
+RDR3.4:																									
+RDR3.4.1:																									
+"• Lista de id_producto, los favoritos del usuario."																									
+RDR3.4.2:																									
+• id_producto de los favoritos.																									
+• Título de producto.																									
+• Imagen del producto.																									
+• Precio del producto.																									
+• Disponibilidad																									
+"RDS3.4:  Listado  de  productos  favoritos  de  un  usuario,  mostrando  para  cada  uno  los"																									
+campos mencionados en RDR3.4																									
+RF3.5: Hacer una búsqueda																									
+Entrada:																									
+• Agente externo: usuario.																									
+"• Acción: pulsar el botón de buscar tras seleccionar opcionalmente una categoría de búsqueda y una cadena de caracteres además de si desea ordenar por precio, pudiendo hacerlo ascendente o descendentemente."																									
+• Requisito de datos de entrada RDE3.5																									
+BD: Requisito de datos de lectura RDR3.5																									
+Salida:																									
+• Agente externo: usuario																									
+• Acción: ninguna																									
+• Requisito de datos de salida: RDS3.5																									
+RDE3.5:																									
+"• ""Nombre de usuario"" del usuario que hace la búsqueda"																									
+• Categoría de filtrado																									
+• Nombre de filtrado de productos																									
+• Ordenación de precio ascendente o descendente (opcional)																									
+RDR3.5:																									
+RDR3.5.1:																									
+• username del usuario que hace la búsqueda																									
+• Ubicación y rango de disponibilidad del usuario.																									
+• Ubicación y rango de disponibilidad de los vendedores.																									
+• Puntuación de los perfiles de vendedores.																									
+• username de los vendedores																									
+RDR3.5.2:																									
+• id_producto de los productos buscados																									
+• Categoría de filtrado																									
+• Nombre de filtrado																									
+• Si están disponibles los productos																									
+• Categorías de los productos buscados																									
+•  promoción de los productos buscados																									
+• Título de los susodichos productos																									
+• Imagen de los susodichos productos																									
+• Precio de los susodichos productos																									
+RDR3.5.3:																									
+• username de los vendedores																									
+• id_producto de los productos buscados																									
+"RDS3.5: Listado de productos que cumplan con las restricciones de rango, categoría y título"																									
+"mencionadas  en  RDR3.5 ordenados  según  el criterio explicado en la sección de ""Feed de recomendaciones, búsquedas y favoritos"", mostrando para cada producto:"																									
+• Título de producto.																									
+• Imagen del producto.																									
+• Precio del producto.																									
+2.4.  Gestión de ventas (Juan Manuel Fernández)																									
+RF4.1: Realizar compra directa de producto.																									
+Entrada:																									
+• Agente externo: Comprador.																									
+• Acción: Retirar dinero del monedero del comprador.																									
+• Requisito de datos entrada RDE4.1																									
+BD: Requisito de datos de escritura RDW4.1																									
+Salida:																									
+• Agente externo: No																									
+• Acción: Confirmación de la compra.																									
+• Requisito de datos de salida: Ninguno.																									
+RDE4.1: Datos de entrada de la compra:																									
+• Identificador de producto: unsigned int																									
+• Identificador de comprador: Cadena de caracteres (15)																									
+• Identificador de vendedor: Cadena de caracteres (15)																									
+RDW4.1: Datos almacenados del comprador y vendedor.																									
+•  Precio de producto: Número real no negativo con dos cifras decimales.																									
+• Monedero del comprador: Contador del saldo del comprador.																									
+• Estado de recepción del producto: booleano indicando si el producto está pendiente de ser recibido.																									
+RF4.2: Realizar contraoferta de producto.																									
+Entrada:																									
+• Agente externo: Comprador.																									
+• Acción: Añadir contraoferta al producto.																									
+• Requisito de datos de entrada RDE4.2																									
+BD: Requisito de datos de escritura RDW4.2																									
+Salida:																									
+• Agente externo: No.																									
+• Acción: Notificar contraoferta al vendedor y confirmar éxito de la																									
+• operación al comprador.																									
+• Requisito de datos de salida: Ninguno.																									
+RDE4.2: Datos de contraoferta:																									
+• Identificador de producto: unsigned int																									
+• Identificador de comprador: Cadena de caracteres (15)																									
+• Identificador de vendedor: Cadena de caracteres (15)																									
+•  Precio contraoferta: Número real no negativo con dos cifras decimales.																									
+RDW4.2: Datos almacenados de contraofertas asociadas al producto.																									
+• Los mismos que RDE4.2																									
+RF4.3: Aceptar/Rechazar  contraoferta de producto.																									
+Entrada:																									
+• Agente externo: Vendedor																									
+• Acción: Aceptar o rechazar la contraoferta																									
+• Requisito de datos de entrada RDE4.3																									
+BD: Requisito de datos de escritura RDW4.3 en caso de aceptar.																									
+Salida:																									
+• Agente externo: No																									
+• Acción: Notificar al comprador sobre el estado de la contraoferta y al vendedor del éxito de la operación.																									
+• Requisito de datos de salida: Ninguno																									
+RDE4.3: Datos de aceptación de la contraoferta																									
+• Aceptación de la contraoferta: booleano																									
+RDW4.3: Datos de contraoferta:																									
+• Los mismos que RDE4.2																									
+RF4.4: Consultar contraofertas asociadas a un producto.																									
+Entrada:																									
+• Agente externo: Usuario																									
+• Acción: Consulta de contraofertas asociadas a un producto.																									
+• Requisito de datos de entrada RDE4.4																									
+BD: Requisito de datos de lectura RDR4.4																									
+Salida:																									
+• Agente externo: No																									
+• Acción: Mostrar contraofertas asociadas a un producto.																									
+• Requisito de datos de salida RDS4.4																									
+RDE4.4: Datos de identificación del producto.																									
+• Identificador de producto: unsigned int																									
+RDR4.4: Datos de contraofertas asociadas al producto.																									
+Para cada contraoferta asociada al producto:																									
+• Identificador del comprador: Cadena de caracteres (15)																									
+•  Precio contraoferta: Número real no negativo con dos cifras decimales.																									
+RDS4.4: Lista de contraofertas asociadas al producto.																									
+Para cada contraoferta asociada al producto:																									
+• Identificador contraoferta: Cadena de caracteres (15)																									
+•  Precio contraoferta: Número real no negativo con dos cifras decimales.																									
+RF4.5: Confirmación compra del producto.																									
+Entrada:																									
+• Agente externo: No																									
+• Acción: Ninguna																									
+• Requisito de datos de entrada: Ninguno																									
+BD: Requisito de datos de escritura RDW.5																									
+Salida:																									
+• Agente externo: No																									
+• Acción: Confirmar compra del producto																									
+• Requisito de datos de salida: RDS4.5																									
+RDW4.5: Estado de recepción del producto:																									
+• Estado de recepción del producto: booleano indicando si el producto está pendiente de ser recibido.																									
+RDS4.5: Confirmación de compra del producto.																									
+•  Estado del producto: booleano indicando si se ha realizado la compra con éxito.																									
+RF4.6: Puntuar compra del producto.																									
+Entrada:																									
+• Agente externo: Comprador																									
+• Acción: Puntuar compra de producto																									
+• Requisito de datos de entrada RDE4.6																									
+BD: Requisito de datos de escritura RDW4.6																									
+Salida:																									
+• Agente externo: No																									
+• Acción: Ninguna																									
+• Requisito de datos de salida: Ninguno																									
+RDE4.6: Datos de compra del producto																									
+• Identificador del producto: unsigned int																									
+• Puntuación del producto: Número real																									
+RDW4.6: Puntuación media del usuario																									
+• Identificador del usuario: Cadena de caracteres (15)																									
+• Identificador del producto: unsigned int																									
+• Puntuación recibida: Número real perteneciente al conjunto																									
+"{0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5}"																									
+2.5.  Gestión de mensajes (Aitor de la Iglesia)																									
+RF5.1: Enviar mensaje																									
+Entrada:																									
+• Agente externo: Usuario																									
+• Acción: Escribir el mensaje																									
+• Requisito de datos de entrada RDE5.1																									
+"BD: Requisito de datos de escritura RDW5.1, RDR5.1"																									
+Salida:																									
+• Agente externo: Usuario																									
+• Acción: Mostrar el mensaje enviado y notificar por correo al receptor																									
+"• Requisito de datos de salida RDS5.1.1, RDS5.1.2"																									
+RDE5.1: Datos de mensaje a enviar																									
+• Mensaje: cadena de caracteres (200)																									
+• Id_vendedor: cadena de caracteres (15)																									
+• ld_comprador: cadena de caracteres (15)																									
+• ld_producto: unsigned int																									
+• Fecha de envío: tipoDate																									
+• Emisor: cadena de caracteres (15)																									
+RDW5.1: Datos almacenados en la conversación																									
+• Los mismos que RDE5.1																									
+• Leído: bool																									
+RDR5.1: Correo receptor:																									
+• ld_receptor: cadena de caracteres (15)																									
+• correo_receptor: cadena de caracteres formato estándar																									
+RDS5.1.1: Último mensaje																									
+• Id_vendedor: cadena de caracteres (15)																									
+• ld_comprador: cadena de caracteres (15)																									
+• ld_producto: unsigned int																									
+• Mensaje: cadena de caracteres (200)																									
+• Fecha de envío: tipoDate																									
+RDS5.1.2: Notificación																									
+• Correo_receptor: cadena de caracteres																									
+• Lo mismo que RDS5.1.1																									
+RF5.2: Consultar conversación																									
+Entrada:																									
+• Agente externo: Usuario																									
+• Acción: Seleccionar una conversación																									
+• Requisito de datos de entrada RDE5.2																									
+"BD: Requisito de datos de lectura RDR5.2, RDW5.2"																									
+Salida:																									
+• Agente externo: Usuario																									
+• Acción: Mostrar mensajes de la conversación																									
+• Requisito de datos de salida RDS5.2																									
+RDE5.2: Conversación a seleccionar																									
+• id_comprador: cadena de caracteres (15)																									
+• id_vendedor: cadena de caracteres (15)																									
+• ld_producto: unsigned int																									
+RDR5.2: Mensajes almacenados de la conversación																									
+• Id_vendedor: cadena de caracteres (15)																									
+• ld_comprador: cadena de caracteres (15)																									
+• ld_producto: unsigned int																									
+• Emisor: cadena de caracteres (15)																									
+• Mensajes: cadena de caracteres (200)																									
+• Archivo: archivo																									
+• Fecha de envío: tipo Date																									
+• Leído: bool																									
+• Archivado: bool																									
+RDW5.2:																									
+• Id_vendedor: cadena de caracteres (15)																									
+• ld_comprador: cadena de caracteres (15)																									
+• ld_producto: unsigned int																									
+• Leído: bool																									
+RDS5.2: Mensajes de la conversación																									
+• Lo mismo que RDR5.2 pero formateado																									
+RF5.3: Adjuntar archivo																									
+Entrada:																									
+• Agente externo: Usuario																									
+• Acción: Pulsar adjuntar																									
+• Requisito de datos de entrada RDE5.3																									
+BD: Requisito de datos de escritura RDW5.3																									
+Salida:																									
+• Agente externo: Usuario																									
+• Acción: Mostrar el mensaje enviado y notificar por correo al receptor																									
+• Requisito de datos de salida RDS5.3																									
+RDE5.3: Archivo a adjuntar																									
+• id_comprador: cadena de caracteres (15)																									
+• id_vendedor: cadena de caracteres (15)																									
+• ld_producto: unsigned int																									
+• Emisor: cadena de caracteres (15)																									
+• Archivo: archivo																									
+•  Fecha : tipo Date																									
+RDW5.3: Archivo almacenado en la conversación																									
+• Los mismos datos que RDE5.3																									
+• Leido: bool																									
+RDS5.3: Archivo enviado																									
+• Lo mismo que RDE5.3																									
+RF5.4: Buscar mensaje																									
+Entrada:																									
+• Agente externo: Usuario																									
+•  Acción: Seleccionar unos filtros																									
+• Requisito de datos de entrada RDE5.4																									
+BD: Requisito de datos de lectura RDR5.4																									
+Salida:																									
+• Agente externo: Usuario																									
+• Acción: Mostrar mensajes concordantes																									
+• Requisito de datos de salida RDS5.4																									
+RDE5.4: Mensajes a buscar																									
+• Palabras clave: cadena de caracteres (200)																									
+• Usuario: cadena de caracteres (15)																									
+• Fecha: tipo Date																									
+RDR5.4: Mensajes almacenados de la conversación																									
+• Palabras clave: cadena de caracteres (200)																									
+• Id_vendedor: cadena de caracteres (15)																									
+• ld_comprador: cadena de caracteres (15)																									
+• ld_producto: unsigned int																									
+• Emisor: cadena de caracteres (15)																									
+• Mensajes: cadena de caracteres (200)																									
+• Archivo: archivo																									
+• Fecha de envío: tipo Date																									
+• Leído: bool																									
+• Archivado: bool																									
+RDS5.4: Mensajes de la conversación																									
+• Subconjunto de RDR5.4 coincidente con RDE5.4 y formateado																									
+RF5.5: Archivar conversación																									
+Entrada:																									
+• Agente externo: SI																									
+• Acción: Una compra ha sido completada																									
+• Requisito de datos de entrada RDE5.5																									
+BD: Requisito de datos de lectura RDW5.5																									
+Salida:																									
+RDE5.5: Conversación a archivar																									
+• id_comprador: cadena de caracteres (15)																									
+• id_vendedor: cadena de caracteres (15)																									
+• ld_producto: unsigned int																									
+RDW5.5: Conversación  a archivar almacenada																									
+• id_comprador: cadena de caracteres (15)																									
+• id_vendedor: cadena de caracteres (15)																									
+• ld_producto: unsigned int																									
+• Archivado: bool																									
+3.  Restricciones semánticas																									
+3.1.  Gestión de perfiles (Eisa Rodríguez)																									
+RS1.1:																									
+Un usuario debe ser mayor de edad para registrarse en la plataforma.																									
+RF: RF1.1.																									
+RD: RDE1.1.																									
+"Descripción: Si el usuario no confirma su mayoría de edad,  no se insertan los datos del nuevo usuario y se devuelve un error."																									
+RS1 2·																									
+El nombre de usuario y el correo electrónico deben ser únicos en el sistema.																									
+RF: RF1.1.																									
+"RD: RDR1.1, RDW1.1."																									
+"Descripción: Si  el  nombre  de  usuario  o  el correo  electrónico  ya  existen  en  la base de datos, no se realiza la inserción y se devuelve un mensaje de error."																									
+RS1.3:																									
+El nombre de usuario y el correo electrónico deben ser únicos en el sistema.																									
+RF: RF1.3.																									
+"RD: RDR1.3, RDW1 .3."																									
+"Descripción: Si  el  nombre  de  usuario  o  el correo  electrónico  ya  existen  en  la base de datos, no se realiza la inserción y se devuelve un mensaje de error."																									
+RS1.4:																									
+La contraseña debe cumplir con los requisitos de complejidad.																									
+RF: RF1.1.																									
+RD: RDE1.1.																									
+"Descripción: Si la contraseña no tiene entre 8 y 15 caracteres, o no contiene al menos una"																									
+"mayúscula, una minúscula, un número y un carácter especial (sin espacios),  no se permite la inserción o modificación."																									
+RS1.5:																									
+El usuario debe aceptar la política de privacidad y las condiciones de uso.																									
+RF: RF1.1.																									
+RD: RDE1.1.																									
+"Descripción: Si el campo de aceptación no es verdadero, no se completa el registro y se devuelve un error."																									
+RS1.6:																									
+Un usuario no puede tener menos de una ni más de seis categorías de preferencia.																									
+RF: RF1.1.																									
+RD: RDE1.1.																									
+"Descripción: Si el número de categorías seleccionadas  está fuera  del rango [1,6], no se guardan los datos y se devuelve un error."																									
+RS1.7:																									
+Un usuario no puede tener menos de una ni más de seis categorías de preferencia.																									
+RF: RF1.3.																									
+RD: RDE1.3.																									
+"Descripción:  Si el número  de categorías  seleccionadas  está fuera  del  rango  [1,6],  no se guardan los datos y se devuelve un error."																									
+RS1.8:																									
+La cantidad a añadir al monedero debe ser positiva.																									
+RF: RF1.4.																									
+RD: RDE1.4.																									
+"Descripción:  Si  la cantidad  es  menor  o  igual que  cero,  no se realiza  la operación  y se devuelve un error."																									
+RS1.9:																									
+La cantidad a transferir  a una cuenta  bancaria debe estar comprendida entre O y el saldo disponible.																									
+RF: RF1.5.																									
+"RD: RDE1.5, RDR1.5."																									
+"Descripción:  Si  la  cantidad  es  menor  o  igual  que  cero,  o  superior  al  saldo  actual  del usuario, no se realiza la transferencia y se devuelve un error."																									
+RS1.10:																									
+No se puede transferir saldo si la contraseña es incorrecta.																									
+RF: RF1.5.																									
+RD: RDE1.5.																									
+"Descripción:  Si  la contraseña  introducida  no coincide  con la registrada,  la operación  se cancela y se devuelve un error de autenticación."																									
+RS1.11:																									
+Un usuario no puede eliminar su cuenta si tiene ventas activas en curso.																									
+RF: RF1.6.																									
+"RD: RDE1.6, RDW1.6."																									
+"Descripción:  Si  existen  registros  de  ventas  no finalizadas  asociados  al  usuario,  no  se realiza la baja y se devuelve un aviso."																									
+RS1.12:																									
+Ninguna operación de gestión de perfil podrá ejecutarse si el usuario no existe.																									
+RF: RF1.2.																									
+RD: RDR1.2.																									
+"Descripción:  Si el campo cuenta _el  minada del usuario es verdadero,  no se realiza la operación y se devuelve un error indicando que la cuenta ha sido eliminada."																									
+RS1.13:																									
+Ninguna operación de gestión de perfil podrá ejecutarse si el usuario no existe.																									
+RF: RF1.3.																									
+RD: RDR1.3.																									
+"Descripción: Si el campo cuent a_el  minada del usuario es verdadero, no se realiza la"																									
+operación y se devuelve un error indicando que la cuenta ha sido eliminada.																									
+RS1.14:																									
+Ninguna operación de gestión de perfil podrá ejecutarse si el usuario no existe.																									
+RF: RF1.4.																									
+RD: RDR1.4.																									
+"Descripción:  Si  el  campo  cuent a_el   minada del usuario es verdadero,  no se realiza la operación y se devuelve un error indicando que la cuenta ha sido eliminada."																									
+RS1.15:																									
+Ninguna operación de gestión de perfil podrá ejecutarse si el usuario no existe.																									
+RF: RF1.5.																									
+RD: RDR1.5.																									
+"Descripción:  Si  el  campo  cuent a_el   minada del usuario es verdadero,  no se realiza la operación y se devuelve un error indicando que la cuenta ha sido eliminada."																									
+RS1.16:																									
+Ninguna operación de gestión de perfil podrá ejecutarse si el usuario no existe.																									
+RF: RF1.6.																									
+RD: RDR1.6.																									
+"Descripción:  Si  el  campo  cuent a_el   minada del usuario es verdadero,  no se realiza la operación y se devuelve un error indicando que la cuenta ha sido eliminada."																									
+RS1.17:																									
+El rango de interés debe ser positivo.																									
+RF: RF1.1.																									
+RD: RDE1.1.																									
+"Descripción: Si  la cantidad  es  menor  o  igual que  cero,  no se  realiza  la inserción y se devuelve un error."																									
+RS1.18:																									
+El rango de interés debe ser positivo.																									
+RF: RF1.3.																									
+RD: RDE1.3.																									
+"Descripción:  Si  la cantidad  es  menor  o  igual  que cero,  no se realiza  la modificación  y  se devuelve  un error."																									
+3.2.   Gestión de productos (Roberto González)																									
+RS2 1:																									
+El precio de un producto debe ser mayor que O y expresarse con dos decimales. RF: RF2.1																									
+"RD: RDE2.1, RDE2.2, RDW2.1, RDW2.2."																									
+"Descripción:  Si  el  precio  es  ::;  O  o  no  tiene  exactamente  dos  decimales,  se  rechaza  la operación  y se devuelve  un error."																									
+RS2.2:																									
+El precio de un producto debe ser mayor que O y expresarse con dos decimales. RF: RF2.2.																									
+"RD: RDE2.1, RDE2.2, RDW2.1, RDW2.2."																									
+"Descripción:  Si el precio es ::; O o  no tiene  exactamente  dos decimales,  se rechaza la operación y se devuelve un error."																									
+RS2.3:																									
+La categoría elegida debe pertenecer a la lista de categorías vigente.																									
+RF: RF2.1.																									
+"RD: RDE2.1, RDE2.2, RDW2.1, RDW2.2."																									
+"Descripción: Si la categoría no existe en el sistema, se cancela la operación y se informa del error."																									
+RS2.4:																									
+La categoría elegida debe pertenecer a la lista de categorías vigente																									
+RF: RF2.2.																									
+"RD: RDE2.1, RDE2.2, RDW2.1, RDW2.2."																									
+"Descripción: Si la categoría no existe en el sistema, se cancela la operación y se informa del error."																									
+RS2.5:																									
+El título y la descripción deben respetar las longitudes máximas: título S 80 y descripción																									
+:::;; 500 caracteres.																									
+RF: RF2.1.																									
+"RD: RDE2.1, RDE2.2, RDW2.1, RDW2.2."																									
+"Descripción: Si se exceden los límites, se rechaza la operación y se devuelve un error."																									
+RS2.6:																									
+El título y la descripción deben respetar las longitudes máximas: título S 80 y descripción																									
+:::;; 500 caracteres.																									
+RF: RF2.2.																									
+"RD: RDE2.1, RDE2.2, RDW2.1, RDW2.2."																									
+"Descripción: Si se exceden los límites, se rechaza la operación y se devuelve un error."																									
+RS2.7:																									
+Solo el propietario (Username_ vendedor) puede promocionar su producto.																									
+RF: RF2.5.																									
+"RD: RDE2.2, RDE2.3, RDE2.5, RDW2.2, RDW2.3, RDW2.5."																									
+"Descripción:  Si  el  usuario  autenticado  no  coincide  con  el  propietario  del  producto,  la operación se deniega y se devuelve un error de autorización."																									
+RS2.8:																									
+Solo se puede modificar un producto que esté disponible y no tenga contraofertas activas																									
+RF: RF2.2.																									
+"RD: RDE2.2, RDE2.3, RDW2.2, RDW2.3."																									
+"Descripción:  Si  el  producto  está  en  venta,  se  cancela  la operación  y  se  devuelve  un mensaje informativo."																									
+RS2.9:																									
+Solo se puede eliminar un producto que esté disponible y no tenga contraofertas activas																									
+RF: RF2.3.																									
+"RD: RDE2.2, RDE2.3, RDW2.2, RDW2.3."																									
+"Descripción:  Si  el  producto  tiene  contraofertas  o  está  pendiente  de  confirmación,  se cancela la operación y se devuelve un mensaje informativo."																									
+RS2.10:																									
+"El grado de promoción debe estar en el intervalo [O, 1] con dos decimales. RF: RF2.5."																									
+"RD: RDE2.5, RDW2.5."																									
+"Descripción:  Si el valor  solicitado  está fuera  de  rango  o  no cumple  el formato  de  dos decimales, la promoción se rechaza y se devuelve un error."																									
+RS2.11:																									
+"El decaimiento automático del grado de promoción es de O, 1 cada 24 horas y no puede resultar en valores negativos (se trunca a O en caso de ser <=O)."																									
+RF: RF2.5.																									
+RD: RDW2.5.																									
+"Descripción:  El sistema aplica el decremento  periódico desde la ""Fecha/hora de inicio de promoción""; si el cálculo resultara < O, se fija en O."																									
+RS2.12:																									
+"El ld_producto se genera automáticamente, es único y no editable por el usuario."																									
+RF: RF2.1.																									
+"RD: RDW2.1, RDW2.2, RDR2.4."																									
+Descripción:  Cualquier  intento de fijar  o alterar  manualmente  el identificador es ignorado y/o genera un error.																									
+RS2.13:																									
+"El ld_producto se genera automáticamente, es único y no editable por el usuario."																									
+RF: RF2.2.																									
+"RD: RDW2.1, RDW2.2, RDR2.4."																									
+Descripción:  Cualquier  intento de fijar  o alterar  manualmente  el identificador es ignorado y/o genera un error.																									
+RS2.14:																									
+El Username_vendedor debe corresponder a un usuario existente. RF: RF2.1.																									
+RD: RDW2.1.																									
+"Descripción:  Si  el  vendedor  no  existe  o  su  cuenta  está  marcada  como  eliminada,  se rechaza el alta del producto."																									
+RS2.15:																									
+La valoración  media  de  un vendedor  se muestra con un decimal  (ej. 4.5) y  no puede modificarse.																									
+RF: RF2.4.																									
+"RD: RDR2.4, RDS2.4."																									
+Descripción:  La valoración  mostrada no se edita en esta operación; cualquier modificación																									
+de valoraciones se gestiona en el subsistema correspondiente.																									
+"3.3.  Feed de recomendaciones, búsquedas y favoritos"																									
+(Daniel Hidalgo)																									
+RS3.1:																									
+Solo deben aparecer en el feed productos que estén disponibles.																									
+RF: RF3.1																									
+RD(s): RDR3.1.2																									
+Descripción:  No tiene sentido que los productos no disponibles  para venta se muestren a un usuario que podría querer compralosr.																									
+RS3.2:																									
+Solo deben poder consultarse como favoritos productos que estén disponibles.																									
+RF: RF3.4																									
+RD(s): RDR3.4.2																									
+"Descripción:  No tiene sentido que los productos no disponibles  para venta se muestren a un usuario en sus favoritos,  porque ahí solo guarda aquellos productos que podría querer"																									
+comprar.																									
+RS3.3:																									
+Solo deben aparecer en las búsquedas productos que estén disponibles																									
+RF: RF3.5																									
+RD(s): RDR3.5.2																									
+Descripción:  No tiene sentido que los productos no disponibles  para venta se muestren a un usuario en sus una búsqueda orientada a compra.																									
+3.4.  Gestión de ventas (Juan Manuel Fernández)																									
+RS4.1:																									
+Una compra puede ser realizada sólo si se dispone de saldo suficiente en el monedero.																									
+RF: RF4.1																									
+RD(s): RDW4.1																									
+"Descripción: Si no se dispone de saldo suficiente en el monedero para hacer la compra, se cancela la operación y se notifica al comprador de que no es posible realizar la compra."																									
+RS4.2:																									
+El precio de una contraoferta debe ser positivo y menor estricto que el precio del producto estipulado por el vendedor.																									
+RF: RF4.2																									
+RD(s): RDW4.2																									
+Descripción:  Si el precio de la contraoferta  no cumple con las restricciones anteriormente																									
+"mencionadas, se cancela la operación y se informa al comprador de que su contraoferta no es válida."																									
+RS4.3:																									
+No se pueden realizar contraofertas superiores al saldo actual del monedero.																									
+RF: RF4.2																									
+RD(s): RDW4.2																									
+"Descripción:  Si el precio de la contraoferta  es superior  al saldo actual del monedero, se"																									
+cancela la operación y se informa al comprador de que su contraoferta no es viable.																									
+RS4.4:																									
+Un usuario sólo puede consultar contraofertas asociadas a sus productos en venta.																									
+RF: RF4.4																									
+RD(s): RDR4.4																									
+Descripción:    Un   usuario   puede   consultar   únicamente   las   contraofertas   que   están																									
+asociadas a los productos que haya puesto en venta.																									
+RS4.5																									
+"El estado del producto debe ser comprado, pendiente de compra o en venta."																									
+RF: RF4.5																									
+RD(s): RDW4.5																									
+"Descripción:  El estado  del producto debe  ser en todo  momento comprado,  pendiente de"																									
+compra o en venta.																									
+RS4.6:																									
+La    puntuación    de    una    compra    debe    ser    un   valor    perteneciente    al    conjunto																									
+"{0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5}."																									
+RF: RF4.6																									
+RD(s): RDW4.6																									
+Descripción:  La puntuación de una compra debe ser un valor real perteneciente al conjunto																									
+"{0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5}."																									
+3.5.  Gestión de mensajes (Aitor de la Iglesia)																									
+RS5.1:																									
+Los usuarios que formen parte de una conversación activa y el producto por el que negocian deben estar registrados en la aplicación y estar activos..																									
+RF: RF5.1																									
+"RD: RDE5.1, RDW5.1"																									
+Descripción: el usuario no podrá enviar un mensaje si no se cumple la condición																									
+RS5.2:																									
+Los usuarios que formen parte de una conversación activa y el producto por el que negocian deben estar registrados en la aplicación y estar activos..																									
+RF: RF5.3																									
+"RD: RDE5.3, RDR5.3, RDW5.3"																									
+Descripción: el usuario no podrá enviar un mensaje si no se cumple la condición																									
+RS5.3:																									
+Los  usuarios  que  forman  parte  de  una  conversación  activa  deben  tener  una venta  en proceso:																									
+RF: RF5.1																									
+"RD: RDE5.1, RDW5.1"																									
+Descripción: el usuario no podrá enviar un mensaje si no se cumple la condición																									
+RS5.4:																									
+Una conversación no puede estar activa y archivada a la vez																									
+RF: RF5.5																									
+RD: RDW5.5																									
+Descripción: el usuario no podrá enviar un mensaje si no se cumple la condición																									
+4.  Diagramas y paso a tablas																									
+4. 1 .																									
+Caja Negra																									
+Usuario																									
+",¡1_"																									
+Ros·.·                      ROE*.*																									
+'																									
+																									
+Correo														"Datos mensaje
+(RDS5.1.2)
+¿"											
+														'											
+																									
+"Correo receptor,"																									
+TikiTún																									
+(SI)																									
+4.2.																									
+Armazón																									
+Favoritos																									
+Ventas																									
+Contraofertas																									
+DR3.4.1				RDW3.2 RDW3.3																					
+R																									
+RDR3.1.2																									
+                                                RDR3.4.2																									
+RDR3.5.2																									
+Productos																									
+Recomendaciones																									
+(S.3)																									
+RDR3.1.3																									
+RDR3.5.3																									
+Ventas																									
+RDE3:																									
+(S.4)																									
+RDR4.4																									
+Usuarios																									
+"RDS4."""					"RDE4."""																				
+"Usuario
+                                    "										RDES.'															
+																									
+										RDSS.'															
+				RDR5.1																					
+RDS3.'																									
+RDR3.1.1																									
+RDR3.5.1																									
+RDR2.1																									
+RDR2.4                                       Productos																									
+RDS2.'																									
+(S.5)																									
+Correo																									
+RDR5.2 RDR5.4						RDW5																			
+RDW2.5																									
+Usuarios																									
+"RDR2.1,2,3,4"																									
+"RDW1.1,3,4,5 ,6"																									
+"RDR1.2,3,4,5,6"																									
+"RDW2.1,2,3,5"																									
+RDW1.6																									
+RDR2.2																									
+RDR2.3                                                    																									
+(S.1)																									
+Mensajes																									
+RDR1 2 2																									
+RDR1.6.2																									
+RDR1 2 3																									
+RDR1 .6.3																									
+Productos																									
+Ventas																									
+4. 3.																									
+DFD1s																									
+4.3. 1 .																									
+Gestión de Perfiles (Eisa Rodríguez)																									
+".                                           ,.  Dar ,de alta usuario"																									
+".""""'  Oonñrma.oió11/Enor                     (1_1)"																									
+Nuevo usuario (ROW1_1)  .•																									
+.....																									
+N11mbre de usuario																									
+(RlJE1-2]																									
+• Perfi'I RlJS1 2)/Ermr																									
+Co115'ulta 1 usuaño																									
+(1-2)																									
+Da.tos usuario RDR1_2_ 1)																									
+"Nombre de usuario,"																									
+"resúmenes p1od:u:eitos ofertados,"																									
+(RDR12-2)																									
+"ld_¡prod.uctos,"																									
+número de valoraciones (ROR1.2 .J)																									
+Producto (A.2)                           Venta {A J)																									
+"Nombre de usua:nio, da.tos modifica.dos (RDE1_..3."																									
+Modiíicar u!>uario																									
+Oam.s actualizados																									
+RDW1-3)																									
+__...._																									
+• Oonñrmaoió11/Enar																									
+(1-3)																									
+"Nomb'Je de usuario,"																									
+U!>uario																									
+                                      cuenta_ elimihad!a (RDR1-3)																									
+Usuariio (A_ 1)																									
+"Nombre d'.e usuaJiio,                                        "																									
+cantidad  RlJE1.4)																									
+•  Oonñrmaoió11/Enor																									
+"Nombre d'.e usua.Jiio,"																									
+"Nombrn de usuario,"																									
+nuevo saldo {RDW1-4)																									
+"Nombrn de usuario,"																									
+"sald'.o acrual, cuenla_ eliminad!a"																									
+RDR1-4)																									
+"ca11tid!ad,oontrasefia                                                 Nombre de usuario,"																									
+".              (ROE1_ 5)                Transfenr saldo a   t-¿     n_u_e_v_o_s_a_ld_'o_(_R_D_w_1 5_l    , -'"																									
+"""""'  Oonñrma.oió11/Error        cuenta bancaria (1.5) ·""""      Nombrn de usuario,"																									
+"saldo actual, rnn raseíia cuenta_ elimihad!a"																									
+RDR1-5]																									
+"Nombre d.e usua:nio,                                        "																									
+wn raseíia RDE1.6)																									
+"Nombrn de usuario,"																									
+cuenta_eltmina.da = true RDW1_ 6)																									
+",.,."																									
+",.- --------------1 Dar de baj:a usuario 1<.11JF-- -----·--1"																									
+' Oonñrmaoió11/Enor                   (Hi)																									
+"Nombrn de usuario,"																									
+oontrasefla cuenta_ elimihad!a																									
+												"ld_¡prod'uctos, d'isponible=fal5'e RDW1_ 6)"													
+Producto (A 2)																				Venta {A J)					
+id_producios																									
+(RDR1_ 6-2)																									
+"Nombre de usuario,"																									
+"id_¡prod:Uclos,ventas activas (ROR1 6 J)"																									
+4.3.2.  Gestión de productos (Roberto González)																									
+RDE2 1 Datos alta																									
+.																									
+e RF2.1 Dar de alta producto																									
+RDR2.1 Vendedo r activo																									
+                                                                     RDW2 1 Nuevo producto                     																									
+																									
+			"RDS2 .1 Confirmacion o error
+RDE2.2 Datos modificacion"																						
+																									
+										"RDS2.2 Confirmacion o error
+RDE2 .3 Solicitud eliminacion"															
+RDW2.2 Producto modificado																									
+                                        RDR2.2 Datos act uales                                                   																									
+RF2.2 Modificar producto																									
+1																									
+Usuario																									
+'                                                                         																									
+1                                                                     RF2 .3 Eliminar producto      )  RDW2.3 Elimina producto																									
+                                 Verif ica contraofertas  activas                																									
+1    Ventas																									
+Ver ifica contraofertas activas																									
+RDE2.4 Solicita consulta																									
+RDS2.4 Datos producto mostrado (  RF2.4 Consultar producto      \             RDR2.4 Datos producto																									
+....																									
+RDR2.4 Datos vendedor																									
+1																									
+Usuarios																									
+1																									
+RDE2.5 Datos promocion                                                                                                                                               R DW2 .5 Descuenta saldo vendedor     																									
+RF2.5 Promocionar producto																									
+RDS2.5 Confirmac1on o error																									
+RDR2 .5 Datos actuales  promoc ion																									
+"4.3.3.  Feed de recomendaciones, búsquedas y favoritos"																									
+(Daniel Hidalgo)																									
+/																									
+RDE 3 .1																									
+","																									
+'																									
+Mostrar las																									
+RDS 3.1                                       recomendaciones (3.1)																									
+",           J"																									
+'-																									
+					RDR 3.1.1																				
+Usuario																									
+					RDR 3.5.1																				
+RDR 3.1.2                        RDR 3.1.3																									
+Producto *																									
+Ventas																									
+RDR 3.5.2                                RDR 3.5.3																									
+"''                   i ,  i"																									
+/																									
+RDE 3 .5																									
+Usuario                                         Hacer una búsqueda (3.5)																									
+'																									
+RDS 3.5       '-...																									
+"""                                                   RDR 3.2"																									
+                                                                                                                                             ¿-																									
+RDE 3 .2                                                                   RDW 3.2																									
+",Marcar como favorito (3.2)"																									
+"RDE 3.3                                                                RDW 3.3                    ,"																									
+RDE 3.4																									
+", Quitar de favoritos (3.3)"																									
+","																									
+RDR 3.4.1																									
+",  Favoritos"																									
+I																									
+RDS 3.4																									
+Consultar los favoritos (3.4) ¿																									
+RDR 3.4.2																									
+Producto *																									
+4.3.4.																									
+Gestión de ventas (Juan Manuel Fernández)																									
+confi rmacion_compra																									
+(RDS 4 .5)																									
+id_producto																									
+(RDW 4.6)																									
+"ld_producto ,"																									
+puntuacion																									
+(RDE 4 6)																									
+ld_producto_																									
+"id_comprador ,"																									
+saldo monedero																									
+( RDW 4. 1)																									
+Usuarios																									
+estado_recepcion_producto                                                  																									
+(RDW 4.5)																									
+Confi rmación compra																									
+producto ( RF4.5)																									
+id_vendedor                                                  																									
+(RDE 4 .1)																									
+Realizar compra																									
+f---------directa del producto																									
+(RF4.1)                                                                  Ventas																									
+Realizar  contraoferta																									
+producto ( RF4.2)																									
+lista co ntraorertas(ld contraorerta.																									
+precio_contraoferta)( RDS 4.4)																									
+Aceptar/Rechazar																									
+contraoferta del producto ( RF4.3)																									
+"ld_comprador,"																									
+precio_contraoferta																									
+(RDR 4 .4)																									
+td_producto																									
+(RDE 4.4)																									
+4.3.5.																									
+Gestión de mensajes (Aitor de la Iglesia)																									
+"Datos Conversación
+id_producto username1 username2
+Datos Mensaje (M):
+mensaje fecha emisor
+Leido (L) Archivo (A)"																									
+Correo																									
+-------																									
+Enviar mensaje (RF5.1)																									
+_receptor (RDR5.1)										"------------
+Usuarios"															
+																									
+DC+M+L (RDW5 1)																									
+Consultar																									
+conversación																									
+(RF5.2)																									
+DC+M+L+A (RDR5 .2)																									
+Mensajes																									
+Buscar																									
+mensaje																									
+(RF5-4)                                        DC+Archivar (RDW5 .5)																									
+DC+A+M+L (RDS5.3)																									
+Añadir																									
+adjunto																									
+(RF5.3)																									
+DC+A+M (RDW5.3)																									
+Archivar																									
+conversación																									
+(RF5.5)																									
+4.4.   Esquemas externos																									
+4.4. 1 .   Gestión de Perfiles (Eisa Rodríguez)																									
+c=J=====(																									
+1 ..6																									
+nombre completo																									
+contraseña correo ubicación rango																									
+valoración media saldo monedero cuenta eliminada																									
+preferidas																									
+Categorías																									
+!Q_¡;iroducto																									
+Título Precio Imagen																									
+Producto                                                                                               Usuario																									
+e:=-=-																									
+Disponible                                            																									
+Recepción confirmada																									
+Valoración																									
+					Usuario																				
+																									
+Producto																									
+																									
+RF1.1 Dar de alta                                 																									
+usuario																									
+username                                                      nombre completo																									
+contraseña                                 Usuario            I====< preferidas																									
+ubicación																									
+rango																									
+1..6																									
+					Categorías																				
+																									
+Producto																									
+Usuario																									
+RF1 .2																									
+Consultar perfil																									
+!Q_Qroducto																									
+Título Precio Imagen Disponible																									
+Valoración																									
+username																									
+nombre completo valoración media																									
+RF1.3																									
+Modificar perfil																									
+username																									
+nombre completo																									
+ubicación																									
+rango																									
+cuenta eliminada																									
+L_   L6																									
+--U-s_u_ar-io-- ¡-preferidas >------<																									
+nombre  categoría																									
+"Categorías
+-----"																									
+RF1.4 Añadir saldo																									
+RF1.5																									
+Transferir saldo a cuenta bancaria																									
+username																									
+saldo monedero cuenta eliminada																									
+username contraseña																									
+saldo monedero                Usuario cuenta eliminada																									
+RF1.6																									
+Dar de baja usuario																									
+Producto																									
+!!Lr-roducto																									
+Disponible																									
+Recepción confirmada																									
+Usuario																									
+userna me																									
+contraseña																									
+cuenta eliminada																									
+Esquema externo total del subsistema Gestión de perfiles:																									
+!.Q_Rroducto																									
+Título Precio Imagen Disponible																									
+Recepción confirmada																									
+Valoración																									
+username																									
+nombre completo contraseña																									
+correo ubicación rango																									
+valoración media saldo monedero cuenta eliminada																									
+Producto																									
+																									
+Usuario																									
+																									
+								Categorías																	
+																					1..6				
+pertenece																									
+preferidas																									
+nombre   categoría																									
+4.4.2.  Gestión de productos (Roberto González)																									
+Producto																									
+Disponible																									
+contraoferta																									
+username																									
+		Usuario																							
+																									
+!.cLRroducto																									
+------- username_vendedor																									
+Título																									
+Producto																									
+Descripción																									
+Precio lmágen																									
+--  Promoción																									
+Disponible																									
+Productos																									
+username																									
+Valoración media Saldo monedero																									
+	Usuario																								
+Categoría																									
+Producto																									
+Usuarios																									
+username																									
+Valoración media Saldo monedero																									
+		Usuario																							
+Producto																									
+!Lwoducto																									
+Título Descripción Precio lmágen Promoción Disponible																									
+RF2.1 Dar de alta producto																									
+-----< Contraoferta																									
+Usuario																									
+Categoría																									
+Producto																									
+!Q_¡;iroducto																									
+Título Descripción Precio lmágen Promoción Disponible																									
+RF2.2 Modificar producto																									
+Usuario																									
+username																									
+Valoración media																									
+-----< Contraoferta																									
+RF2.3 Eliminar producto																									
+44																									
+Categoría																									
+Producto																									
+kLRroducto																									
+Título Descripción Precio Imagen Promoción Disponible																									
+RF2.4 Consultar producto																									
+Usuario																									
+'-------< Contraoferta ;--------_J																									
+username																									
+Valoración media																									
+Categoría																									
+Producto																									
+!.Q_¡:iroducto																									
+Promoción Disponible																									
+RF2.5 Promocionar producto																									
+Usuario																									
+username																									
+Saldo monedero																									
+Esquema externo total del subsistema Gestión de productos:																									
+Producto																									
+!Q_Rroducto																									
+Título Descripción Precio Imagen Promoción Disponible																									
+Usuario																									
+-----<. Contraoferta >---'----- ---'																									
+username																									
+Valoración media Saldo monedero																									
+Categoría																									
+"4.4.3.    Feed de recomendaciones, búsquedas y favoritos"																									
+(Daniel Hidalgo)																									
+username																									
+Puntuación Ubicación Rango																									
+!Qyroducto																									
+Título																									
+1' imagen Precio Promoción Disponible																									
+Categorias																									
+Producto																									
+Categorías																									
+Favoritos																									
+Usuario																									
+Producto																									
+Usuario																									
+_J.																									
+"roducto        ,"																									
+Mostrar las																									
+recomendaciones (3.1)																									
+!.Q_J)roducto																									
+Títutlo																									
+1º Imagen Precio Promoción																									
+username																									
+Ubicación Rango Puntuación																									
+"!======< pertenece  >-------,"																									
+e====< preferidas																									
+Producto																									
+																									
+Categorías																									
+Usuario																									
+Usuario																									
+Producto																									
+Marcar como favorito (3.2)																									
+Quitar de favoritos (3.3)																									
+username                                                                        !2_J)roducto																									
+disponible																									
+Usuario																									
+username																									
+Producto																									
+Producto																									
+Consultar los favoritos (3.4)																									
+Usuario																									
+username																									
+ifUiroducto Título--																									
+10 imagen Precio Disponible																									
+Categorías																									
+Hacer una búsqueda (3.5)																									
+)Q_¡:¡roducto Títutlo--																									
+1º Imagen Precio Disponible																									
+username																									
+Ubicación Rango Puntuación																									
+Producto																									
+Usuario																									
+"Esquema externo total del subsistema ""Feed de recomendaciones, búsquedas y favoritos"":"																									
+!Q    Rroducto																									
+Títutlo																									
+1º Imagen Precio Promoción Disponible																									
+I=====< pertenece																									
+Producto																									
+																									
+			Categorías																						
+Usuario																									
+username																									
+Ubicación Rango Puntuación																									
+I=====< preferidas																									
+1..6																									
+4.4.4.     Gestión de ventas (Juan Manuel Fernández)																									
+Realizar compra																									
+direcla del prod11cto																									
+Ventas																									
+usemame																									
+reoepctón_oonñrmada																									
+precio_tinal valoración																									
+Confirmació n compra del producto																									
+Pun1.1ar compra																									
+produc1o																									
+Realizar contraoferta																									
+de producto																									
+Contraofertas --------<																									
+precio																									
+Usuario																									
+																									
+							Produclo																		
+																									
+Consultar																									
+contraofertas																									
+asociauas a un                                                                                                                                                                                                                      producto																									
+Producto                                                                                                                                                    Usuario																									
+precio																									
+Aceptar/ Rechazar																									
+oontraoferta																									
+recepción_confirmada																									
+precio_final																									
+valoración																									
+Esquema externo total del subsistema Ventas:																									
+Usuario																									
+Producto																									
+precio																									
+"reoepcr,ón_oonlirmada"																									
+precio_Hnal valoración																									
+4.4.5.   Gestión de mensajes (Aitor de la Iglesia)																									
+Usuario																									
+username																									
+correo																									
+'----- ------'1																									
+Producto																									
+Buscar																									
+mensaje																									
+username                Usuario																									
+id  chat																									
+archivado																									
+Chal																									
+Consultar																									
+conversación																									
+fecha																									
+r-;::=====11texto																									
+L.!::::========1      Mensaje         adjunto																									
+1																									
+t..======::'.Jleido																									
+username               Usuario																									
+disponible																									
+Producto																									
+Chal																									
+id chal																									
+archivado																									
+fecha																									
+r;:::=====:l;itexto																									
+L.!::::========l     Mensaje        adjunto																									
+L..::::=====::'.Jleido																									
+Producto																									
+userna me																									
+correo																									
+Usuario																									
+disponible																									
+Enviar																									
+mensaje																									
+Chat                id  chat																									
+archivado																									
+Mensaje																									
+fecha																									
+texto																									
+L'::::====:::::::1'Jleido																									
+Producto																									
+username                Usuario																									
+disponible																									
+Añadir																									
+adjunto																									
+id  chal																									
+archivado																									
+Chal																									
+r.======:;ifecha																									
+Mensaje																									
+adjunto																									
+l...'.::=====:'1·...l  leido																									
+Producto																									
+username																									
+Usuario																									
+1Q_12roducto																									
+disponible																									
+Archivar																									
+conversación																									
+Chat																									
+id  chat																									
+archivado																									
+Esquema externo del subsistema de mensajes:																									
+username																									
+correo																									
+Usuario																									
+disponible																									
+Chat               id  chat																									
+archivado																									
+fecha																									
+"r.::::====::::'.:::====:::1;-,texto"																									
+t..:::::::===============1    Mensaje       adjunto																									
+       - - - - leido																									
+4.4.6.    Sistema																									
+id  chat																									
+archivado																									
+r====::;-¡ fecha																									
+Chat																									
+Mensaje																									
+=:;:;::::=:'.J																									
+texto																									
+nto 0																									
+llLRroducto																									
+Título																									
+Precio Imagen Promoción Disponible																									
+Producto																									
+-----																									
+-< Es favorito  >--- ---																									
+comprador                              emisor																									
+r---              em ompleto																									
+contraseña																									
+precio																									
+recepcion_ confirmada																									
+precio_final valoración																									
+Usuario																									
+preferidas																									
+ubicación																									
+rango																									
+valoración media saldo monedero cuenta eliminada																									
+                                                  Categoría                                                           																									
+1..6																									
+nombre   categoría																									
+4. 5.    Paso a tablas																									
+A  partir  del  esquema  externo  total  hemos  obtenido  el  siguiente  conjunto  de tablas.  Las																									
+"claves primarias irán subrayadas , las claves candidatas se señalan con ""(CC)"" y las claves externas con ""(CE)""."																									
+"• Usuario (username, correo (CC), nombre_completo , contraseña , ubicación, rango,"																									
+"valoración_media , saldo, cuenta_eliminada)"																									
+"•  Producto (id   producto, título , descripción , precio, imagen, promoción, disponible)"																									
+• Categoría (nombre   cat)																									
+"• Preferidas (username (CE), nombre cat (CE))"																									
+"• Pertenece (id producto (CE), nombre_cat (CE))"																									
+"• Favorito (id producto (CE), username (CE))"																									
+"• Vendedor (id producto (CE), username (CE))"																									
+"• Contraoferta (id producto (CE), username (CE), precio)"																									
+"• Vendido (id producto (CE), username (CE), recepción_confirmada, precio_final,"																									
+valoración)																									
+"• Chat (id chat, archivado)"																									
+"• Mensaje (id chat (CE), fecha, texto, adjunto,  leído)"																									
+"• Sobre (id chat (CE), id_producto (CE))"																									
+"• Comprador (id chat (CE), username (CE))"																									
+"•  Emisor (id  chat (CE)  fecha (CE compuesta), username (CE))"																									
+4.6.  Fusión de tablas																									
+"Antes  de estudiar  las dependencias  funcionales,  fusionamos  aquellas tablas de relaciones"																									
+"con   cardinalidad   1:1  o   1:N,  para  simplificar   el  conjunto   de  tablas.   De  este  modo, consideramos las siguientes fusiones:"																									
+"• La relación Emisor entre Usuario y Mensaje es 1:N, pues cada mensaje es emitido"																									
+"por un único usuario y cada usuario emite muchos mensajes. Por tanto, fusionamos las tablas Emisor+Mensaje obteniendo:"																									
+"Emisor+Mensaje (id   chat (CE), fecha, username (CE), texto, adjunto, leído)"																									
+•  Las  relaciones   Sobre  y  Comprador  entre  Chat  con  Producto  y  Usuario																									
+"respectivamente son ambas 1:N. Tenemos así una única entidad que sería un chat entre un comprador y un vendedor acerca de un producto. Por tanto, fusionamos las tablas Chat+Sobre+Comprador  obteniendo:"																									
+"Chat+Sobre+Comprador  (id   chat, id_producto (CE), username (CE), archivado)"																									
+"Donde (id_producto (CE), username (CE)) es una clave candidata compuesta."																									
+•  Las  relaciones   Vendedor  y  Pertenece  entre  Producto  con  Usuario  y  Categoría																									
+"respectivamente son ambas 1:N. Tenemos así una única entidad que sería un producto que tiene  un único vendedor y que pertenece a una única categoría. Por tanto, fusionamos las tablas Chat+Sobre+Comprador  obteniendo:"																									
+"Producto+Vendedor+Pertenece    (id   producto,   username   (CE),   nombre  cat   (CE),"																									
+"título, descripción, precio, imagen, promoción, disponible)"																									
+4. 7. Dependencias funcionales																									
+"Analizando   las  tablas   obtenidas,   vemos   que  se  tienen   las  siguientes   dependencias"																									
+funcionales:																									
+"• Usuario (username, correo (CC), nombre_completo, contraseña, ubicación, rango,"																									
+"valoración_media,  saldo, cuenta_eliminada)"																									
+o   username ---+ Usuario																									
+o   correo ---+ Usuario																									
+"• Producto+Vendedor+Pertenece  (id producto, username (CE), nombre cat (CE),"																									
+"título, descripción, precio, imagen, promoción, disponible)"																									
+o    id_producto ---+ Producto+Vendedor+Pertenece																									
+• Categoría (nombre   cat)																									
+o   nombre_cat ---+ Categoría																									
+"• Preferidas (username (CE), nombre cat (CE))"																									
+"o    (username, nombre_cat) ---+ Preferidas"																									
+"• Favorito (id producto (CE), username (CE))"																									
+"o    (id_producto, username) ---+ Favorito"																									
+"• Contraoferta (id producto (CE), username (CE), precio)"																									
+"o    (id_producto, username) ---+ Contraoferta"																									
+"• Vendido (id producto (CE), username (CE), recepción_confirmada, precio_final,"																									
+valoración)																									
+"o   (id_producto, username) ---+ Vendido"																									
+"• Chat+Sobre+Comprador (id chat, id_producto (CE), username (CE), archivado)"																									
+o   id_chat ---+ Chat+Sobre+Comprador																									
+"o   (id_producto, username) ---+ Chat+Sobre+Comprador"																									
+"•  Emisor+Mensaje (id  chat (CE), fecha, username (CE), texto, adjunto, leído)"																									
+"o    (id_chat, fecha) ---+ Emisor+Mensaje"																									
+4. 8.  Normalización																									
+"Para cada tabla analizamos la clave primaria, las dependencias funcionales  relevantes y si"																									
+"cumple las formas normales 1FN, 2FN, 3FN y BCNF."																									
+"Usuario   (username,   correo   (CC),   nombre_completo,    contraseña,    ubicación,   rango,"																									
+"valoración_media,  saldo, cuenta_eliminada)"																									
+(1FN): La tabla Usuario está en 1FN porque todos sus atributos son atómicos e indivisibles.																									
+"(2FN):  El conjunto  de atributos  primos es {username,  correo},  ya que estos dos atributos"																									
+"forman las únicas claves candidatas. Ambas claves son simples  (no compuestas),  por lo que no puede haber dependencias parciales. Todos los atributos no primos dependen completamente de username y también de correo. Por tanto, la tabla está en 2FN."																									
+(3FN):  Las dependencias  no triviales  son:  {username  ---+  resto de atributos} y {correo ---+																									
+"resto de atributos}. En ambas, el determinante es una clave candidata (superclave). Por tanto, se cumple que para toda dependencia a ---+ {3, a es una superclave.  La tabla está en 3FN."																									
+(FNBC):  Dado  que  todos  los determinantes  de  las dependencias  funcionales  son claves																									
+"candidatas,  se  cumple  la  condición  de  Boyce-Codd.  Por ello,  la tabla  Usuario  está  en FNBC."																									
+"Producto+Vendedor+Pertenece   (id   producto,  username  (CE),  nombre  cat  (CE),  título,"																									
+"descripción, precio, imagen, promoción, disponible)"																									
+(1FN): La tabla está en 1FN porque todos sus atributos son atómicos.																									
+"(2FN): El atributo primo es únicamente id_producto, ya que es la única clave candidata y es"																									
+"simple.  Todos los demás atributos  dependen  completamente  de id_producto.  Por tanto, la tabla está en 2FN."																									
+(3FN):   La   única  dependencia   no  trivial   es  {id_producto   ---+    resto   de   atributos}.   El																									
+"determinante id_producto es una superclave. Por tanto, la tabla está en 3FN."																									
+(FNBC):   La  tabla   cumple   BCNF   porque   el  único  determinante   es  clave  candidata.																									
+Producto+Vendedor+Pertenece  está en FNBC.																									
+Categoría (nombre   cat)																									
+"(1FN): Sólo tiene un atributo nombre_cat que es indivisible, por lo que la tabla está en 1FN."																									
+"(2FN):  El único atributo  primo es nombre_cat,  clave primaria no compuesta.  No hay más"																									
+atributos. La tabla está en 2FN.																									
+(3FN): La única dependencia no trivial tiene como determinante a una superclave.  La tabla																									
+está en 3FN.																									
+"(FNBC): El determinante es clave candidata, por lo que también cumple FNBC."																									
+"Preferidas (username (CE), nombre   cat (CE))"																									
+(1FN): Los atributos son atómicos.																									
+(2FN):  La clave primaria es compuesta y ambos atributos son primos. No hay atributos no																									
+"primos, por lo que no puede haber dependencias parciales. La tabla está en 2FN."																									
+"(3FN):  Solo  existe  la  dependencia  {(username,  nombre_cat)  ---+    resto  de  atributos}.  El"																									
+"determinante es clave primaria, luego es superclave. La tabla está en 3FN."																									
+"(FNBC): Como el determinante de la única dependencia es una superclave, la tabla está en"																									
+FNBC.																									
+"Favorito (id   producto (CE), username (CE))"																									
+(1FN): Los atributos son indivisibles.																									
+"(2FN): La clave es compuesta (id_producto, username).  No existen atributos no primos. La"																									
+tabla está en 2FN.																									
+(3FN):  La única dependencia  tiene  como determinante  la clave  primaria.  La tabla está en																									
+3FN.																									
+(FNBC): El determinante es superclave. La tabla está en FNBC.																									
+"Contraoferta (id   producto (CE), username (CE),  precio)"																									
+(1FN): Todos los atributos son atómicos.																									
+"(2FN):  La clave  primaria es compuesta:  (id_producto,  username).  Los atributos no primos"																									
+"(precio, fecha)  dependen  completamente  de la clave compuesta.  Por ello, la tabla está en 2FN."																									
+(3FN): La única dependencia no trivial tiene como determinante a una superclave.  La tabla																									
+está en 3FN.																									
+"(FNBC): El determinante es clave candidata. Por tanto, Contraoferta está en FNBC."																									
+"Vendido (id   producto (CE), username (CE), recepción_confirmada,  precio_final, valoración)"																									
+(1FN): La tabla está en 1FN.																									
+(2FN):  Clave primaria compuesta.  Los atributos  no primos dependen  de toda  la clave. La																									
+tabla está en 2FN.																									
+(3FN): La única dependencia no trivial tiene como determinante a una superclave.  La tabla																									
+está en 3FN.																									
+(FNBC): El determinante es clave candidata. La tabla está en FNBC.																									
+"Chat+Sobre+Comprador  (id   chat, id_producto (CE), username (CE), archivado)"																									
+(1FN): Todos los atributos son indivisibles.																									
+"(2FN): Atributos primos: {id_chat} y {id_producto,  username}. Todos los atributos no primos"																									
+(archivado) dependen completamente de ambas claves candidatas. La tabla está en 2FN.																									
+(3FN): Analizamos las dependencias:																									
+1.  id_chat ---+ resto: id_chat es superclave																									
+"2.   (id_producto, username) ---+ id_chat: (id_producto, username) es clave candidata luego superclave"																									
+En ambos casos el determinante es superclave. La tabla está en 3FN.																									
+"(FNBC): Todas las dependencias tienen como determinante una clave candidata. Por tanto,"																									
+la tabla está en FNBC.																									
+"Emisor+Mensaje (id  chat (CE), fecha, username (CE), texto, adjunto, leído)"																									
+(1FN): Todos los atributos son atómicos.																									
+"(2FN): Clave primaria compuesta: (id_chat, fecha). No existen dependencias parciales, pues"																									
+no hay dependencias de un solo atributo de la clave. La tabla está en 2FN.																									
+"(3FN): La única dependencia no trivial tiene como determinante a una superclave. Por ello,"																									
+la tabla está en 3FN.																									
+(FNBC): El determinante es clave primaria luego está en FNBC.																									
+El esquema resultante de nuestro análisis es:																									
+"Mensaje+Emisor id cha lecha usemame, texto,adjunto, leido)"																									
+c.p																									
+(3)          e.e (2)          e.e (1)																									
+c.p                      e.e																									
+"e.e (2)         e.e (1) Contraoferta (iJ!_Qroducto  username , precio)"																									
+c.p																									
+"Usuario (use\ 1 me, correo nombre_completo, contraseña, ubicación, rango, saldo, valoración_ media, cuenta_eLiminada )"																									
+c.p         e.e																									
+Preferidos  uscen e n bk																									
+c.p																									
+Categoría (no.\?Jrel																									
+c.p																									
+              j																									
+"Producto+Vende<lor+Pertenece ÜJLQ    ucto, us i e, nombcr:_J Jtegoría, título , descripción , precio, imagen, promoción,disponible ) c.p"																									
+0																									
+"Vendido O!Lil'ri3Ja¿to , usen  e . recepción_confirmada, precio_final,valoración) c.p"																									
+"Vemos que el modelo relacional está en FNBC, ya que todas las dependencias que"																									
+tenemos tienen a la izquierda una superclave.																									
