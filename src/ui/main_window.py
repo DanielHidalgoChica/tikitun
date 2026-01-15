@@ -1,9 +1,9 @@
 import tkinter as tk
-from src.ui.publicar_producto_window import open_publicar_producto
-from src.ui.perfil_window import show_perfil_view
-from src.ui.feed_window import show_feed_view
-from src.ui.mensajes_window import show_mensajes_view
-from src.ui.favoritos_window import show_favoritos_view
+from src.ui.productos.publicar_window import open_publicar_producto
+from src.ui.perfil.perfil_window import show_perfil_view
+from src.ui.feed.feed_window import show_feed_view
+from src.ui.mensajes.mensajes_window import show_mensajes_view
+from src.ui.favoritos.favoritos_window import show_favoritos_view
 
 
 def run_app(username="usuario_demo"):

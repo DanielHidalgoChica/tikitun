@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from src.db.db_app import begin_transaction, commit, rollback
-from src.services.productos_service import publicar_producto
+from src.services.productos.productos_service import publicar_producto
 
 def open_publicar_producto(parent):
     win = tk.Toplevel(parent)
