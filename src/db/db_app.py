@@ -7,6 +7,8 @@ import pyodbc
 from contextlib import contextmanager
 from typing import Optional
 from dotenv import load_dotenv
+from pathlib import Path
+from typing import List
 
 load_dotenv()
 
@@ -103,3 +105,64 @@ def rollback_to_savepoint(cn: pyodbc.Connection, name: str) -> None:
     cur = cn.cursor()
     cur.execute(f"ROLLBACK TO SAVEPOINT {name}")
     cur.close()
+
+
+def initialize_database(sql_dir: Optional[str] = None, files: Optional[List[str]] = None) -> dict:
+    """Inicializa la base de datos ejecutando una lista de scripts SQL.
+
+    Args:
+        sql_dir: Carpeta donde buscar los ficheros SQL. Si es None, se usa el directorio `src/db` del paquete.
+        files: Lista de nombres de fichero SQL a ejecutar en orden. Por defecto
+            ['init.sql', 'insert_test_tuples.sql'].
+
+    Returns:
+        Dict con resumen: {'executed_files': [...], 'statements_executed': n}
+
+    Raises:
+        FileNotFoundError: si falta algún fichero SQL.
+        Exception: si la ejecución SQL falla (se hace rollback y se propaga la excepción).
+    """
+    if files is None:
+        files = ["init.sql", "insert_test_tuples.sql"]
+
+    # Determinar directorio por defecto (carpeta donde está este archivo -> src/db)
+    if sql_dir is None:
+        sql_dir = str(Path(__file__).resolve().parent)
+
+    executed = []
+    stmt_count = 0
+
+    with connect(autocommit=False) as cn:
+        cur = cn.cursor()
+        try:
+            for fname in files:
+                path = Path(sql_dir) / fname
+                if not path.exists():
+                    raise FileNotFoundError(f"SQL file not found: {path}")
+
+                sql_text = path.read_text(encoding="utf-8")
+
+                # Intenta dividir por ';' para obtener sentencias independientes.
+                # Se eliminan líneas vacías resultantes.
+                statements = [s.strip() for s in sql_text.split(";") if s.strip()]
+
+                for stmt in statements:
+                    # Ejecutar cada sentencia individualmente
+                    cur.execute(stmt)
+                    stmt_count += 1
+
+                executed.append(str(path))
+
+            # Confirmar todos los cambios si todo fue bien
+            cn.commit()
+        except Exception:
+            # Si hay error, revertir y propagar
+            try:
+                cn.rollback()
+            except Exception:
+                pass
+            raise
+        finally:
+            cur.close()
+
+    return {"executed_files": executed, "statements_executed": stmt_count}

@@ -4,6 +4,8 @@ from src.ui.perfil.perfil_window import show_perfil_view
 from src.ui.feed.feed_window import show_feed_view
 from src.ui.mensajes.mensajes_window import show_mensajes_view
 from src.ui.favoritos.favoritos_window import show_favoritos_view
+from src.db import db_app
+import tkinter.messagebox as messagebox
 
 
 def run_app(username="bob"):
@@ -108,6 +110,24 @@ def run_app(username="bob"):
     
     btn_crear = create_menu_button(sidebar, "Crear", "+", lambda: open_publicar_producto(root))
     btn_crear.pack(pady=5, padx=10)
+    
+    # Developer button: abre diálogo para inicializar la BD
+    def on_developer_init():
+        """Muestra confirmación y llama a initialize_database."""
+        if not messagebox.askyesno("Inicializar BD", "¿Deseas inicializar la base de datos con los scripts SQL? Esto sobrescribirá datos existentes."):
+            return
+
+        try:
+            result = db_app.initialize_database()
+            message = f"Inicialización completada. Archivos ejecutados: {len(result['executed_files'])}, sentencias: {result['statements_executed']}"
+            messagebox.showinfo("Éxito", message)
+        except FileNotFoundError as e:
+            messagebox.showerror("Error", f"Fichero SQL no encontrado: {e}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al inicializar la BD: {e}")
+
+    btn_dev = create_menu_button(sidebar, "Dev", "[1F[1B", on_developer_init)
+    btn_dev.pack(pady=20, padx=10)
     
     # ===== ÁREA DE CONTENIDO =====
     content_frame = tk.Frame(main_container, bg="white")

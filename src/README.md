@@ -262,3 +262,24 @@ Todo esto se hace **sin cambiar la estructura**.
 Si se cumple esto, la práctica está bien planteada.
 
 ---
+
+## 11. Botón "Developer" (inicializar BD)
+
+Para facilitar las pruebas hay un botón "Dev" disponible en la barra lateral de la ventana principal. Este botón permite ejecutar los scripts SQL de inicialización que se incluyen en `src/db` (por defecto `init.sql` y `insert_test_tuples.sql`).
+
+Comportamiento:
+
+- Al pulsar el botón se solicita confirmación.
+- Si se confirma, la aplicación llama a la función `initialize_database()` definida en `src/db/db_app.py`.
+- Si todo va bien, se muestra un mensaje con el número de archivos y sentencias ejecutadas; en caso de error se muestra la excepción.
+
+Precauciones:
+
+- Este botón ejecuta SQL directamente contra la base de datos configurada en el `.env` (variables: `ORACLE_HOST`, `ORACLE_PORT`, `ORACLE_SERVICE`, `ORACLE_USER`, `ORACLE_PASSWORD`, `ORACLE_ODBC_DRIVER`). Asegúrate de no apuntar a una BD de producción.
+- Si faltan los drivers ODBC o las librerías necesarias (`pyodbc`, `python-dotenv`), la inicialización fallará localmente.
+
+Ocultar el botón en producción:
+
+Si quieres que el botón solo esté visible en desarrollo, puedes modificar `src/ui/main_window.py` para leer la variable de entorno `TIKI_DEV` y mostrar el botón solo cuando `TIKI_DEV=1`.
+
+---
