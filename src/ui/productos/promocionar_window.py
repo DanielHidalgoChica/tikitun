@@ -15,8 +15,7 @@ def open_promocionar_producto(parent, id_producto: int, username_vendedor: str):
         id_producto: ID del producto a promocionar
         username_vendedor: Vendedor que promociona
     """
-    from src.services.productos.productos_service import consultar_producto
-    from src.repositories.perfiles.usuarios_repo import get_usuario
+    from src.services.productos.productos_service import get_info_promocion
     
     win = tk.Toplevel(parent)
     win.title("Promocionar Producto")
@@ -25,11 +24,12 @@ def open_promocionar_producto(parent, id_producto: int, username_vendedor: str):
     
     # Cargar datos del producto y usuario
     producto = None
-    usuario = None
+    saldo_actual = 0
     try:
         with connect() as cn:
-            producto = consultar_producto(cn, id_producto)
-            usuario = get_usuario(cn, username_vendedor)
+            info = get_info_promocion(cn, id_producto, username_vendedor)
+            producto = info["producto"]
+            saldo_actual = info["saldo_usuario"]
     except ValueError as e:
         messagebox.showerror("Error", str(e))
         win.destroy()
@@ -39,13 +39,12 @@ def open_promocionar_producto(parent, id_producto: int, username_vendedor: str):
         win.destroy()
         return
     
-    if not producto or not usuario:
+    if not producto:
         messagebox.showerror("Error", "No se pudieron cargar los datos.")
         win.destroy()
         return
     
     precio_producto = producto.get("precio", 0)
-    saldo_actual = usuario.get("saldo", 0)
     promocion_actual = producto.get("promocion", 0)
     
     # --- Contenido ---
@@ -245,8 +244,7 @@ def show_promocionar_view(parent, id_producto: int, username_vendedor: str):
         id_producto: ID del producto a promocionar
         username_vendedor: Vendedor que promociona
     """
-    from src.services.productos.productos_service import consultar_producto, promocionar_producto
-    from src.repositories.perfiles.usuarios_repo import get_usuario
+    from src.services.productos.productos_service import get_info_promocion, promocionar_producto
     
     # Limpiar contenido anterior
     for widget in parent.winfo_children():
@@ -254,11 +252,12 @@ def show_promocionar_view(parent, id_producto: int, username_vendedor: str):
     
     # Cargar datos del producto y usuario
     producto = None
-    usuario = None
+    saldo_actual = 0
     try:
         with connect() as cn:
-            producto = consultar_producto(cn, id_producto)
-            usuario = get_usuario(cn, username_vendedor)
+            info = get_info_promocion(cn, id_producto, username_vendedor)
+            producto = info["producto"]
+            saldo_actual = info["saldo_usuario"]
     except ValueError as e:
         messagebox.showerror("Error", str(e))
         from src.ui.productos.detalle_window import show_detalle_view
@@ -270,14 +269,13 @@ def show_promocionar_view(parent, id_producto: int, username_vendedor: str):
         show_detalle_view(parent, id_producto, username_vendedor)
         return
     
-    if not producto or not usuario:
+    if not producto:
         messagebox.showerror("Error", "No se pudieron cargar los datos.")
         from src.ui.productos.detalle_window import show_detalle_view
         show_detalle_view(parent, id_producto, username_vendedor)
         return
     
     precio_producto = producto.get("precio", 0)
-    saldo_actual = usuario.get("saldo", 0)
     promocion_actual = producto.get("promocion", 0) or 0
     
     # Frame principal

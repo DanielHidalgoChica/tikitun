@@ -134,6 +134,19 @@ def get_categorias(cn) -> list[str]:
     return productos_repo.get_todas_categorias(cn)
 
 
+def get_productos_usuario(cn, username: str) -> list[dict]:
+    """Obtiene los productos de un usuario.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre del usuario
+    
+    Returns:
+        Lista de productos del usuario
+    """
+    return productos_repo.get_productos_usuario(cn, username)
+
+
 def modificar_producto(cn, id_producto: int, username_vendedor: str, cambios: dict) -> None:
     """RF2.2: Modifica datos de un producto propio.
     
@@ -241,6 +254,41 @@ def eliminar_producto(cn, id_producto: int, username_vendedor: str) -> None:
     
     savepoint(cn, "SP_ELIMINAR_PRODUCTO")
     productos_repo.soft_delete_producto(cn, id_producto)
+
+
+def get_info_promocion(cn, id_producto: int, username_vendedor: str) -> dict:
+    """Obtiene la información necesaria para la vista de promoción.
+    
+    Args:
+        cn: Conexión a la base de datos
+        id_producto: ID del producto
+        username_vendedor: Usuario que quiere promocionar
+    
+    Returns:
+        Dict con:
+            - producto: datos del producto
+            - saldo_usuario: saldo actual del usuario
+    
+    Raises:
+        ValueError: Si el producto no existe o el usuario no es el vendedor
+    """
+    from src.repositories.perfiles import usuarios_repo
+    
+    producto = productos_repo.get_producto(cn, id_producto)
+    if not producto:
+        raise ValueError(f"El producto con ID {id_producto} no existe.")
+    
+    if producto.get("username_vendedor") != username_vendedor:
+        raise ValueError("No tienes permiso para promocionar este producto.")
+    
+    usuario = usuarios_repo.get_usuario(cn, username_vendedor)
+    if not usuario:
+        raise ValueError("No se pudo obtener la información del usuario.")
+    
+    return {
+        "producto": producto,
+        "saldo_usuario": usuario.get("saldo", 0)
+    }
 
 
 def promocionar_producto(cn, id_producto: int, username_vendedor: str, 

@@ -149,6 +149,45 @@ def get_producto(cn, id_producto: int) -> dict | None:
         "longitud_vendedor": row[11],
     }
 
+def get_productos_usuario(cn, username: str) -> list[dict]:
+    """Obtiene los productos de un usuario.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+    
+    Returns:
+        Lista de productos del usuario
+    """
+    cur = cn.cursor()
+    cur.execute("""
+        SELECT 
+            id_producto,
+            titulo,
+            descripcion,
+            precio,
+            nombre_categoria,
+            promocion,
+            disponible
+        FROM Producto
+        WHERE username = ?
+        ORDER BY id_producto DESC
+    """, (username,))
+    
+    productos = []
+    for row in cur.fetchall():
+        productos.append({
+            "id_producto": row[0],
+            "titulo": row[1],
+            "descripcion": row[2],
+            "precio": row[3],
+            "nombre_categoria": row[4],
+            "promocion": row[5] if row[5] else 0,
+            "disponible": row[6]
+        })
+    
+    cur.close()
+    return productos
 
 def update_producto(cn, id_producto: int, cambios: dict) -> None:
     """Actualiza campos de un producto.

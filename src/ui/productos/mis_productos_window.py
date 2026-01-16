@@ -4,6 +4,7 @@ Permite acceder a consultar, editar, eliminar y promocionar.
 """
 import tkinter as tk
 from tkinter import ttk, messagebox
+from src.services.productos.productos_service import get_productos_usuario
 from src.db.db_app import connect
 
 
@@ -91,45 +92,6 @@ def show_mis_productos_view(parent, username: str):
         crear_tarjeta_producto(scrollable_frame, producto, username, parent)
 
 
-def get_productos_usuario(cn, username: str) -> list[dict]:
-    """Obtiene los productos de un usuario.
-    
-    Args:
-        cn: Conexión a la base de datos
-        username: Nombre de usuario
-    
-    Returns:
-        Lista de productos del usuario
-    """
-    cur = cn.cursor()
-    cur.execute("""
-        SELECT 
-            id_producto,
-            titulo,
-            descripcion,
-            precio,
-            nombre_categoria,
-            promocion,
-            disponible
-        FROM Producto
-        WHERE username = ?
-        ORDER BY id_producto DESC
-    """, (username,))
-    
-    productos = []
-    for row in cur.fetchall():
-        productos.append({
-            "id_producto": row[0],
-            "titulo": row[1],
-            "descripcion": row[2],
-            "precio": row[3],
-            "nombre_categoria": row[4],
-            "promocion": row[5] if row[5] else 0,
-            "disponible": row[6]
-        })
-    
-    cur.close()
-    return productos
 
 
 def crear_tarjeta_producto(parent, producto: dict, username: str, content_frame):
