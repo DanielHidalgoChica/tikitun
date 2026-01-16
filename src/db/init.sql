@@ -81,3 +81,11 @@ CREATE TABLE Vendido(
     CONSTRAINT FK_VendidoProducto FOREIGN KEY (id_producto) REFERENCES Producto(id_producto),
     CONSTRAINT FK_VendidoComprador FOREIGN KEY (username) REFERENCES Usuario(username)
 );
+
+-- Categorías maestras del sistema
+INSERT INTO Categoria VALUES ('Vehículos');
+INSERT INTO Categoria VALUES ('Moda');
+INSERT INTO Categoria VALUES ('Tecnología');
+INSERT INTO Categoria VALUES ('Deportes');
+INSERT INTO Categoria VALUES ('Hogar');
+INSERT INTO Categoria VALUES ('Libros');
