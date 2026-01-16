@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox
 from src.db.db_app import connect, begin_transaction, commit, rollback
 from src.services.feed_busqueda_favs.recomendaciones_service import obtener_feed
 from src.services.feed_busqueda_favs.favoritos_service import agregar_favorito
-from src.services.feed_busqueda_favs.busqueda_service import buscar_productos, CATEGORIAS_DISPONIBLES
+from src.services.feed_busqueda_favs.busqueda_service import buscar_productos, obtener_categorias_disponibles
 
 
 def show_feed_view(parent_frame, username="bob"):
@@ -44,10 +44,19 @@ def show_feed_view(parent_frame, username="bob"):
     tk.Label(row1, text="Categoría:", font=("Arial", 10)).pack(side=tk.LEFT, padx=(15, 5))
     
     categoria_var = tk.StringVar(value="(Todas)")
+    
+    # Obtener categorías de la BD
+    categorias_list = ["(Todas)"]
+    try:
+        with connect() as cn:
+            categorias_list.extend(obtener_categorias_disponibles(cn))
+    except Exception as ex:
+        messagebox.showerror("Error", f"No se pudieron cargar las categorías: {str(ex)}")
+    
     categoria_combo = ttk.Combobox(
         row1, 
         textvariable=categoria_var,
-        values=["(Todas)"] + CATEGORIAS_DISPONIBLES,
+        values=categorias_list,
         state="readonly",
         width=15
     )
@@ -65,7 +74,7 @@ def show_feed_view(parent_frame, username="bob"):
     tk.Radiobutton(row2, text="Precio ↑", variable=orden_var, value="precio_asc").pack(side=tk.LEFT, padx=3)
     tk.Radiobutton(row2, text="Precio ↓", variable=orden_var, value="precio_desc").pack(side=tk.LEFT, padx=3)
     
-    buscar_btn = tk.Button(row2, text="🔍 Buscar", state=tk.DISABLED)
+    buscar_btn = tk.Button(row2, text="🔍 Buscar", state=tk.NORMAL)
     buscar_btn.pack(side=tk.RIGHT, padx=10)
     
     volver_btn = tk.Button(
@@ -186,12 +195,8 @@ def show_feed_view(parent_frame, username="bob"):
             ).pack(side=tk.LEFT, padx=3)
     
     def actualizar_estado_boton(*args):
-        """Habilita/deshabilita el botón Buscar según si hay texto."""
-        texto = search_var.get().strip()
-        if texto:
-            buscar_btn.config(state=tk.NORMAL)
-        else:
-            buscar_btn.config(state=tk.DISABLED)
+        """El botón Buscar siempre está habilitado (búsqueda opcional)."""
+        buscar_btn.config(state=tk.NORMAL)
     
     def on_buscar():
         """Handler del botón Buscar."""
@@ -204,7 +209,10 @@ def show_feed_view(parent_frame, username="bob"):
                 productos = buscar_productos(cn, texto, categoria, orden)
             
             # Actualizar UI
-            results_label.config(text=f"Resultados de búsqueda: \"{texto}\"")
+            if texto:
+                results_label.config(text=f"Resultados de búsqueda: \"{texto}\"")
+            else:
+                results_label.config(text="Todos los productos disponibles:")
             volver_btn.pack(side=tk.RIGHT, padx=5)  # Mostrar botón volver
             render_productos(productos)
             
@@ -217,7 +225,7 @@ def show_feed_view(parent_frame, username="bob"):
     search_var.trace_add("write", actualizar_estado_boton)
     
     # Buscar al presionar Enter
-    search_entry.bind("<Return>", lambda e: on_buscar() if search_var.get().strip() else None)
+    search_entry.bind("<Return>", lambda e: on_buscar())
     
     # Configurar comando del botón buscar
     buscar_btn.config(command=on_buscar)

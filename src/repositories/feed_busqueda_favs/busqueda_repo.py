@@ -35,10 +35,6 @@ def get_busqueda(cn, filtros: dict) -> list[dict]:
     
     print(f"   [REPO busqueda] get_busqueda() q='{q}', categoria='{categoria}', orden='{orden}'")
     
-    if not q:
-        print("   [REPO busqueda] Búsqueda vacía, retornando lista vacía")
-        return []
-    
     cur = cn.cursor()
     
     # Construir query dinámica
@@ -57,10 +53,14 @@ def get_busqueda(cn, filtros: dict) -> list[dict]:
         FROM producto p
         JOIN usuario u ON p.username = u.username
         WHERE p.disponible = 1
-          AND LOWER(p.titulo) LIKE '%' || LOWER(?) || '%'
     """
     
-    params = [q]
+    params = []
+    
+    # Filtro por texto de búsqueda (opcional)
+    if q:
+        query += " AND LOWER(p.titulo) LIKE '%' || LOWER(?) || '%'"
+        params.append(q)
     
     # Filtro por categoría (opcional)
     if categoria and categoria.strip():
@@ -100,3 +100,25 @@ def get_busqueda(cn, filtros: dict) -> list[dict]:
     print(f"   [DEBUG BUSQUEDA] Encontrados {len(productos)} productos")
     
     return productos
+
+
+def get_categorias(cn) -> list[str]:
+    """Obtiene todas las categorías disponibles de la tabla Categoria.
+    
+    Args:
+        cn: Conexión a la base de datos
+    
+    Returns:
+        Lista de nombres de categorías ordenados alfabéticamente
+    """
+    print("   [REPO busqueda] get_categorias()")
+    
+    cur = cn.cursor()
+    cur.execute("SELECT nombre FROM categoria ORDER BY nombre ASC")
+    
+    categorias = [row[0] for row in cur.fetchall()]
+    cur.close()
+    
+    print(f"   [DEBUG BUSQUEDA] Categorías obtenidas de la BD: {categorias}")
+    
+    return categorias
