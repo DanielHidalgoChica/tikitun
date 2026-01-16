@@ -73,7 +73,7 @@ INSERT INTO Producto VALUES (
   'Munkres: 2019',
   25.00,
   NULL,
-  NULL,
+  1,
   1
 );
 
