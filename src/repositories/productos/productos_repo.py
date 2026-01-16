@@ -264,3 +264,20 @@ def search_productos(cn, filtros: dict) -> list[dict]:
         {"id_producto": 1, "titulo": "Producto 1", "precio": 29.99},
         {"id_producto": 2, "titulo": "Producto 2", "precio": 49.99},
     ]
+
+
+def update_promocion(cn, id_producto: int, grado_promocion: float) -> None:
+    """Actualiza el grado de promoción de un producto.
+    
+    Args:
+        cn: Conexión a la base de datos
+        id_producto: ID del producto
+        grado_promocion: Valor entre 0 y 1 con 2 decimales
+    """
+    cur = cn.cursor()
+    cur.execute("""
+        UPDATE Producto 
+        SET promocion = ?
+        WHERE id_producto = ?
+    """, (grado_promocion, id_producto))
+    cur.close()

@@ -244,10 +244,14 @@ def eliminar_producto(cn, id_producto: int, username_vendedor: str) -> None:
 
 
 def promocionar_producto(cn, id_producto: int, username_vendedor: str, 
-                        grado_promocion: float) -> None:
+                        grado_promocion: float) -> float:
     """RF2.5: Promociona un producto incrementando su visibilidad.
     
     Coste: grado_promocion * 0.1 * precio_producto
+    
+    RS aplicadas:
+    - RS2.7: Solo el propietario puede promocionar
+    - RS2.10: Grado de promoción en [0, 1] con 2 decimales
     
     Args:
         cn: Conexión a la base de datos
@@ -255,12 +259,70 @@ def promocionar_producto(cn, id_producto: int, username_vendedor: str,
         username_vendedor: Vendedor (para cobrar del saldo)
         grado_promocion: Valor entre 0 y 1
     
+    Returns:
+        Coste de la promoción
+    
     Raises:
         ValueError: Si saldo insuficiente o valor no válido
     """
-    print(" [SERVICE productos] promocionar_producto()")
-    # TODO: Validar grado_promocion (0-1)
-    # TODO: Calcular coste
-    # TODO: Verificar saldo suficiente
-    # TODO: Descontar del monedero y actualizar promoción
-    pass
+    from src.repositories.perfiles import usuarios_repo
+    
+    # Validar grado_promocion (RS2.10)
+    try:
+        grado_promocion = float(grado_promocion)
+    except (TypeError, ValueError):
+        raise ValueError("El grado de promoción debe ser un número válido.")
+    
+    if grado_promocion < 0 or grado_promocion > 1:
+        raise ValueError("El grado de promoción debe estar entre 0 y 1.")
+    
+    # Redondear a 2 decimales
+    grado_promocion = round(grado_promocion, 2)
+    
+    # Obtener producto
+    producto = productos_repo.get_producto(cn, id_producto)
+    if not producto:
+        raise ValueError(f"El producto con ID {id_producto} no existe.")
+    
+    if not producto.get("disponible"):
+        raise ValueError(f"El producto con ID {id_producto} no está disponible.")
+    
+    # Verificar que el usuario es el vendedor (RS2.7)
+    if producto.get("username_vendedor") != username_vendedor:
+        raise ValueError("No tienes permiso para promocionar este producto.")
+    
+    # Calcular coste
+    precio = producto.get("precio", 0)
+    coste = round(grado_promocion * 0.1 * precio, 2)
+    
+    if coste <= 0:
+        # Si grado = 0, no hay coste pero actualizamos igualmente
+        savepoint(cn, "SP_PROMOCIONAR_PRODUCTO")
+        productos_repo.update_promocion(cn, id_producto, grado_promocion)
+        return 0.0
+    
+    # Obtener saldo del usuario
+    usuario = usuarios_repo.get_usuario(cn, username_vendedor)
+    if not usuario:
+        raise ValueError("No se pudo obtener la información del usuario.")
+    
+    saldo_actual = usuario.get("saldo", 0)
+    
+    # Verificar saldo suficiente
+    if saldo_actual < coste:
+        raise ValueError(
+            f"Saldo insuficiente. El coste es {coste:.2f}€ "
+            f"y tu saldo es {saldo_actual:.2f}€."
+        )
+    
+    # Realizar transacción
+    savepoint(cn, "SP_PROMOCIONAR_PRODUCTO")
+    
+    # Descontar del monedero
+    nuevo_saldo = round(saldo_actual - coste, 2)
+    usuarios_repo.update_saldo(cn, username_vendedor, nuevo_saldo)
+    
+    # Actualizar promoción del producto
+    productos_repo.update_promocion(cn, id_producto, grado_promocion)
+    
+    return coste
