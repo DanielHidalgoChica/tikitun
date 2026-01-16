@@ -134,15 +134,16 @@ def show_feed_view(parent_frame, username="bob"):
             
             precio = prod.get('precio', 0)
             categoria = prod.get('nombre_categoria', 'Sin categoría')
-            vendedor = prod.get('username_vendedor', 'desconocido')
             promocion = prod.get('promocion', 0)
             rating = prod.get('valoracion_vendedor', 0)
+            num_favs = prod.get('num_favs', 0)
             
-            desc_text = f"€{precio:.2f} • {categoria} • por @{vendedor}"
+            desc_text = f"€{precio:.2f} • {categoria}"
             if promocion and promocion > 0:
-                desc_text += f" • {promocion}% DESC"
+                desc_text += f" • {promocion}% OFF"
             if rating:
                 desc_text += f" • ⭐{rating:.1f}"
+            desc_text += f" • ❤️ {num_favs}"
             
             tk.Label(
                 info_frame,

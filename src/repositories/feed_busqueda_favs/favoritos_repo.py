@@ -90,7 +90,7 @@ def get_favoritos(cn, username: str) -> list[dict]:
     cur.execute("""
         SELECT p.id_producto, p.titulo, p.precio, p.descripcion,
                p.username AS username_vendedor, p.nombre_categoria, 
-               p.imagen, p.promocion, p.disponible
+               p.imagen, p.promocion, p.num_favs, p.disponible
         FROM favorito f
         JOIN producto p ON f.id_producto = p.id_producto
         WHERE f.username = ? AND p.disponible = 1
