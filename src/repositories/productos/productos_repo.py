@@ -154,23 +154,55 @@ def update_producto(cn, id_producto: int, cambios: dict) -> None:
     Args:
         cn: Conexión a la base de datos
         id_producto: ID del producto
-        cambios: Dict con campos a modificar
+        cambios: Dict con campos a modificar. Campos permitidos:
+            - titulo
+            - descripcion
+            - precio
+            - nombre_categoria
+            - imagen
     """
-    print("   [REPO productos] update_producto()", id_producto, cambios)
-    # TODO: UPDATE PRODUCTO SET ... WHERE id_producto = ?
-    pass
+    # Mapeo de campos del dict a columnas de la tabla
+    campos_permitidos = {
+        "titulo": "titulo",
+        "descripcion": "descripcion",
+        "precio": "precio",
+        "nombre_categoria": "nombre_categoria",
+        "imagen": "imagen",
+    }
+    
+    # Construir SET dinámicamente solo con campos presentes
+    set_clauses = []
+    valores = []
+    
+    for campo, columna in campos_permitidos.items():
+        if campo in cambios:
+            set_clauses.append(f"{columna} = ?")
+            valores.append(cambios[campo])
+    
+    if not set_clauses:
+        return  # No hay nada que actualizar
+    
+    valores.append(id_producto)
+    
+    cur = cn.cursor()
+    cur.execute(f"""
+        UPDATE Producto
+        SET {', '.join(set_clauses)}
+        WHERE id_producto = ?
+    """, tuple(valores))
+    cur.close()
 
 
 def soft_delete_producto(cn, id_producto: int) -> None:
-    """Marca un producto como no disponible.
+    """Marca un producto como no disponible (soft delete).
     
     Args:
         cn: Conexión a la base de datos
         id_producto: ID del producto
     """
-    print("   [REPO productos] soft_delete_producto()", id_producto)
-    # TODO: UPDATE PRODUCTO SET disponible = false WHERE id_producto = ?
-    pass
+    cur = cn.cursor()
+    cur.execute("UPDATE Producto SET disponible = 0 WHERE id_producto = ?", (id_producto,))
+    cur.close()
 
 
 def get_all_productos(cn) -> list[dict]:

@@ -146,17 +146,70 @@ def modificar_producto(cn, id_producto: int, username_vendedor: str, cambios: di
         cn: Conexión a la base de datos
         id_producto: ID del producto a modificar
         username_vendedor: Vendedor (para verificar permisos)
-        cambios: Dict con campos a actualizar
+        cambios: Dict con campos a actualizar (titulo, descripcion, precio, nombre_categoria, imagen)
     
     Raises:
         ValueError: Si no es el vendedor o validaciones fallan
     """
-    print(" [SERVICE productos] modificar_producto()")
-    # TODO: Verificar que el usuario es el vendedor
-    # TODO: Validar cambios
-    # TODO: savepoint(cn, "SP_MODIFICAR_PRODUCTO")
-    # TODO: productos_repo.update_producto(cn, id_producto, cambios)
-    pass
+    # Verificar que el producto existe y está disponible
+    producto = productos_repo.get_producto(cn, id_producto)
+    if not producto:
+        raise ValueError(f"El producto con ID {id_producto} no existe.")
+    
+    if not producto.get("disponible"):
+        raise ValueError(f"El producto con ID {id_producto} no está disponible.")
+    
+    # Verificar que el usuario es el vendedor
+    if producto.get("username_vendedor") != username_vendedor:
+        raise ValueError("No tienes permiso para modificar este producto.")
+    
+    # Validar cambios
+    cambios_validados = {}
+    
+    # Título (RS2.6)
+    if "titulo" in cambios:
+        titulo = cambios["titulo"].strip() if cambios["titulo"] else ""
+        if not titulo:
+            raise ValueError("El título no puede estar vacío.")
+        if len(titulo) > MAX_TITULO_LENGTH:
+            raise ValueError(f"El título no puede superar {MAX_TITULO_LENGTH} caracteres.")
+        cambios_validados["titulo"] = titulo
+    
+    # Descripción (RS2.6)
+    if "descripcion" in cambios:
+        descripcion = cambios["descripcion"].strip() if cambios["descripcion"] else ""
+        if len(descripcion) > MAX_DESCRIPCION_LENGTH:
+            raise ValueError(f"La descripción no puede superar {MAX_DESCRIPCION_LENGTH} caracteres.")
+        cambios_validados["descripcion"] = descripcion
+    
+    # Precio (RS2.2)
+    if "precio" in cambios:
+        try:
+            precio = float(cambios["precio"])
+        except (TypeError, ValueError):
+            raise ValueError("El precio debe ser un número válido.")
+        if precio <= 0:
+            raise ValueError("El precio debe ser mayor que 0.")
+        cambios_validados["precio"] = round(precio, 2)
+    
+    # Categoría (RS2.4)
+    if "nombre_categoria" in cambios:
+        categoria = cambios["nombre_categoria"].strip() if cambios["nombre_categoria"] else ""
+        if not categoria:
+            raise ValueError("Debe seleccionar una categoría.")
+        if not productos_repo.categoria_existe(cn, categoria):
+            raise ValueError(f"La categoría '{categoria}' no es válida.")
+        cambios_validados["nombre_categoria"] = categoria
+    
+    # Imagen
+    if "imagen" in cambios:
+        cambios_validados["imagen"] = cambios["imagen"]
+    
+    if not cambios_validados:
+        return  # No hay cambios
+    
+    savepoint(cn, "SP_MODIFICAR_PRODUCTO")
+    productos_repo.update_producto(cn, id_producto, cambios_validados)
 
 
 def eliminar_producto(cn, id_producto: int, username_vendedor: str) -> None:
@@ -168,13 +221,26 @@ def eliminar_producto(cn, id_producto: int, username_vendedor: str) -> None:
         username_vendedor: Vendedor (para verificar permisos)
     
     Raises:
-        ValueError: Si no es el vendedor o producto en proceso de venta
+        ValueError: Si no es el vendedor, producto no existe, o producto en proceso de venta
     """
-    print(" [SERVICE productos] eliminar_producto()")
-    # TODO: Verificar permisos
-    # TODO: Verificar que no está en proceso de venta
-    # TODO: productos_repo.soft_delete_producto(cn, id_producto)
-    pass
+    # Verificar que el producto existe
+    producto = productos_repo.get_producto(cn, id_producto)
+    if not producto:
+        raise ValueError(f"El producto con ID {id_producto} no existe.")
+    
+    if not producto.get("disponible"):
+        raise ValueError(f"El producto con ID {id_producto} ya no está disponible.")
+    
+    # Verificar que el usuario es el vendedor
+    if producto.get("username_vendedor") != username_vendedor:
+        raise ValueError("No tienes permiso para eliminar este producto.")
+    
+    # TODO: Verificar que no está en proceso de venta (contraoferta activa o venta pendiente)
+    # Esto requeriría consultar la tabla Vendido y Contraoferta
+    # Por ahora lo dejamos pendiente de implementar en RF4
+    
+    savepoint(cn, "SP_ELIMINAR_PRODUCTO")
+    productos_repo.soft_delete_producto(cn, id_producto)
 
 
 def promocionar_producto(cn, id_producto: int, username_vendedor: str, 
