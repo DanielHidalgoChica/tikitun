@@ -7,15 +7,98 @@ Operaciones CRUD sobre la tabla USUARIO.
 
 
 def insert_usuario(cn, usuario: dict) -> None:
-    """Inserta un nuevo usuario en la BD.
+    """Inserta un nuevo usuario en la BD y sus categorías preferidas en Preferidos.
     
     Args:
         cn: Conexión a la base de datos
         usuario: Dict con todos los campos del usuario
     """
-    print("   [REPO perfiles] insert_usuario()", usuario)
-    # TODO: INSERT INTO USUARIO (...) VALUES (...)
-    pass
+    # Campos esperados (service debe validar antes):
+    username = usuario.get("username")
+    correo = usuario.get("correo")
+    nombre = usuario.get("nombre_completo")
+    contrasenia = usuario.get("contraseña") or usuario.get("contrasenia")
+    ubic = usuario.get("ubicacion")
+    lat = lon = None
+    if isinstance(ubic, (list, tuple)) and len(ubic) >= 2:
+        try:
+            lat = float(ubic[0]); lon = float(ubic[1])
+        except Exception:
+            lat = lon = None
+    rango = usuario.get("rango")
+    saldo = usuario.get("saldo", 0.0)
+    valoracion_media = usuario.get("valoracion_media")
+    cuenta_eliminada = 1 if usuario.get("cuenta_eliminada") else 0
+    categorias = usuario.get("categorias", [])
+
+    sql_usuario = (
+        "INSERT INTO Usuario (username, correo, nombre_completo, contrasenia, "
+        "ubi_latitud, ubi_longitud, rango, saldo, valoracion_media, cuenta_eliminada)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    )
+    
+    sql_preferido = "INSERT INTO Preferidos (username, nombre) VALUES (?, ?)"
+
+    # If caller did not provide a connection, open one using db_app.connect()
+    if cn is None:
+        from src.db.db_app import connect
+        with connect() as local_cn:
+            cur = local_cn.cursor()
+            try:
+                # Unicidad: comprobar username y correo
+                cur.execute("SELECT username FROM Usuario WHERE username = ? OR correo = ?", (username, correo))
+                if cur.fetchone():
+                    raise ValueError("Nombre de usuario o correo ya existente")
+                cur.execute(sql_usuario, (username, correo, nombre, contrasenia, lat, lon, rango, saldo, valoracion_media, cuenta_eliminada))
+                # Insertar categorías preferidas
+                for cat in categorias:
+                    cur.execute(sql_preferido, (username, cat))
+                local_cn.commit()
+            except Exception as e:
+                try:
+                    local_cn.rollback()
+                except Exception:
+                    pass
+                raise ValueError(f"Error insertando usuario: {e}")
+            finally:
+                cur.close()
+        return
+
+    # Use provided connection (DB-API compatible). Use savepoint + rollback_to_savepoint if available.
+    from src.db.db_app import savepoint, rollback_to_savepoint
+    sp_name = "SP_INSERT_USUARIO"
+    try:
+        savepoint(cn, sp_name)
+    except Exception:
+        # Driver may not support savepoints; continue
+        pass
+
+    cur = cn.cursor()
+    try:
+        cur.execute("SELECT username FROM Usuario WHERE username = ? OR correo = ?", (username, correo))
+        if cur.fetchone():
+            try:
+                rollback_to_savepoint(cn, sp_name)
+            except Exception:
+                pass
+            raise ValueError("Nombre de usuario o correo ya existente")
+        cur.execute(sql_usuario, (username, correo, nombre, contrasenia, lat, lon, rango, saldo, valoracion_media, cuenta_eliminada))
+        # Insertar categorías preferidas en tabla Preferidos
+        for cat in categorias:
+            cur.execute(sql_preferido, (username, cat))
+        # Commit la transacción
+        cn.commit()
+    except Exception as e:
+        try:
+            rollback_to_savepoint(cn, sp_name)
+        except Exception:
+            pass
+        raise ValueError(f"Error insertando usuario: {e}")
+    finally:
+        try:
+            cur.close()
+        except Exception:
+            pass
 
 
 def get_usuario(cn, username: str) -> dict | None:
@@ -78,6 +161,30 @@ def soft_delete_usuario(cn, username: str) -> None:
     print("   [REPO perfiles] soft_delete_usuario()", username)
     # TODO: UPDATE USUARIO SET cuenta_eliminada = true, ... WHERE username = ?
     pass
+
+
+def get_categorias_disponibles(cn) -> list[str]:
+    """Obtiene la lista de categorías disponibles de la tabla Categoria.
+    
+    Args:
+        cn: Conexión a la base de datos
+    
+    Returns:
+        Lista de nombres de categorías
+    """
+    cur = cn.cursor()
+    try:
+        cur.execute("SELECT nombre FROM Categoria ORDER BY nombre")
+        categorias = [row[0] for row in cur.fetchall()]
+        return categorias
+    except Exception as e:
+        print(f"Error obteniendo categorías: {e}")
+        return []
+    finally:
+        try:
+            cur.close()
+        except Exception:
+            pass
 
 
 def verificar_contraseña(cn, username: str, contraseña: str) -> bool:
