@@ -5,6 +5,30 @@ Responsable: Aitor de la Iglesia
 Operaciones sobre la tabla MENSAJE.
 """
 
+def ultimo_mensaje(cn, id_chat: int) -> str:
+    """
+    Devuelve el último mensaje de la conversación
+    
+    Args:
+        cn: Conexión a la base de datos
+        id_chat: ID del chat
+    
+    Returns:
+        Ultimo mensaje de la conversación
+    """
+    sql = """
+        SELECT texto
+        FROM Mensaje
+        WHERE id_chat = :id_chat
+        ORDER BY fecha DESC
+        FETCH FIRST 1 ROW ONLY
+        """
+    cur = cn.cursor()
+    cur.execute(sql, id_chat=id_chat)
+    row = cur.fetchone()
+    if not row:
+        return None
+    return row
 
 def insert_mensaje(cn, mensaje: dict) -> None:
     """Inserta un nuevo mensaje.
@@ -18,8 +42,7 @@ def insert_mensaje(cn, mensaje: dict) -> None:
     pass
 
 
-def get_mensajes_conversacion(cn, id_producto: int, username_comprador: str,
-                              username_vendedor: str) -> list[dict]:
+def get_mensajes_conversacion(cn, username: str, id_chat: int) -> list[dict]:
     """Obtiene todos los mensajes de una conversación.
     
     Args:
@@ -31,7 +54,7 @@ def get_mensajes_conversacion(cn, id_producto: int, username_comprador: str,
     Returns:
         Lista de mensajes ordenados por fecha
     """
-    print("   [REPO mensajes] get_mensajes_conversacion()")
+    print("   [REPO mensajes] get_mensajes_conversacion({id_chat})").format(id_chat=id_chat)
     # TODO: SELECT * FROM MENSAJE WHERE ... ORDER BY fecha_envio
     return []
 

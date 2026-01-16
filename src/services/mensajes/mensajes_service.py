@@ -32,8 +32,32 @@ def enviar_mensaje(cn, data: dict) -> None:
     pass
 
 
-def consultar_conversacion(cn, id_producto: int, username_comprador: str, 
-                          username_vendedor: str) -> list[dict]:
+def listar_conversaciones_inicio(cn, username: str) -> list[dict]:
+    """Obtiene los chats que se mostraran al inicio.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Usuario
+    
+    Returns:
+        Lista de conversaciones (como comprador o vendedor)
+    """
+    print(" [SERVICE mensajes] consultar_conversaciones_inicio()")
+    all = conversaciones_repo.get_conversaciones_usuario(cn, username)
+    out = []
+    for chat in all:
+        if chat['archivado'] == 0:
+            last = mensajes_repo.ultimo_mensaje(cn, chat['id_chat'])
+            otro = chat['vendedor'] if chat['comprador'] == username else chat['comprador']
+            out.append({
+                'id_chat': chat['id_chat'],
+                'usuario': otro,
+                'producto': chat['titulo'],
+                'ultimo_mensaje' : last
+                })
+    return out
+
+def consultar_conversacion(cn, id_chat: int, username: str) -> list[dict]:
     """RF5.2: Obtiene todos los mensajes de una conversación.
     
     Args:
@@ -46,7 +70,7 @@ def consultar_conversacion(cn, id_producto: int, username_comprador: str,
         Lista de mensajes ordenados por fecha
     """
     print(" [SERVICE mensajes] consultar_conversacion()")
-    # TODO: mensajes_repo.get_mensajes_conversacion(...)
+    mensajes_repo.get_mensajes_conversacion(cn, username, id_chat)
     # TODO: Marcar mensajes como leídos
     return []
 

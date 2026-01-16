@@ -5,6 +5,8 @@ Responsable: Aitor de la Iglesia
 Operaciones sobre la tabla CONVERSACION.
 """
 
+def crear_conversacion(cn, username: str, id_producto: int) -> None:
+    pass
 
 def get_conversaciones_usuario(cn, username: str) -> list[dict]:
     """Obtiene todas las conversaciones del usuario.
@@ -27,10 +29,19 @@ def get_conversaciones_usuario(cn, username: str) -> list[dict]:
         p.titulo,
         c.archivado
         FROM Chat c JOIN Producto p ON c.id_producto = p.id_producto 
-        WHERE c.username = {username} or p.username = {username}
+        WHERE c.username = ? or p.username = ?
         ORDER BY c.archivado asc;
-        """.format(username=username)
-    return []
+        """
+    cur = cn.cursor()
+    try:
+        cur.execute(sql, (username,username))
+        cols = [c[0] for c in cur.description]
+        rows = [dict(zip(cols, r)) for r in cur.fetchall()]
+        out = rows
+    except Exception as e:
+        raise
+    cur.close()
+    return out
 
 
 def set_archivada(cn, id_producto: int, archivada: bool) -> None:
