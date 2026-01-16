@@ -6,4 +6,4 @@ ldd /opt/oracle/instantclient_23_26/libsqora.so.23.1
 source .venv/bin/activate
 pip install -r requirements.txt > /dev/null
 #exec streamlit run app.py
-exec python -m src.app
+exec python3 -m src.app
