@@ -113,13 +113,19 @@ def run_app(username="bob"):
     
     # Developer button: abre diálogo para inicializar la BD
     def on_developer_init():
-        """Muestra confirmación y llama a initialize_database."""
-        if not messagebox.askyesno("Inicializar BD", "¿Deseas inicializar la base de datos con los scripts SQL? Esto sobrescribirá datos existentes."):
+        """Muestra confirmación y llama a initialize_database (DROP + CREATE, sin datos)."""
+        if not messagebox.askyesno(
+            "Inicializar BD",
+            "¿Deseas reinicializar la base de datos?\n\nEsto BORRARÁ todas las tablas existentes y las volverá a crear vacías."
+        ):
             return
 
         try:
+            # drop_first=True (default) + solo init.sql (default)
             result = db_app.initialize_database()
-            message = f"Inicialización completada. Archivos ejecutados: {len(result['executed_files'])}, sentencias: {result['statements_executed']}"
+            dropped = len(result.get("dropped_tables", []))
+            stmts = result["statements_executed"]
+            message = f"Inicialización completada.\n\nTablas eliminadas: {dropped}\nSentencias ejecutadas: {stmts}"
             messagebox.showinfo("Éxito", message)
         except FileNotFoundError as e:
             messagebox.showerror("Error", f"Fichero SQL no encontrado: {e}")

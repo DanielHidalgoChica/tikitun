@@ -108,23 +108,28 @@ def rollback_to_savepoint(cn: pyodbc.Connection, name: str) -> None:
     cur.close()
 
 
-def initialize_database(sql_dir: Optional[str] = None, files: Optional[List[str]] = None) -> dict:
+def initialize_database(
+    sql_dir: Optional[str] = None,
+    files: Optional[List[str]] = None,
+    drop_first: bool = True,
+) -> dict:
     """Inicializa la base de datos ejecutando una lista de scripts SQL.
 
     Args:
         sql_dir: Carpeta donde buscar los ficheros SQL. Si es None, se usa el directorio `src/db` del paquete.
-        files: Lista de nombres de fichero SQL a ejecutar en orden. Por defecto
-            ['init.sql', 'insert_test_tuples.sql'].
+        files: Lista de nombres de fichero SQL a ejecutar en orden. Por defecto ['init.sql'].
+        drop_first: Si es True (por defecto), primero hace DROP TABLE de todas las tablas
+            del esquema respetando el orden de dependencias (FK) para evitar errores.
 
     Returns:
-        Dict con resumen: {'executed_files': [...], 'statements_executed': n}
+        Dict con resumen: {'executed_files': [...], 'statements_executed': n, 'dropped_tables': [...]}
 
     Raises:
         FileNotFoundError: si falta algún fichero SQL.
         Exception: si la ejecución SQL falla (se hace rollback y se propaga la excepción).
     """
     if files is None:
-        files = ["init.sql", "insert_test_tuples.sql"]
+        files = ["init.sql"]
 
     # Determinar directorio por defecto (carpeta donde está este archivo -> src/db)
     if sql_dir is None:
@@ -134,10 +139,46 @@ def initialize_database(sql_dir: Optional[str] = None, files: Optional[List[str]
     stmt_count = 0
     skipped_count = 0
     skipped_details = []
+    dropped_tables: List[str] = []
 
     with connect(autocommit=False) as cn:
         cur = cn.cursor()
         try:
+            # --- DROP TABLES FIRST ---
+            if drop_first:
+                # Obtener todas las tablas del usuario en orden de dependencias (hijos primero)
+                # Usamos una consulta que ordena por profundidad de FK
+                cur.execute("""
+                    SELECT table_name FROM (
+                        SELECT table_name, LEVEL AS lvl
+                        FROM (
+                            SELECT uc.table_name, ucc.table_name AS parent
+                            FROM user_constraints uc
+                            LEFT JOIN user_constraints ucc
+                              ON uc.r_constraint_name = ucc.constraint_name
+                             AND ucc.constraint_type = 'P'
+                            WHERE uc.constraint_type = 'R'
+                            UNION ALL
+                            SELECT table_name, NULL FROM user_tables
+                        )
+                        START WITH parent IS NULL
+                        CONNECT BY PRIOR table_name = parent
+                    )
+                    GROUP BY table_name
+                    ORDER BY MAX(lvl) DESC
+                """)
+                tables_to_drop = [row[0] for row in cur.fetchall()]
+
+                for tbl in tables_to_drop:
+                    try:
+                        cur.execute(f'DROP TABLE "{tbl}" CASCADE CONSTRAINTS PURGE')
+                        dropped_tables.append(tbl)
+                    except pyodbc.Error as e:
+                        err = str(e)
+                        # ORA-00942: table or view does not exist (ignorar)
+                        if 'ORA-00942' not in err:
+                            raise
+
             for fname in files:
                 path = Path(sql_dir) / fname
                 if not path.exists():
@@ -209,4 +250,5 @@ def initialize_database(sql_dir: Optional[str] = None, files: Optional[List[str]
         "statements_executed": stmt_count,
         "skipped_statements": skipped_count,
         "skipped_details": skipped_details,
+        "dropped_tables": dropped_tables,
     }
