@@ -126,7 +126,8 @@ def run_app(username="bob"):
         except Exception as e:
             messagebox.showerror("Error", f"Error al inicializar la BD: {e}")
 
-    btn_dev = create_menu_button(sidebar, "Dev", "[1F[1B", on_developer_init)
+    # Reemplazar caracteres de control por un emoji para que se muestre correctamente
+    btn_dev = create_menu_button(sidebar, "Dev", "🛠", on_developer_init)
     btn_dev.pack(pady=20, padx=10)
     
     # ===== ÁREA DE CONTENIDO =====

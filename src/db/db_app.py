@@ -9,6 +9,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from pathlib import Path
 from typing import List
+import re
 
 load_dotenv()
 
@@ -147,9 +148,40 @@ def initialize_database(sql_dir: Optional[str] = None, files: Optional[List[str]
                 statements = [s.strip() for s in sql_text.split(";") if s.strip()]
 
                 for stmt in statements:
-                    # Ejecutar cada sentencia individualmente
-                    cur.execute(stmt)
-                    stmt_count += 1
+                    s = stmt.strip()
+                    if not s:
+                        continue
+
+                    # Si la sentencia es CREATE TABLE y la tabla ya existe, la saltamos
+                    if re.match(r'(?i)^create\s+table', s):
+                        m = re.search(r'(?i)^create\s+table\s+"?([A-Za-z0-9_$]+)"?', s)
+                        table_name = m.group(1) if m else None
+                        if table_name:
+                            exists = 0
+                            try:
+                                cur.execute("SELECT COUNT(*) FROM user_tables WHERE table_name = ?", (table_name.upper(),))
+                                row = cur.fetchone()
+                                exists = row[0] if row else 0
+                            except Exception:
+                                # Si la consulta de existencia falla, no asumimos que exista
+                                exists = 0
+
+                            if exists and exists > 0:
+                                executed.append(f"skipped CREATE TABLE {table_name}")
+                                continue
+
+                    # Ejecutar la sentencia y capturar errores de "objeto ya existe"
+                    try:
+                        cur.execute(s)
+                        stmt_count += 1
+                    except pyodbc.Error as e:
+                        err = str(e)
+                        # ORA-00955: name is already used by an existing object
+                        if 'ORA-00955' in err or 'already exists' in err.lower() or 'name is already used' in err.lower():
+                            executed.append(f"skipped (already exists): {s.splitlines()[0]}")
+                            continue
+                        # Propagar otros errores
+                        raise
 
                 executed.append(str(path))
 
