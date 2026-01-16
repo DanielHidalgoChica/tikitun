@@ -108,7 +108,7 @@ def run_app(username="bob"):
     btn_mensajes = create_menu_button(sidebar, "Mensajes", "📧", lambda: show_mensajes_view(content_frame, username))
     btn_mensajes.pack(pady=5, padx=10)
     
-    btn_crear = create_menu_button(sidebar, "Crear", "+", lambda: open_publicar_producto(root))
+    btn_crear = create_menu_button(sidebar, "Crear", "+", lambda: open_publicar_producto(root, username))
     btn_crear.pack(pady=5, padx=10)
     
     # Developer button: abre diálogo para inicializar la BD
