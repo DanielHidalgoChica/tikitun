@@ -17,7 +17,19 @@ def get_conversaciones_usuario(cn, username: str) -> list[dict]:
         Lista de conversaciones (como comprador o vendedor)
     """
     print("   [REPO conversaciones] get_conversaciones_usuario()", username)
-    # TODO: SELECT * FROM CONVERSACION WHERE username_comprador = ? OR username_vendedor = ?
+
+    sql = """
+        SELECT 
+        c.id_chat,
+        c.id_producto,
+        c.username        AS comprador,
+        p.username        AS vendedor,
+        p.titulo,
+        c.archivado
+        FROM Chat c JOIN Producto p ON c.id_producto = p.id_producto 
+        WHERE c.username = {username} or p.username = {username}
+        ORDER BY c.archivado asc;
+        """.format(username=username)
     return []
 
 

@@ -2,7 +2,7 @@
 Repositorio de acceso a datos de mensajes.
 Responsable: Aitor de la Iglesia
 
-Operaciones CRUD sobre la tabla MENSAJE.
+Operaciones sobre la tabla MENSAJE.
 """
 
 
