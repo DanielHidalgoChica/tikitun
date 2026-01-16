@@ -1,6 +1,3 @@
-Aquí tienes un **README sólido, claro y defendible** para la práctica de **TikiTun**, explicando **el esquema, el porqué y cómo se usa**, pensado para DDSI y para que cualquiera del grupo lo entienda aunque no sepa desarrollo.
-
-Puedes copiarlo tal cual a `README.md`.
 
 ---
 
