@@ -37,9 +37,7 @@ INSERT INTO Usuario VALUES (
   0
 );
 
-INSERT INTO Categoria VALUES ('Electrónica');
-INSERT INTO Categoria VALUES ('Libros');
-INSERT INTO Categoria VALUES ('Hogar');
+-- Categorías ya insertadas en init.sql
 
 INSERT INTO Producto VALUES (
   1,

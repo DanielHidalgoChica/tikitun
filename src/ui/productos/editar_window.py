@@ -185,3 +185,188 @@ def open_editar_producto(parent, id_producto: int, username: str):
         command=on_cancelar,
         width=15
     ).pack(side=tk.LEFT, padx=10)
+
+
+def show_editar_view(parent, id_producto: int, username: str):
+    """Muestra el formulario de edición en el content_frame (vista embebida).
+    
+    Args:
+        parent: Frame contenedor (content_frame)
+        id_producto: ID del producto a editar
+        username: Usuario que edita (debe ser el vendedor)
+    """
+    # Limpiar contenido anterior
+    for widget in parent.winfo_children():
+        widget.destroy()
+    
+    # Cargar datos actuales del producto y categorías
+    producto = None
+    categorias = []
+    try:
+        with connect() as cn:
+            producto = consultar_producto(cn, id_producto)
+            categorias = get_categorias(cn)
+    except ValueError as e:
+        messagebox.showerror("Error", str(e))
+        from src.ui.productos.mis_productos_window import show_mis_productos_view
+        show_mis_productos_view(parent, username)
+        return
+    except Exception as e:
+        messagebox.showerror("Error", f"No se pudo cargar el producto: {e}")
+        from src.ui.productos.mis_productos_window import show_mis_productos_view
+        show_mis_productos_view(parent, username)
+        return
+    
+    if not producto:
+        messagebox.showerror("Error", "Producto no encontrado.")
+        from src.ui.productos.mis_productos_window import show_mis_productos_view
+        show_mis_productos_view(parent, username)
+        return
+    
+    if producto.get("username_vendedor") != username:
+        messagebox.showerror("Error", "No tienes permiso para editar este producto.")
+        from src.ui.productos.mis_productos_window import show_mis_productos_view
+        show_mis_productos_view(parent, username)
+        return
+    
+    imagen_bytes = {"data": None, "changed": False}
+    
+    # Frame principal
+    main_frame = tk.Frame(parent, bg="white", padx=20, pady=20)
+    main_frame.pack(fill=tk.BOTH, expand=True)
+    
+    # Header con botón volver
+    header = tk.Frame(main_frame, bg="white")
+    header.pack(fill=tk.X, pady=(0, 20))
+    
+    def on_volver():
+        from src.ui.productos.detalle_window import show_detalle_view
+        show_detalle_view(parent, id_producto, username)
+    
+    tk.Button(
+        header,
+        text="← Volver",
+        command=on_volver,
+        relief=tk.FLAT,
+        font=("Arial", 10)
+    ).pack(side=tk.LEFT)
+    
+    tk.Label(
+        header,
+        text=f"✏️ Editar Producto (ID: {id_producto})",
+        font=("Arial", 16, "bold"),
+        bg="white"
+    ).pack(side=tk.LEFT, padx=20)
+    
+    # Formulario
+    form_frame = tk.Frame(main_frame, bg="white")
+    form_frame.pack(fill=tk.BOTH, expand=True)
+    
+    # Título
+    tk.Label(form_frame, text="Título *", font=("Arial", 10, "bold"), bg="white").pack(anchor="w", pady=(0, 5))
+    e_titulo = tk.Entry(form_frame, width=60)
+    e_titulo.insert(0, producto.get("titulo", ""))
+    e_titulo.pack(anchor="w", pady=(0, 10))
+    
+    # Descripción
+    tk.Label(form_frame, text="Descripción", font=("Arial", 10, "bold"), bg="white").pack(anchor="w", pady=(0, 5))
+    t_descripcion = tk.Text(form_frame, width=60, height=4)
+    t_descripcion.insert("1.0", producto.get("descripcion", ""))
+    t_descripcion.pack(anchor="w", pady=(0, 10))
+    
+    # Precio y Categoría
+    row_frame = tk.Frame(form_frame, bg="white")
+    row_frame.pack(fill=tk.X, pady=(0, 10))
+    
+    precio_frame = tk.Frame(row_frame, bg="white")
+    precio_frame.pack(side=tk.LEFT, padx=(0, 30))
+    tk.Label(precio_frame, text="Precio (€) *", font=("Arial", 10, "bold"), bg="white").pack(anchor="w")
+    e_precio = tk.Entry(precio_frame, width=15)
+    e_precio.insert(0, f"{producto.get('precio', 0):.2f}")
+    e_precio.pack(anchor="w")
+    
+    cat_frame = tk.Frame(row_frame, bg="white")
+    cat_frame.pack(side=tk.LEFT)
+    tk.Label(cat_frame, text="Categoría *", font=("Arial", 10, "bold"), bg="white").pack(anchor="w")
+    categoria_var = tk.StringVar(value=producto.get("nombre_categoria", ""))
+    cb_categoria = ttk.Combobox(cat_frame, textvariable=categoria_var, values=categorias, state="readonly", width=25)
+    cb_categoria.pack(anchor="w")
+    cat_actual = producto.get("nombre_categoria", "")
+    if cat_actual in categorias:
+        cb_categoria.current(categorias.index(cat_actual))
+    
+    # Imagen
+    img_frame = tk.Frame(form_frame, bg="white")
+    img_frame.pack(fill=tk.X, pady=10)
+    
+    tk.Label(img_frame, text="Imagen", font=("Arial", 10, "bold"), bg="white").pack(anchor="w")
+    
+    img_row = tk.Frame(img_frame, bg="white")
+    img_row.pack(anchor="w", pady=5)
+    
+    lbl_imagen = tk.Label(img_row, text="Sin cambios", fg="gray", bg="white")
+    lbl_imagen.pack(side=tk.LEFT)
+    
+    def seleccionar_imagen():
+        filepath = filedialog.askopenfilename(
+            title="Seleccionar imagen",
+            filetypes=[("Imágenes", "*.jpg *.jpeg *.png"), ("Todos", "*.*")]
+        )
+        if filepath:
+            try:
+                with open(filepath, "rb") as f:
+                    imagen_bytes["data"] = f.read()
+                    imagen_bytes["changed"] = True
+                lbl_imagen.config(text=f"✓ {filepath.split('/')[-1]}", fg="green")
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudo leer la imagen: {e}")
+    
+    tk.Button(img_row, text="Cambiar...", command=seleccionar_imagen).pack(side=tk.LEFT, padx=10)
+    
+    # Botones
+    btn_frame = tk.Frame(form_frame, bg="white")
+    btn_frame.pack(pady=20)
+    
+    def on_guardar():
+        cn = begin_transaction()
+        try:
+            cambios = {
+                "titulo": e_titulo.get().strip(),
+                "descripcion": t_descripcion.get("1.0", tk.END).strip(),
+                "precio": e_precio.get().strip(),
+                "nombre_categoria": categoria_var.get(),
+            }
+            
+            if imagen_bytes["changed"]:
+                cambios["imagen"] = imagen_bytes["data"]
+            
+            modificar_producto(cn, id_producto, username, cambios)
+            commit(cn)
+            
+            messagebox.showinfo("Guardado", "Producto modificado correctamente.")
+            from src.ui.productos.detalle_window import show_detalle_view
+            show_detalle_view(parent, id_producto, username)
+            
+        except ValueError as ex:
+            rollback(cn)
+            messagebox.showerror("Error de validación", str(ex))
+        except Exception as ex:
+            rollback(cn)
+            messagebox.showerror("Error", f"Error al guardar: {ex}")
+    
+    tk.Button(
+        btn_frame, 
+        text="✓ Guardar Cambios", 
+        command=on_guardar,
+        bg="#4CAF50",
+        fg="white",
+        width=18,
+        font=("Arial", 11, "bold")
+    ).pack(side=tk.LEFT, padx=10)
+    
+    tk.Button(
+        btn_frame,
+        text="Cancelar",
+        command=on_volver,
+        width=12
+    ).pack(side=tk.LEFT, padx=10)

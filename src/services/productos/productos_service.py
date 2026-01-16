@@ -291,12 +291,23 @@ def promocionar_producto(cn, id_producto: int, username_vendedor: str,
     if producto.get("username_vendedor") != username_vendedor:
         raise ValueError("No tienes permiso para promocionar este producto.")
     
-    # Calcular coste
+    # Obtener promoción actual
+    promocion_actual = producto.get("promocion", 0) or 0
+    
+    # Verificar que el nuevo grado es mayor que el actual
+    if grado_promocion <= promocion_actual:
+        raise ValueError(
+            f"El nuevo grado ({grado_promocion:.0%}) debe ser mayor que "
+            f"la promoción actual ({promocion_actual:.0%})."
+        )
+    
+    # Calcular coste solo por el INCREMENTO
     precio = producto.get("precio", 0)
-    coste = round(grado_promocion * 0.1 * precio, 2)
+    incremento = grado_promocion - promocion_actual
+    coste = round(incremento * 0.1 * precio, 2)
     
     if coste <= 0:
-        # Si grado = 0, no hay coste pero actualizamos igualmente
+        # Si no hay coste, solo actualizamos
         savepoint(cn, "SP_PROMOCIONAR_PRODUCTO")
         productos_repo.update_promocion(cn, id_producto, grado_promocion)
         return 0.0

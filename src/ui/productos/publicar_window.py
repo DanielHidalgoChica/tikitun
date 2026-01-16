@@ -159,3 +159,175 @@ def open_publicar_producto(parent, username: str = "bob"):
         command=on_cancelar,
         width=15
     ).pack(side=tk.LEFT, padx=10)
+
+
+def show_publicar_view(parent, username: str):
+    """Muestra el formulario de publicación en el content_frame.
+    
+    Args:
+        parent: Frame contenedor (content_frame)
+        username: Usuario que publica el producto
+    """
+    # Limpiar contenido anterior
+    for widget in parent.winfo_children():
+        widget.destroy()
+    
+    # Cargar categorías desde la BD
+    categorias = []
+    try:
+        with connect() as cn:
+            categorias = get_categorias(cn)
+    except Exception as e:
+        messagebox.showerror("Error", f"No se pudieron cargar las categorías: {e}")
+    
+    # Variable para guardar la imagen seleccionada
+    imagen_bytes = {"data": None, "filename": ""}
+    
+    # Frame principal
+    main_frame = tk.Frame(parent, bg="white", padx=20, pady=20)
+    main_frame.pack(fill=tk.BOTH, expand=True)
+    
+    # Header
+    header = tk.Frame(main_frame, bg="white")
+    header.pack(fill=tk.X, pady=(0, 20))
+    
+    tk.Label(
+        header,
+        text="➕ Publicar Producto",
+        font=("Arial", 18, "bold"),
+        bg="white"
+    ).pack(side=tk.LEFT)
+    
+    # Formulario
+    form_frame = tk.Frame(main_frame, bg="white")
+    form_frame.pack(fill=tk.BOTH, expand=True)
+    
+    # Título
+    tk.Label(form_frame, text="Título *", font=("Arial", 10, "bold"), bg="white").pack(anchor="w", pady=(0, 5))
+    e_titulo = tk.Entry(form_frame, width=60)
+    e_titulo.pack(anchor="w", pady=(0, 5))
+    tk.Label(form_frame, text="(máx. 80 caracteres)", font=("Arial", 8), fg="gray", bg="white").pack(anchor="w", pady=(0, 10))
+    
+    # Descripción
+    tk.Label(form_frame, text="Descripción", font=("Arial", 10, "bold"), bg="white").pack(anchor="w", pady=(0, 5))
+    t_descripcion = tk.Text(form_frame, width=60, height=4)
+    t_descripcion.pack(anchor="w", pady=(0, 5))
+    tk.Label(form_frame, text="(máx. 500 caracteres)", font=("Arial", 8), fg="gray", bg="white").pack(anchor="w", pady=(0, 10))
+    
+    # Precio y Categoría en la misma fila
+    row_frame = tk.Frame(form_frame, bg="white")
+    row_frame.pack(fill=tk.X, pady=(0, 10))
+    
+    precio_frame = tk.Frame(row_frame, bg="white")
+    precio_frame.pack(side=tk.LEFT, padx=(0, 30))
+    tk.Label(precio_frame, text="Precio (€) *", font=("Arial", 10, "bold"), bg="white").pack(anchor="w")
+    e_precio = tk.Entry(precio_frame, width=15)
+    e_precio.pack(anchor="w")
+    
+    cat_frame = tk.Frame(row_frame, bg="white")
+    cat_frame.pack(side=tk.LEFT)
+    tk.Label(cat_frame, text="Categoría *", font=("Arial", 10, "bold"), bg="white").pack(anchor="w")
+    categoria_var = tk.StringVar()
+    cb_categoria = ttk.Combobox(
+        cat_frame, 
+        textvariable=categoria_var,
+        values=categorias,
+        state="readonly",
+        width=25
+    )
+    cb_categoria.pack(anchor="w")
+    if categorias:
+        cb_categoria.current(0)
+    
+    # Imagen
+    img_frame = tk.Frame(form_frame, bg="white")
+    img_frame.pack(fill=tk.X, pady=10)
+    
+    tk.Label(img_frame, text="Imagen (opcional)", font=("Arial", 10, "bold"), bg="white").pack(anchor="w")
+    
+    img_row = tk.Frame(img_frame, bg="white")
+    img_row.pack(anchor="w", pady=5)
+    
+    lbl_imagen = tk.Label(img_row, text="No seleccionada", fg="gray", bg="white")
+    lbl_imagen.pack(side=tk.LEFT)
+    
+    def seleccionar_imagen():
+        filepath = filedialog.askopenfilename(
+            title="Seleccionar imagen",
+            filetypes=[("Imágenes", "*.jpg *.jpeg *.png"), ("Todos", "*.*")]
+        )
+        if filepath:
+            try:
+                with open(filepath, "rb") as f:
+                    imagen_bytes["data"] = f.read()
+                    imagen_bytes["filename"] = filepath.split("/")[-1]
+                lbl_imagen.config(text=f"✓ {imagen_bytes['filename']}", fg="green")
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudo leer la imagen: {e}")
+    
+    tk.Button(img_row, text="Seleccionar...", command=seleccionar_imagen).pack(side=tk.LEFT, padx=10)
+    
+    # Vendedor
+    tk.Label(
+        form_frame, 
+        text=f"Vendedor: @{username}", 
+        font=("Arial", 10), 
+        fg="blue",
+        bg="white"
+    ).pack(anchor="w", pady=10)
+    
+    # Botones
+    btn_frame = tk.Frame(form_frame, bg="white")
+    btn_frame.pack(pady=20)
+    
+    def on_guardar():
+        cn = begin_transaction()
+        try:
+            data = {
+                "titulo": e_titulo.get().strip(),
+                "descripcion": t_descripcion.get("1.0", tk.END).strip(),
+                "precio": e_precio.get().strip(),
+                "nombre_categoria": categoria_var.get(),
+                "imagen": imagen_bytes["data"],
+                "username_vendedor": username,
+            }
+            
+            new_id = publicar_producto(cn, data)
+            commit(cn)
+            
+            messagebox.showinfo(
+                "Producto Publicado",
+                f"¡Producto publicado correctamente!\n\nID: {new_id}"
+            )
+            
+            # Ir a mis productos
+            from src.ui.productos.mis_productos_window import show_mis_productos_view
+            show_mis_productos_view(parent, username)
+            
+        except ValueError as ex:
+            rollback(cn)
+            messagebox.showerror("Error de validación", str(ex))
+        except Exception as ex:
+            rollback(cn)
+            messagebox.showerror("Error", f"Error al publicar: {ex}")
+    
+    def on_cancelar():
+        from src.ui.productos.mis_productos_window import show_mis_productos_view
+        show_mis_productos_view(parent, username)
+    
+    tk.Button(
+        btn_frame, 
+        text="✓ Publicar", 
+        command=on_guardar,
+        bg="#4CAF50",
+        fg="white",
+        width=15,
+        font=("Arial", 11, "bold")
+    ).pack(side=tk.LEFT, padx=10)
+    
+    tk.Button(
+        btn_frame,
+        text="Cancelar",
+        command=on_cancelar,
+        width=15
+    ).pack(side=tk.LEFT, padx=10)

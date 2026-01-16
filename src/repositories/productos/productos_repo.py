@@ -119,6 +119,7 @@ def get_producto(cn, id_producto: int) -> dict | None:
             p.precio,
             p.promocion,
             p.disponible,
+            p.imagen,
             u.valoracion_media,
             u.ubi_latitud,
             u.ubi_longitud
@@ -142,9 +143,10 @@ def get_producto(cn, id_producto: int) -> dict | None:
         "precio": row[5],
         "promocion": row[6],
         "disponible": row[7],
-        "valoracion_vendedor": row[8],
-        "latitud_vendedor": row[9],
-        "longitud_vendedor": row[10],
+        "imagen": row[8],
+        "valoracion_vendedor": row[9],
+        "latitud_vendedor": row[10],
+        "longitud_vendedor": row[11],
     }
 
 
