@@ -1,16 +1,26 @@
 import tkinter as tk
 from tkinter import messagebox
+from src.db.db_app import connect, begin_transaction, commit, rollback
+from src.services.feed_busqueda_favs.favoritos_service import (
+    consultar_favoritos,
+    quitar_favorito
+)
 
 
-def show_favoritos_view(parent_frame, username="usuario_demo"):
+def show_favoritos_view(parent_frame, username="bob"):
     """
     Muestra la lista de productos favoritos del usuario en el frame principal.
     
-    Funcionalidades futuras (RF3.2, RF3.3, RF3.4):
-    - Consultar productos marcados como favoritos
-    - Quitar productos de favoritos
-    - Consultar detalles de cada producto
-    - Filtrar/ordenar favoritos
+    Consulta en tiempo real los favoritos del usuario desde la BD y los renderiza.
+    
+    Funcionalidades (RF3.2, RF3.3, RF3.4):
+    - Consultar productos marcados como favoritos ✓
+    - Quitar productos de favoritos ✓
+    - Mostrar solo productos disponibles ✓
+    
+    Args:
+        parent_frame: Frame donde renderizar la vista
+        username: Usuario autenticado
     """
     # Limpiar el frame
     for widget in parent_frame.winfo_children():
@@ -26,7 +36,7 @@ def show_favoritos_view(parent_frame, username="usuario_demo"):
     # Información
     tk.Label(
         parent_frame,
-        text="Aquí aparecerán los productos que hayas guardado como favoritos",
+        text="Productos que has guardado como favoritos",
         font=("Arial", 10),
         fg="gray"
     ).pack(pady=5)
@@ -44,13 +54,17 @@ def show_favoritos_view(parent_frame, username="usuario_demo"):
     canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
     canvas.configure(yscrollcommand=scrollbar.set)
     
-    # Productos favoritos de ejemplo (placeholder)
-    favoritos_ejemplo = [
-        {"titulo": "Bicicleta de montaña", "precio": "450.00", "vendedor": "maria_bikes"},
-        {"titulo": "Smartphone Samsung", "precio": "199.99", "vendedor": "techstore"},
-    ]
+    # Obtener favoritos reales de la BD
+    favoritos = []
+    try:
+        with connect() as cn:
+            favoritos = consultar_favoritos(cn, username)
+    except Exception as ex:
+        messagebox.showerror("Error", f"No se pudieron cargar los favoritos: {str(ex)}")
+        favoritos = []
     
-    if not favoritos_ejemplo:
+    # Mostrar favoritos o mensaje vacío
+    if not favoritos:
         tk.Label(
             scrollable_frame,
             text="No tienes productos favoritos aún\n\n"
@@ -60,7 +74,7 @@ def show_favoritos_view(parent_frame, username="usuario_demo"):
             justify=tk.CENTER
         ).pack(pady=50)
     else:
-        for i, prod in enumerate(favoritos_ejemplo):
+        for prod in favoritos:
             prod_frame = tk.Frame(scrollable_frame, relief=tk.RIDGE, borderwidth=2)
             prod_frame.pack(fill=tk.X, padx=20, pady=8)
             
@@ -78,13 +92,15 @@ def show_favoritos_view(parent_frame, username="usuario_demo"):
             
             tk.Label(
                 info_frame,
-                text=prod['titulo'],
+                text=prod.get('titulo', 'Sin título'),
                 font=("Arial", 12, "bold")
             ).pack(anchor=tk.W)
             
+            precio = prod.get('precio', 0)
+            vendedor = prod.get('username_vendedor', 'desconocido')
             tk.Label(
                 info_frame,
-                text=f"€{prod['precio']} • por @{prod['vendedor']}",
+                text=f"€{precio:.2f} • por @{vendedor}",
                 font=("Arial", 10),
                 fg="gray"
             ).pack(anchor=tk.W)
@@ -99,12 +115,31 @@ def show_favoritos_view(parent_frame, username="usuario_demo"):
                 state=tk.DISABLED
             ).pack(side=tk.LEFT, padx=3)
             
+            # Botón Quitar con recarga automática
+            def crear_quitar_handler(id_prod, user):
+                """Factory para crear handler del botón Quitar."""
+                def on_quitar():
+                    cn = None
+                    try:
+                        cn = begin_transaction()
+                        quitar_favorito(cn, user, id_prod)
+                        commit(cn)
+                        messagebox.showinfo("OK", "Producto eliminado de favoritos")
+                        # Recarga automática: re-renderiza la vista
+                        show_favoritos_view(parent_frame, user)
+                    except Exception as ex:
+                        if cn:
+                            rollback(cn)
+                        messagebox.showerror("Error", str(ex))
+                return on_quitar
+            
             tk.Button(
                 btn_frame,
                 text="Quitar ♥",
                 fg="red",
-                state=tk.DISABLED
+                command=crear_quitar_handler(prod.get('id_producto'), username)
             ).pack(side=tk.LEFT, padx=3)
     
+    # Empaquetar canvas y scrollbar
     canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y, padx=(0, 20))
