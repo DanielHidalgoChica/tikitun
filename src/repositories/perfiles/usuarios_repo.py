@@ -111,18 +111,41 @@ def get_usuario(cn, username: str) -> dict | None:
     Returns:
         Dict con datos del usuario o None si no existe
     """
-    print("   [REPO perfiles] get_usuario()", username)
-    # TODO: SELECT * FROM USUARIO WHERE username = ?
-    
-    # Demo (eliminar cuando implementes)
     if not username:
         return None
-    return {
-        "username": username,
-        "saldo": 100.00,
-        "nombre_completo": "Usuario Demo",
-        "cuenta_eliminada": False
-    }
+    
+    cur = cn.cursor()
+    try:
+        cur.execute(
+            "SELECT username, correo, nombre_completo, contrasenia, "
+            "ubi_latitud, ubi_longitud, rango, saldo, valoracion_media, cuenta_eliminada "
+            "FROM Usuario WHERE username = ?",
+            (username,)
+        )
+        row = cur.fetchone()
+        if row is None:
+            return None
+        
+        return {
+            "username": row[0],
+            "correo": row[1],
+            "nombre_completo": row[2],
+            "contrasenia": row[3],
+            "ubi_latitud": row[4],
+            "ubi_longitud": row[5],
+            "rango": row[6],
+            "saldo": row[7],
+            "valoracion_media": row[8],
+            "cuenta_eliminada": bool(row[9])
+        }
+    except Exception as e:
+        print(f"Error obteniendo usuario {username}: {e}")
+        return None
+    finally:
+        try:
+            cur.close()
+        except Exception:
+            pass
 
 
 def update_usuario(cn, username: str, cambios: dict) -> None:
@@ -198,7 +221,27 @@ def verificar_contraseña(cn, username: str, contraseña: str) -> bool:
     Returns:
         True si coincide, False si no
     """
-    print("   [REPO perfiles] verificar_contraseña()", username)
-    # TODO: SELECT contraseña FROM USUARIO WHERE username = ?
-    # TODO: Comparar hash (si usas hash) o texto plano
-    return True  # Demo
+    if not username or not contraseña:
+        return False
+    
+    cur = cn.cursor()
+    try:
+        cur.execute(
+            "SELECT contrasenia FROM Usuario WHERE username = ?",
+            (username,)
+        )
+        row = cur.fetchone()
+        if row is None:
+            return False
+        
+        contraseña_bd = row[0]
+        # Comparación de texto plano (sin hash, como indicó el usuario)
+        return contraseña_bd == contraseña
+    except Exception as e:
+        print(f"Error verificando contraseña para {username}: {e}")
+        return False
+    finally:
+        try:
+            cur.close()
+        except Exception:
+            pass
