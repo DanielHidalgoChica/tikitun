@@ -3,32 +3,98 @@ Repositorio de consultas de búsqueda de productos.
 Responsable: Daniel Hidalgo
 
 Consultas con filtrado fuzzy y ordenación.
+RF3.5: Búsqueda de productos por texto y categoría.
 """
 
 
-def search_productos(cn, username: str, filtros: dict) -> list[dict]:
+def get_busqueda(cn, filtros: dict) -> list[dict]:
     """Busca productos según filtros.
     
-    Filtros:
-    - q: búsqueda fuzzy en título (LIKE %query%)
-    - categoria: filtro por categoría
-    - orden_precio: "asc" o "desc"
+    Filtros esperados:
+    - q: búsqueda fuzzy en título (obligatorio, LIKE %query%)
+    - categoria: filtro por categoría (opcional, None = todas)
+    - orden: "rating" (default), "precio_asc", "precio_desc"
     
-    Siempre filtra por:
-    - disponible = true
-    - rango de distancia del usuario
+    Siempre filtra por disponible = 1.
     
-    Orden por defecto: puntuación vendedor DESC
+    Ordenación:
+    - "rating": valoracion_media DESC
+    - "precio_asc": precio ASC, valoracion_media DESC
+    - "precio_desc": precio DESC, valoracion_media DESC
     
     Args:
         cn: Conexión a la base de datos
-        username: Usuario que busca
         filtros: Dict con parámetros de búsqueda
     
     Returns:
         Lista de productos ordenados
     """
-    print("   [REPO busqueda] search_productos()", username, filtros)
-    # TODO: Implementar consulta con filtros dinámicos
-    # TODO: Usar UPPER(titulo) LIKE UPPER(?) para fuzzy search
-    return []  # Demo
+    q = filtros.get("q", "").strip()
+    categoria = filtros.get("categoria")
+    orden = filtros.get("orden", "rating")
+    
+    print(f"   [REPO busqueda] get_busqueda() q='{q}', categoria='{categoria}', orden='{orden}'")
+    
+    if not q:
+        print("   [REPO busqueda] Búsqueda vacía, retornando lista vacía")
+        return []
+    
+    cur = cn.cursor()
+    
+    # Construir query dinámica
+    query = """
+        SELECT 
+            p.id_producto,
+            p.titulo,
+            p.descripcion,
+            p.precio,
+            p.username AS username_vendedor,
+            p.nombre_categoria,
+            p.promocion,
+            p.disponible,
+            u.valoracion_media
+        FROM producto p
+        JOIN usuario u ON p.username = u.username
+        WHERE p.disponible = 1
+          AND LOWER(p.titulo) LIKE '%' || LOWER(?) || '%'
+    """
+    
+    params = [q]
+    
+    # Filtro por categoría (opcional)
+    if categoria and categoria.strip():
+        query += " AND p.nombre_categoria = ?"
+        params.append(categoria.strip())
+    
+    # Ordenación
+    if orden == "precio_asc":
+        query += " ORDER BY p.precio ASC, u.valoracion_media DESC"
+    elif orden == "precio_desc":
+        query += " ORDER BY p.precio DESC, u.valoracion_media DESC"
+    else:  # default: rating
+        query += " ORDER BY u.valoracion_media DESC"
+    
+    print(f"   [DEBUG BUSQUEDA] Query: {query}")
+    print(f"   [DEBUG BUSQUEDA] Params: {params}")
+    
+    cur.execute(query, params)
+    
+    productos = []
+    for row in cur.fetchall():
+        productos.append({
+            "id_producto": row[0],
+            "titulo": row[1],
+            "descripcion": row[2],
+            "precio": row[3],
+            "username_vendedor": row[4],
+            "nombre_categoria": row[5],
+            "promocion": row[6] or 0,
+            "disponible": row[7],
+            "valoracion_vendedor": row[8] or 0
+        })
+    
+    cur.close()
+    
+    print(f"   [DEBUG BUSQUEDA] Encontrados {len(productos)} productos")
+    
+    return productos
