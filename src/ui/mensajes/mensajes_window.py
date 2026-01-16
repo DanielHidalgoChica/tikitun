@@ -15,15 +15,31 @@ def render_mensajes(messages_frame, mensajes, mi_usuario):
         es_mio = autor == mi_usuario
         bg = "#DCF8C6" if es_mio else "#F1F0F0"
         anchor = tk.E if es_mio else tk.W
+        justify = tk.RIGHT if es_mio else tk.LEFT
 
+        # Burbuja
         bubble = tk.Frame(messages_frame, bg=bg, padx=8, pady=4)
         bubble.pack(anchor=anchor, pady=4, padx=10)
 
-        tk.Label(bubble, text=autor, font=("Arial", 8, "bold"), bg=bg).pack(anchor=tk.W)
-        tk.Label(bubble, text=texto, wraplength=300, justify=tk.LEFT, bg=bg).pack(anchor=tk.W)
-        tk.Label(bubble, text=str(fecha), font=("Arial", 7), fg="gray", bg=bg).pack(anchor=tk.E)
+        tk.Label(bubble, text=autor, font=("Arial", 8, "bold"),
+                 bg=bg, justify=justify).pack(anchor=anchor)
 
+        tk.Label(bubble, text=texto, wraplength=300,
+                 bg=bg, justify=justify).pack(anchor=anchor)
 
+        tk.Label(bubble, text=str(fecha), font=("Arial", 7),
+                 fg="gray", bg=bg).pack(anchor=anchor)
+
+def enviar_mensaje():
+    texto = entry_msg.get().strip()
+    if not texto:
+        return
+
+    # Aquí deberías llamar a tu service/repo para guardar el mensaje
+    print("Enviar:", texto)
+
+    entry_msg.delete(0, tk.END)
+    
 def show_mensajes_view(parent_frame, username="bob"):
     """
     Muestra la vista de gestión de mensajes en el frame principal.
@@ -113,9 +129,8 @@ def show_mensajes_view(parent_frame, username="bob"):
                     cn = None
                     try:
                         cn = begin_transaction()
-                        mensajes = mensajes_service.consultar_conversacion(cn, user, id_chat)
+                        mensajes = mensajes_service.consultar_conversacion(cn, id_chat, user)
                         commit(cn)
-                        messagebox.showinfo("OK", "Seleccionado")
                         # Recarga automática: re-renderiza la vista
                         render_mensajes(messages_frame, mensajes, user)
                     except Exception as ex:
