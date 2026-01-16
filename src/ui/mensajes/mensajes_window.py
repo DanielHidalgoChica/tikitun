@@ -3,6 +3,27 @@ from tkinter import messagebox
 from src.db.db_app import connect, begin_transaction, commit, rollback
 from src.services.mensajes import mensajes_service
 
+def render_mensajes(messages_frame, mensajes, mi_usuario):
+    for widget in messages_frame.winfo_children():
+        widget.destroy()
+
+    for msg in mensajes:
+        autor = msg['username']
+        texto = msg['texto']
+        fecha = msg['fecha']
+
+        es_mio = autor == mi_usuario
+        bg = "#DCF8C6" if es_mio else "#F1F0F0"
+        anchor = tk.E if es_mio else tk.W
+
+        bubble = tk.Frame(messages_frame, bg=bg, padx=8, pady=4)
+        bubble.pack(anchor=anchor, pady=4, padx=10)
+
+        tk.Label(bubble, text=autor, font=("Arial", 8, "bold"), bg=bg).pack(anchor=tk.W)
+        tk.Label(bubble, text=texto, wraplength=300, justify=tk.LEFT, bg=bg).pack(anchor=tk.W)
+        tk.Label(bubble, text=str(fecha), font=("Arial", 7), fg="gray", bg=bg).pack(anchor=tk.E)
+
+
 def show_mensajes_view(parent_frame, username="bob"):
     """
     Muestra la vista de gestión de mensajes en el frame principal.
@@ -41,13 +62,6 @@ def show_mensajes_view(parent_frame, username="bob"):
         font=("Arial", 12, "bold")
     ).pack(pady=10)
     
-    # Lista de conversaciones (placeholder)
- 
-    conversaciones_ejemplo = [
-        {"id_chat": "1", "usuario": "maria_bikes", "producto": "Bicicleta de montaña", "ultimo_msg": "¿Sigue disponible?"},
-        {"id_chat": "2","usuario": "juan123", "producto": "Guitarra eléctrica", "ultimo_msg": "Te la dejo en 250€"},
-    ]
-    
     conversaciones_inicio = []
     try:
         with connect() as cn:
@@ -65,7 +79,7 @@ def show_mensajes_view(parent_frame, username="bob"):
         ).pack(expand=True)
 
     else:
-        for conv in conversaciones_ejemplo:
+        for conv in conversaciones_inicio:
             conv_frame = tk.Frame(left_panel, relief=tk.RAISED, borderwidth=1)
             conv_frame.pack(fill=tk.X, padx=5, pady=3)
             
@@ -84,7 +98,7 @@ def show_mensajes_view(parent_frame, username="bob"):
             
             tk.Label(
                 conv_frame,
-                text=conv['ultimo_msg'],
+                text=conv['ultimo_mensaje'],
                 font=("Arial", 9)
             ).pack(anchor=tk.W, padx=5, pady=2)
 
@@ -99,11 +113,11 @@ def show_mensajes_view(parent_frame, username="bob"):
                     cn = None
                     try:
                         cn = begin_transaction()
-                        mensajes_service.consultar_conversacion(cn, user, id_chat)
+                        mensajes = mensajes_service.consultar_conversacion(cn, user, id_chat)
                         commit(cn)
                         messagebox.showinfo("OK", "Seleccionado")
                         # Recarga automática: re-renderiza la vista
-                        show_mensajes_view(parent_frame, user)
+                        render_mensajes(messages_frame, mensajes, user)
                     except Exception as ex:
                         if cn:
                             rollback(cn)
@@ -123,12 +137,27 @@ def show_mensajes_view(parent_frame, username="bob"):
     right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
     
     tk.Label(
-        right_panel,
-        text="Selecciona una conversación",
-        font=("Arial", 11),
-        fg="gray"
-    ).pack(expand=True)
-    
+    right_panel,
+    text="Mensajes",
+    font=("Arial", 12, "bold")
+    ).pack(pady=10)
+
+    # Canvas + Scrollbar
+    canvas = tk.Canvas(right_panel)
+    scrollbar = tk.Scrollbar(right_panel, orient=tk.VERTICAL, command=canvas.yview)
+    messages_frame = tk.Frame(canvas)
+
+    messages_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    canvas.create_window((0, 0), window=messages_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
     # Nota informativa
     tk.Label(
         parent_frame,

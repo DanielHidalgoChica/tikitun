@@ -29,19 +29,18 @@ def get_conversaciones_usuario(cn, username: str) -> list[dict]:
         p.titulo,
         c.archivado
         FROM Chat c JOIN Producto p ON c.id_producto = p.id_producto 
-        WHERE c.username = ? or p.username = ?
+        WHERE c.username = :1 or p.username = :2
         ORDER BY c.archivado asc;
         """
     cur = cn.cursor()
     try:
-        cur.execute(sql, (username,username))
-        cols = [c[0] for c in cur.description]
+        cur.execute(sql, (username, username))
+        cols = [c[0].lower() for c in cur.description]
         rows = [dict(zip(cols, r)) for r in cur.fetchall()]
-        out = rows
     except Exception as e:
         raise
     cur.close()
-    return out
+    return rows
 
 
 def set_archivada(cn, id_producto: int, archivada: bool) -> None:

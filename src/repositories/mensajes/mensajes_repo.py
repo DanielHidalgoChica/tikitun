@@ -5,7 +5,7 @@ Responsable: Aitor de la Iglesia
 Operaciones sobre la tabla MENSAJE.
 """
 
-def ultimo_mensaje(cn, id_chat: int) -> str:
+def ultimo_mensaje(cn, id_chat: int) -> dict | None:
     """
     Devuelve el último mensaje de la conversación
     
@@ -17,18 +17,23 @@ def ultimo_mensaje(cn, id_chat: int) -> str:
         Ultimo mensaje de la conversación
     """
     sql = """
-        SELECT texto
+        SELECT texto, fecha, username
         FROM Mensaje
-        WHERE id_chat = :id_chat
+        WHERE id_chat = :1
         ORDER BY fecha DESC
         FETCH FIRST 1 ROW ONLY
-        """
+    """
     cur = cn.cursor()
-    cur.execute(sql, id_chat=id_chat)
+    cur.execute(sql, (id_chat))
     row = cur.fetchone()
     if not row:
         return None
-    return row
+    cur.close()
+    return {
+        "texto": row[0],
+        "fecha": row[1],
+        "autor": row[2]
+    }
 
 def insert_mensaje(cn, mensaje: dict) -> None:
     """Inserta un nuevo mensaje.
@@ -55,8 +60,17 @@ def get_mensajes_conversacion(cn, username: str, id_chat: int) -> list[dict]:
         Lista de mensajes ordenados por fecha
     """
     print("   [REPO mensajes] get_mensajes_conversacion({id_chat})").format(id_chat=id_chat)
-    # TODO: SELECT * FROM MENSAJE WHERE ... ORDER BY fecha_envio
-    return []
+    sql = """
+        SELECT username, texto, fecha
+        FROM Mensaje
+        WHERE id_chat = :id_chat
+        ORDER BY fecha ASC
+        """
+    cur = cn.cursor()
+    cur.execute(sql, id_chat=id_chat)
+
+    cols = [c[0].lower() for c in cur.description]
+    return [dict(zip(cols, row)) for row in cur.fetchall()]
 
 
 def mark_as_read(cn, mensaje_ids: list[int]) -> None:

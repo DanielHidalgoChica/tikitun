@@ -43,9 +43,12 @@ def listar_conversaciones_inicio(cn, username: str) -> list[dict]:
         Lista de conversaciones (como comprador o vendedor)
     """
     print(" [SERVICE mensajes] consultar_conversaciones_inicio()")
-    all = conversaciones_repo.get_conversaciones_usuario(cn, username)
+    all = []
     out = []
+    all = conversaciones_repo.get_conversaciones_usuario(cn, username)
+    
     for chat in all:
+        print(chat)
         if chat['archivado'] == 0:
             last = mensajes_repo.ultimo_mensaje(cn, chat['id_chat'])
             otro = chat['vendedor'] if chat['comprador'] == username else chat['comprador']
@@ -53,7 +56,7 @@ def listar_conversaciones_inicio(cn, username: str) -> list[dict]:
                 'id_chat': chat['id_chat'],
                 'usuario': otro,
                 'producto': chat['titulo'],
-                'ultimo_mensaje' : last
+                'ultimo_mensaje' : last['texto']
                 })
     return out
 
