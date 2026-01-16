@@ -69,46 +69,6 @@ def soft_delete_producto(cn, id_producto: int) -> None:
     pass
 
 
-def get_all_productos(cn) -> list[dict]:
-    """Obtiene todos los productos disponibles.
-    
-    Args:
-        cn: Conexión a la base de datos
-    
-    Returns:
-        Lista de todos los productos con disponible = 1
-    """
-    cur = cn.cursor()
-    cur.execute("""
-        SELECT 
-            p.id_producto,
-            p.titulo,
-            p.descripcion,
-            p.precio,
-            p.username AS username_vendedor,
-            p.nombre_categoria,
-            p.promocion,
-            p.disponible
-        FROM producto p
-        WHERE p.disponible = 1
-        ORDER BY p.id_producto DESC
-    """)
-    
-    productos = []
-    for row in cur.fetchall():
-        productos.append({
-            "id_producto": row[0],
-            "titulo": row[1],
-            "descripcion": row[2],
-            "precio": row[3],
-            "username_vendedor": row[4],
-            "nombre_categoria": row[5],
-            "promocion": row[6],
-            "disponible": row[7]
-        })
-    
-    return productos
-
 
 def search_productos(cn, filtros: dict) -> list[dict]:
     """Busca productos según filtros.

@@ -104,6 +104,7 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
             p.nombre_categoria,
             p.promocion,
             p.disponible,
+            p.num_favs,
             u_vendedor.ubi_latitud,
             u_vendedor.ubi_longitud,
             u_vendedor.rango,
@@ -123,10 +124,11 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
         categoria = row[5]
         promocion = row[6] or 0  # NULL → 0
         disponible = row[7]
-        vendedor_lat = row[8]
-        vendedor_lon = row[9]
-        vendedor_rango = row[10] or 0  # NULL → 0
-        valoracion_vendedor = row[11] or 0  # NULL → 0
+        num_favs = row[8] or 0  # NULL → 0
+        vendedor_lat = row[9]
+        vendedor_lon = row[10]
+        vendedor_rango = row[11] or 0  # NULL → 0
+        valoracion_vendedor = row[12] or 0  # NULL → 0
         
         # PASO 4a: Filtrar por rango: distancia <= rango_usuario + rango_vendedor
         distancia = calcular_distancia_haversine(
@@ -156,6 +158,7 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
             "nombre_categoria": categoria,
             "promocion": promocion,
             "disponible": disponible,
+            "num_favs": num_favs,
             "valoracion_vendedor": valoracion_vendedor,
             "en_preferidas": en_preferidas,
             "distancia_km": round(distancia, 2)
@@ -163,11 +166,11 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
     
     cur.close()
     
-    # PASO 5: Ordenamiento simple: Promoción DESC → Valoración vendedor DESC
+    # PASO 5: Ordenamiento: Promoción DESC → Número de favoritos DESC
     productos.sort(
         key=lambda prod: (
             -(prod["promocion"] or 0),  # Negado para DESC
-            -(prod["valoracion_vendedor"] or 0)  # Negado para DESC
+            -(prod["num_favs"] or 0)  # Negado para DESC - ordenar por popularidad
         )
     )
     

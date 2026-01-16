@@ -37,9 +37,6 @@ INSERT INTO Usuario VALUES (
   0
 );
 
-INSERT INTO Categoria VALUES ('Electrónica');
-INSERT INTO Categoria VALUES ('Libros');
-INSERT INTO Categoria VALUES ('Hogar');
 
 INSERT INTO Producto VALUES (
   1,
@@ -50,6 +47,7 @@ INSERT INTO Producto VALUES (
   59.99,
   NULL,
   10.00,
+  0,
   1
 );
 
@@ -62,6 +60,7 @@ INSERT INTO Producto VALUES (
   25.00,
   NULL,
   NULL,
+  0,
   1
 );
 
@@ -74,6 +73,7 @@ INSERT INTO Producto VALUES (
   25.00,
   NULL,
   1,
+  0,
   1
 );
 
@@ -86,6 +86,7 @@ INSERT INTO Producto VALUES (
   18.50,
   NULL,
   5.00,
+  0,
   1
 );
 
