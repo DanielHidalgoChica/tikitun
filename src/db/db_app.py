@@ -132,6 +132,8 @@ def initialize_database(sql_dir: Optional[str] = None, files: Optional[List[str]
 
     executed = []
     stmt_count = 0
+    skipped_count = 0
+    skipped_details = []
 
     with connect(autocommit=False) as cn:
         cur = cn.cursor()
@@ -167,6 +169,8 @@ def initialize_database(sql_dir: Optional[str] = None, files: Optional[List[str]
                                 exists = 0
 
                             if exists and exists > 0:
+                                skipped_count += 1
+                                skipped_details.append(f"CREATE TABLE {table_name}")
                                 executed.append(f"skipped CREATE TABLE {table_name}")
                                 continue
 
@@ -178,7 +182,10 @@ def initialize_database(sql_dir: Optional[str] = None, files: Optional[List[str]
                         err = str(e)
                         # ORA-00955: name is already used by an existing object
                         if 'ORA-00955' in err or 'already exists' in err.lower() or 'name is already used' in err.lower():
-                            executed.append(f"skipped (already exists): {s.splitlines()[0]}")
+                            skipped_count += 1
+                            detail = s.splitlines()[0]
+                            skipped_details.append(detail)
+                            executed.append(f"skipped (already exists): {detail}")
                             continue
                         # Propagar otros errores
                         raise
@@ -197,4 +204,9 @@ def initialize_database(sql_dir: Optional[str] = None, files: Optional[List[str]
         finally:
             cur.close()
 
-    return {"executed_files": executed, "statements_executed": stmt_count}
+    return {
+        "executed_files": executed,
+        "statements_executed": stmt_count,
+        "skipped_statements": skipped_count,
+        "skipped_details": skipped_details,
+    }
