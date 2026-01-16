@@ -66,6 +66,18 @@ INSERT INTO Producto VALUES (
 );
 
 INSERT INTO Producto VALUES (
+  11,
+  'bob',
+  'Libros',
+  'Libro de Topología',
+  'Munkres: 2019',
+  25.00,
+  NULL,
+  NULL,
+  1
+);
+
+INSERT INTO Producto VALUES (
   3,
   'alice',
   'Hogar',
