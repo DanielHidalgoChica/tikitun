@@ -90,3 +90,5 @@ INSERT INTO Categoria VALUES ('Tecnología');
 INSERT INTO Categoria VALUES ('Deportes');
 INSERT INTO Categoria VALUES ('Hogar');
 INSERT INTO Categoria VALUES ('Libros');
+
+COMMIT;
