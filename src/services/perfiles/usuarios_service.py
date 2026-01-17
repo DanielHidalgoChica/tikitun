@@ -157,30 +157,75 @@ def consultar_perfil(cn, username: str) -> dict:
         ValueError: Si usuario no existe o cuenta eliminada
     """
     print(" [SERVICE perfiles] consultar_perfil()")
-    # TODO: Implementar
-    pass
+    usuario = usuarios_repo.get_usuario(cn, username)
+    if usuario is None or usuario.get("cuenta_eliminada"):
+        raise ValueError("Usuario no existe o cuenta eliminada")
+    
+    # Devolver sólo campos permitidos
+    return {k: usuario[k] for k in (
+        "username", "nombre_completo", "correo", "ubicacion", "rango", "categorias", "mayoria_edad", "aceptacion_politicas", "saldo", "valoracion_media"
+    )}
 
 
 def modificar_perfil(cn, username: str, cambios: dict) -> None:
     """RF1.3: Modifica datos del perfil de usuario.
-    
+
     RS aplicadas:
     - RS1.3: Nombre de usuario y correo únicos
     - RS1.7: Entre 1 y 6 categorías de preferencia
     - RS1.13: Usuario debe existir y no estar eliminado
     - RS1.18: Rango de interés positivo
-    
+
     Args:
         cn: Conexión a la base de datos
         username: Usuario a modificar
         cambios: Dict con campos a actualizar
-    
+
     Raises:
         ValueError: Si no cumple validaciones
     """
-    print(" [SERVICE perfiles] modificar_perfil()")
-    # TODO: Implementar validaciones y actualización
-    pass
+    # Validar existencia del usuario
+    usuario = usuarios_repo.get_usuario(cn, username)
+    if not usuario or usuario.get("cuenta_eliminada"):
+        raise ValueError("El usuario no existe o ha sido eliminado")
+
+    # Validar correo
+    correo = cambios.get("correo")
+    if correo and not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", correo):
+        raise ValueError("Formato de correo inválido")
+
+    # Validar ubicación
+    lat = cambios.get("ubi_latitud")
+    lon = cambios.get("ubi_longitud")
+    if lat or lon:
+        if not lat or not lon:
+            raise ValueError("Debes proporcionar ambas coordenadas (latitud y longitud) o ninguna")
+        try:
+            lat = float(lat)
+            lon = float(lon)
+            if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+                raise ValueError("Coordenadas fuera de rango")
+        except ValueError:
+            raise ValueError("Latitud y longitud deben ser números")
+
+    # Validar rango
+    rango = cambios.get("rango")
+    if rango:
+        try:
+            rango = float(rango)
+            if rango <= 0:
+                raise ValueError("El rango debe ser mayor a 0")
+        except ValueError:
+            raise ValueError("El rango debe ser un número")
+
+    # Validar categorías
+    categorias = cambios.get("categorias", [])
+    if not (1 <= len(categorias) <= 6):
+        raise ValueError("Debe seleccionar entre 1 y 6 categorías preferidas")
+
+    # Actualizar datos del usuario
+    usuarios_repo.update_usuario(cn, username, cambios)
+    usuarios_repo.update_categorias_preferidas(cn, username, categorias)
 
 
 def añadir_saldo(cn, username: str, cantidad: float) -> None:
@@ -199,10 +244,18 @@ def añadir_saldo(cn, username: str, cantidad: float) -> None:
         ValueError: Si cantidad no es positiva o usuario no existe
     """
     print(" [SERVICE perfiles] añadir_saldo()")
-    # TODO: Implementar validaciones
-    # TODO: savepoint(cn, "SP_AÑADIR_SALDO")
-    # TODO: usuarios_repo.update_saldo(cn, username, nuevo_saldo)
-    pass
+    usuario = usuarios_repo.get_usuario(cn, username)
+    if usuario is None or usuario.get("cuenta_eliminada"):
+        raise ValueError("Usuario no existe o cuenta eliminada")
+    
+    if cantidad <= 0:
+        raise ValueError("La cantidad a añadir debe ser positiva")
+    
+    # Calcular nuevo saldo
+    nuevo_saldo = round(usuario["saldo"] + cantidad, 2)
+    
+    # Actualizar saldo (repositorio maneja la persistencia)
+    usuarios_repo.update_saldo(cn, username, nuevo_saldo)
 
 
 def transferir_saldo(cn, username: str, cantidad: float, contraseña: str) -> None:
@@ -223,9 +276,22 @@ def transferir_saldo(cn, username: str, cantidad: float, contraseña: str) -> No
         ValueError: Si saldo insuficiente o contraseña incorrecta
     """
     print(" [SERVICE perfiles] transferir_saldo()")
-    # TODO: Implementar validaciones
-    # TODO: savepoint(cn, "SP_TRANSFERIR_SALDO")
-    pass
+    usuario = usuarios_repo.get_usuario(cn, username)
+    if usuario is None or usuario.get("cuenta_eliminada"):
+        raise ValueError("Usuario no existe o cuenta eliminada")
+    
+    if cantidad <= 0 or cantidad > usuario["saldo"]:
+        raise ValueError("Cantidad a transferir inválida")
+    
+    # Verificar contraseña
+    if not usuarios_repo.verificar_contraseña(cn, username, contraseña):
+        raise ValueError("La contraseña introducida es incorrecta.")
+    
+    # Calcular nuevo saldo
+    nuevo_saldo = round(usuario["saldo"] - cantidad, 2)
+    
+    # Actualizar saldo (repositorio maneja la persistencia)
+    usuarios_repo.update_saldo(cn, username, nuevo_saldo)
 
 
 def dar_baja_usuario(cn, username: str, contraseña: str) -> None:
