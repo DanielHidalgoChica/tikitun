@@ -155,10 +155,33 @@ def update_usuario(cn, username: str, cambios: dict) -> None:
         cn: Conexión a la base de datos
         username: Usuario a actualizar
         cambios: Dict con campos a modificar
+    
+    Campos permitidos:
+        - nombre_completo
+        - correo
+        - ubi_latitud, ubi_longitud (ubicación)
+        - rango
     """
-    print("   [REPO perfiles] update_usuario()", username, cambios)
-    # TODO: UPDATE USUARIO SET ... WHERE username = ?
-    pass
+    # Campos permitidos a actualizar
+    campos_permitidos = ["nombre_completo", "correo", "ubi_latitud", "ubi_longitud", "rango"]
+    
+    # Filtrar cambios a solo campos permitidos
+    cambios_filtrados = {k: v for k, v in cambios.items() if k in campos_permitidos}
+    
+    if not cambios_filtrados:
+        return
+    
+    # Construir SQL dinámico
+    set_clause = ", ".join([f"{k} = ?" for k in cambios_filtrados.keys()])
+    sql = f"UPDATE Usuario SET {set_clause} WHERE username = ?"
+    
+    values = list(cambios_filtrados.values()) + [username]
+    
+    cur = cn.cursor()
+    try:
+        cur.execute(sql, values)
+    finally:
+        cur.close()
 
 
 def update_saldo(cn, username: str, nuevo_saldo: float) -> None:
@@ -212,6 +235,60 @@ def get_categorias_disponibles(cn) -> list[str]:
             cur.close()
         except Exception:
             pass
+
+
+def get_categorias_preferidas(cn, username: str) -> list[str]:
+    """Obtiene las categorías preferidas de un usuario.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Usuario
+    
+    Returns:
+        Lista de nombres de categorías preferidas
+    """
+    cur = cn.cursor()
+    try:
+        cur.execute(
+            "SELECT nombre FROM Preferidos WHERE username = ? ORDER BY nombre",
+            (username,)
+        )
+        categorias = [row[0] for row in cur.fetchall()]
+        return categorias
+    except Exception as e:
+        print(f"Error obteniendo categorías preferidas: {e}")
+        return []
+    finally:
+        try:
+            cur.close()
+        except Exception:
+            pass
+
+
+def update_categorias_preferidas(cn, username: str, categorias: list[str]) -> None:
+    """Actualiza las categorías preferidas de un usuario.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Usuario
+        categorias: Lista de categorías (debe tener entre 1 y 6 elementos)
+    """
+    if not categorias or len(categorias) > 6:
+        raise ValueError("Las categorías preferidas deben ser entre 1 y 6")
+    
+    cur = cn.cursor()
+    try:
+        # Eliminar categorías previas
+        cur.execute("DELETE FROM Preferidos WHERE username = ?", (username,))
+        
+        # Insertar nuevas categorías
+        for cat in categorias:
+            cur.execute(
+                "INSERT INTO Preferidos (username, nombre) VALUES (?, ?)",
+                (username, cat)
+            )
+    finally:
+        cur.close()
 
 
 def verificar_contraseña(cn, username: str, contraseña: str) -> bool:

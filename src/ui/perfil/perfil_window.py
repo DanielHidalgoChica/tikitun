@@ -69,16 +69,19 @@ def show_perfil_view(parent_frame, username="bob"):
         pady=10
     ).pack(fill=tk.X, pady=5)
     
+    def on_editar_perfil():
+        from src.ui.perfil.editar_window import show_editar_perfil_view
+        show_editar_perfil_view(parent_frame, username)
+    
     tk.Button(
         frm_principales,
         text="✏️ Editar Perfil",
-        state=tk.DISABLED,
+        command=on_editar_perfil,
         bg="#2196F3",
         fg="white",
-        font=("Arial", 10),
+        font=("Arial", 10, "bold"),
         padx=20,
-        pady=10,
-        disabledforeground="white"
+        pady=10
     ).pack(fill=tk.X, pady=5)
     
     tk.Button(
