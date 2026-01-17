@@ -1,70 +1,110 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
+from src.db.db_app import connect
+from src.repositories.perfiles import usuarios_repo
+from src.repositories.productos import productos_repo
 
 
 def show_perfil_view(parent_frame, username="bob"):
     """
-    Muestra la vista de gestión de perfil en el frame principal.
+    Muestra la vista de gestión de perfil (RF1.2).
     
-    Funcionalidades futuras:
-    - Consultar información del perfil
-    - Modificar datos personales (nombre, correo, ubicación, etc.)
-    - Gestionar saldo del monedero (añadir/transferir)
-    - Consultar productos publicados
-    - Dar de baja la cuenta
+    Consulta:
+    - Información del perfil del usuario
     """
     # Limpiar el frame
     for widget in parent_frame.winfo_children():
         widget.destroy()
     
-    # Título
-    tk.Label(
-        parent_frame,
-        text=f"👤 Perfil de {username}",
-        font=("Arial", 16, "bold")
-    ).pack(pady=20)
+    # Cargar datos del usuario
+    try:
+        with connect() as cn:
+            usuario = usuarios_repo.get_usuario(cn, username)
+            if usuario is None or usuario.get("cuenta_eliminada"):
+                messagebox.showerror("Error", "El usuario no existe o ha sido eliminado")
+                tk.Label(parent_frame, text="Usuario no encontrado").pack(pady=20)
+                return
+    except Exception as e:
+        messagebox.showerror("Error", f"Error cargando perfil: {e}")
+        tk.Label(parent_frame, text="Error al cargar el perfil").pack(pady=20)
+        return
     
-    # Placeholder de funcionalidades
-    tk.Label(
-        parent_frame,
-        text="Aquí podrás gestionar tu perfil:\n\n"
-             "• Ver y editar información personal\n"
-             "• Gestionar saldo del monedero\n"
-             "• Consultar tus productos publicados\n"
-             "• Modificar preferencias\n"
-             "• Dar de baja tu cuenta",
-        justify=tk.LEFT,
-        font=("Arial", 11)
-    ).pack(pady=20)
+    # === SECCIÓN DE INFORMACIÓN DEL PERFIL ===
+    frm_info = tk.LabelFrame(parent_frame, text="Información del Perfil", padx=15, pady=15)
+    frm_info.pack(padx=10, pady=10, fill=tk.X)
     
-    # Botones de demostración (sin funcionalidad)
-    btn_frame = tk.Frame(parent_frame)
-    btn_frame.pack(pady=20)
+    # Nombre completo y username
+    tk.Label(frm_info, text=f"Nombre: {usuario.get('nombre_completo', 'N/A')}", font=("Arial", 12, "bold")).pack(anchor="w", pady=5)
+    tk.Label(frm_info, text=f"Usuario: @{username}", font=("Arial", 11)).pack(anchor="w", pady=2)
     
-    tk.Button(
-        btn_frame,
-        text="Ver información",
-        width=20,
-        state=tk.DISABLED
-    ).grid(row=0, column=0, padx=10, pady=5)
+    # Saldo
+    saldo = usuario.get("saldo", 0.0)
+    tk.Label(frm_info, text=f"Saldo: €{saldo:.2f}", font=("Arial", 11)).pack(anchor="w", pady=2)
     
-    tk.Button(
-        btn_frame,
-        text="Editar perfil",
-        width=20,
-        state=tk.DISABLED
-    ).grid(row=0, column=1, padx=10, pady=5)
+    # Valoración media
+    valoracion = usuario.get("valoracion_media", 0)
+    val_texto = f"{valoracion:.1f}" if valoracion else "Sin valoraciones"
+    tk.Label(frm_info, text=f"Valoración media: {val_texto} ⭐", font=("Arial", 11)).pack(anchor="w", pady=2)
     
-    tk.Button(
-        btn_frame,
-        text="Gestionar saldo",
-        width=20,
-        state=tk.DISABLED
-    ).grid(row=1, column=0, padx=10, pady=5)
+    # === BOTONES DE ACCIÓN ===
+    frm_acciones = tk.Frame(parent_frame, bg="white")
+    frm_acciones.pack(pady=20, padx=10, fill=tk.X)
+    
+    def on_mis_productos():
+        from src.ui.productos.mis_productos_window import show_mis_productos_view
+        show_mis_productos_view(parent_frame, username)
+    
+    # Botones principales
+    frm_principales = tk.Frame(frm_acciones, bg="white")
+    frm_principales.pack(fill=tk.X, pady=(0, 15))
     
     tk.Button(
-        btn_frame,
-        text="Mis productos",
-        width=20,
-        state=tk.DISABLED
-    ).grid(row=1, column=1, padx=10, pady=5)
+        frm_principales,
+        text="📦 Mis Productos",
+        command=on_mis_productos,
+        bg="#4CAF50",
+        fg="white",
+        font=("Arial", 10, "bold"),
+        padx=20,
+        pady=10
+    ).pack(fill=tk.X, pady=5)
+    
+    tk.Button(
+        frm_principales,
+        text="✏️ Editar Perfil",
+        state=tk.DISABLED,
+        bg="#2196F3",
+        fg="white",
+        font=("Arial", 10),
+        padx=20,
+        pady=10,
+        disabledforeground="white"
+    ).pack(fill=tk.X, pady=5)
+    
+    tk.Button(
+        frm_principales,
+        text="💰 Gestionar Monedero",
+        state=tk.DISABLED,
+        bg="#FF9800",
+        fg="white",
+        font=("Arial", 10),
+        padx=20,
+        pady=10,
+        disabledforeground="white"
+    ).pack(fill=tk.X, pady=5)
+    
+    # Separador visual
+    ttk.Separator(frm_acciones, orient="horizontal").pack(fill=tk.X, pady=10)
+    
+    # Botón de dar de baja (separado)
+    tk.Button(
+        frm_acciones,
+        text="🗑️ Dar de Baja",
+        state=tk.DISABLED,
+        bg="#F44336",
+        fg="white",
+        font=("Arial", 10),
+        padx=20,
+        pady=10,
+        disabledforeground="white"
+    ).pack(fill=tk.X, pady=5)
