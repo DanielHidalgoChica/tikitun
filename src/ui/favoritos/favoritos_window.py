@@ -5,6 +5,13 @@ from src.services.feed_busqueda_favs.favoritos_service import (
     consultar_favoritos,
     quitar_favorito
 )
+from io import BytesIO
+
+try:
+    from PIL import Image, ImageTk
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
 
 
 def show_favoritos_view(parent_frame, username="bob"):
@@ -78,13 +85,41 @@ def show_favoritos_view(parent_frame, username="bob"):
             prod_frame = tk.Frame(scrollable_frame, relief=tk.RIDGE, borderwidth=2)
             prod_frame.pack(fill=tk.X, padx=20, pady=8)
             
-            # Icono corazón
-            tk.Label(
-                prod_frame,
-                text="♥",
-                font=("Arial", 16),
-                fg="red"
-            ).pack(side=tk.LEFT, padx=10, pady=10)
+            # Imagen del producto (si existe)
+            imagen_data = prod.get('imagen')
+            if imagen_data and PIL_AVAILABLE:
+                try:
+                    # Convertir bytes a imagen
+                    image = Image.open(BytesIO(imagen_data))
+                    # Redimensionar manteniendo aspecto (thumbnail pequeño)
+                    image.thumbnail((80, 80))
+                    photo = ImageTk.PhotoImage(image)
+                    
+                    img_label = tk.Label(prod_frame, image=photo)
+                    img_label.image = photo  # Mantener referencia
+                    img_label.pack(side=tk.LEFT, padx=10, pady=5)
+                except Exception:
+                    # Si hay error con la imagen, mostrar placeholder
+                    tk.Label(
+                        prod_frame,
+                        text="🖼️",
+                        font=("Arial", 24),
+                        fg="gray",
+                        bg="#f0f0f0",
+                        width=3,
+                        height=2
+                    ).pack(side=tk.LEFT, padx=10, pady=5)
+            else:
+                # Sin imagen o PIL no disponible
+                tk.Label(
+                    prod_frame,
+                    text="🖼️",
+                    font=("Arial", 24),
+                    fg="gray",
+                    bg="#f0f0f0",
+                    width=3,
+                    height=2
+                ).pack(side=tk.LEFT, padx=10, pady=5)
             
             # Información del producto
             info_frame = tk.Frame(prod_frame)
