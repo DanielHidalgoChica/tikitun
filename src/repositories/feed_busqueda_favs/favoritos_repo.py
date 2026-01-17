@@ -16,8 +16,6 @@ def add_favorito(cn, username: str, id_producto: int) -> None:
         username: Usuario
         id_producto: Producto
     """
-    print("   [REPO favoritos] add_favorito()", username, id_producto)
-    
     cur = cn.cursor()
     cur.execute("INSERT INTO favorito (id_producto, username) VALUES (?, ?)", 
                 (id_producto, username))
@@ -34,8 +32,6 @@ def remove_favorito(cn, username: str, id_producto: int) -> None:
         username: Usuario
         id_producto: Producto
     """
-    print("   [REPO favoritos] remove_favorito()", username, id_producto)
-    
     cur = cn.cursor()
     cur.execute("DELETE FROM favorito WHERE id_producto = ? AND username = ?", 
                 (id_producto, username))
@@ -55,8 +51,6 @@ def is_favorito(cn, username: str, id_producto: int) -> bool:
     Returns:
         True si está en favoritos
     """
-    print("   [REPO favoritos] is_favorito()", username, id_producto)
-    
     cur = cn.cursor()
     cur.execute("SELECT COUNT(*) FROM favorito WHERE username = ? AND id_producto = ?", 
                 (username, id_producto))
@@ -84,8 +78,6 @@ def get_favoritos(cn, username: str) -> list[dict]:
         Lista de productos con detalles (id_producto, titulo, precio, 
         descripcion, username_vendedor, imagen, nombre_categoria, promocion)
     """
-    print("   [REPO favoritos] get_favoritos()", username)
-    
     cur = cn.cursor()
     cur.execute("""
         SELECT p.id_producto, p.titulo, p.precio, p.descripcion,

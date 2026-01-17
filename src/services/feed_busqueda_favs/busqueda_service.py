@@ -18,7 +18,6 @@ def obtener_categorias_disponibles(cn) -> list[str]:
     Returns:
         Lista de nombres de categorías ordenados alfabéticamente
     """
-    print(" [SERVICE busqueda] obtener_categorias_disponibles()")
     return busqueda_repo.get_categorias(cn)
 
 
@@ -41,8 +40,6 @@ def buscar_productos(cn, texto: str = "", categoria: str = None, orden: str = "r
     Returns:
         Lista de productos ordenados
     """
-    print(f" [SERVICE busqueda] buscar_productos() texto='{texto}', categoria='{categoria}', orden='{orden}'")
-    
     # Normalizar texto (puede estar vacío)
     texto_limpio = texto.strip() if texto else ""
     

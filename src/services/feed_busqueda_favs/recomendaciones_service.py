@@ -25,5 +25,4 @@ def obtener_feed(cn, username: str) -> list[dict]:
     Returns:
         Lista ordenada de productos recomendados
     """
-    print(" [SERVICE recomendaciones] obtener_feed()")
     return recomendaciones_repo.get_recomendaciones(cn, username)

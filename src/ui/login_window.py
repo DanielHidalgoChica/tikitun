@@ -97,9 +97,7 @@ def show_login(parent=None) -> tuple[bool, str]:
     try:
         with connect() as cn:
             categorias_disponibles = usuarios_repo.get_categorias_disponibles(cn)
-        print(f"[DEBUG] Categorías cargadas: {categorias_disponibles}")
     except Exception as e:
-        print(f"[ERROR] No se pudieron cargar categorías: {e}")
         categorias_disponibles = []
     
     # Crear checkboxes para cada categoría
