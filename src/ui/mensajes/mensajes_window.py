@@ -122,6 +122,7 @@ def show_mensajes_view(parent_frame, username="bob"):
                         cn = begin_transaction()
                         mensajes = mensajes_service.consultar_conversacion(cn, id_chat, user)
                         commit(cn)
+                        print('guarda')
                         # Recarga automática: re-renderiza la vista
                         render_mensajes(messages_frame, mensajes, user)
                     except Exception as ex:

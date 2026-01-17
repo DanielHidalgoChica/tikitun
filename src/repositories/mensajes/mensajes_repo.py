@@ -83,17 +83,21 @@ def mark_as_read(cn, id_chat: int, username: str) -> None:
         id_chat
         username
     """
-    print("   [REPO mensajes] mark_as_read()")
+    print("   [REPO mensajes] mark_as_read()",id_chat,username)
     sql = """
         UPDATE Mensaje
         SET leido = 1
         WHERE id_chat = :1
-          AND username <> :2
-          AND leido = 0
+        AND username <> :2
+        AND leido = 0
     """
     cur = cn.cursor()
-    cur.execute(sql, (id_chat, username))
-    cur.close()
+    print('hola')
+    try:
+        cur.execute(sql, (id_chat, username))
+    finally:
+        cur.close()
+    print('adios')
     pass
 
 

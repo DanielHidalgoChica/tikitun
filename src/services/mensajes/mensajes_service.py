@@ -1,3 +1,5 @@
+from src.db.db_app import connect, begin_transaction, commit, rollback
+
 """
 Servicios de gestión de mensajes.
 Responsable: Aitor de la Iglesia
@@ -75,7 +77,7 @@ def consultar_conversacion(cn, id_chat: int, username: str) -> list[dict]:
     print(" [SERVICE mensajes] consultar_conversacion()")
     out = []
     out = mensajes_repo.get_mensajes_conversacion(cn, username, id_chat)
-    #mensajes_repo.mark_as_read(cn, id_chat, username)
+    mensajes_repo.mark_as_read(cn, id_chat, username)
     return out
 
 
