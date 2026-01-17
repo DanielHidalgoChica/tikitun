@@ -255,17 +255,8 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
                 messagebox.showerror("Error", f"Error al comprar producto: {e}")
         
         def on_contraoferta():
-            from src.services.ventas.ventas_service import realizar_contraoferta
-            from src.db.db_app import begin_transaction, commit, rollback
-
-            try:
-                realizar_contraoferta(cn, id_producto, username_actual, precio)
-                commit(cn)
-                messagebox.showinfo("Realizar contraoferta", "Producto comprado.")
-
-            except Exception as e:
-                rollback(cn)
-                messagebox.showerror("Error", f"Error al comprar producto: {e}")
+            from src.ui.productos.realizar_contraoferta_win import open_realizar_contraoferta
+            open_realizar_contraoferta(id_producto, username_actual)
         
         def on_favorito():
             from src.services.feed_busqueda_favs.favoritos_service import add_favorito
@@ -534,17 +525,8 @@ def show_detalle_view(parent, id_producto: int, username_actual: str, origen: st
                 messagebox.showerror("Error", f"Error al comprar producto: {e}")
         
         def on_contraoferta():
-            from src.services.ventas.ventas_service import realizar_contraoferta
-            from src.db.db_app import begin_transaction, commit, rollback
-
-            try:
-                realizar_contraoferta(cn, id_producto, username_actual, precio)
-                commit(cn)
-                messagebox.showinfo("Realizar contraoferta", "Producto comprado.")
-
-            except Exception as e:
-                rollback(cn)
-                messagebox.showerror("Error", f"Error al comprar producto: {e}")
+            from src.ui.productos.realizar_contraoferta_win import open_realizar_contraoferta
+            open_realizar_contraoferta(id_producto, username_actual)
         
         def on_favorito():
             from src.services.feed_busqueda_favs.favoritos_service import add_favorito

@@ -68,7 +68,7 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
         ('id_producto', id_producto),
         ('username' , username_comprador),
         ('recepcion_confirmada' , 0),
-        ('precio_final', precio)
+        ('precio_final', precio),
         ('valoracion', 0)
     ])
     ventas_repo.insert_venta(cn, venta)
@@ -96,7 +96,7 @@ def realizar_contraoferta(cn, id_producto: int, username_comprador: str,
         ValueError: Si oferta no viable
     """
     print(" [SERVICE ventas] realizar_contraoferta()")
-
+    
     # Validación de las restricciones semánticas
     prod = productos_repo.get_producto(cn, id_producto)
     if not prod:
@@ -105,7 +105,7 @@ def realizar_contraoferta(cn, id_producto: int, username_comprador: str,
     comprador = usuarios_repo.get_usuario(cn, username_comprador)
     if not comprador:
         raise ValueError("El usuario no existe")
-    
+
     precio = prod['precio']
     propietario = prod['username']
 
@@ -172,7 +172,7 @@ def aceptar_contraoferta(cn, id_producto: int, username_comprador: str,
         ('id_producto', id_producto),
         ('username' , username_comprador),
         ('recepcion_confirmada' , 0),
-        ('precio_final', precio)
+        ('precio_final', precio),
         ('valoracion', 0)
     ])
 
@@ -272,3 +272,5 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
     vendedor['valoracion_media']=valoracion_media
     usuarios_repo.update_usuario(cn, vendedor)
 
+def obtener_ventas_usuario(cn, username : str) -> list[dict]:
+    return ventas_repo.get_ventas_usuario(username)

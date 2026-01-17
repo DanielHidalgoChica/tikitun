@@ -14,7 +14,7 @@ def insert_contraoferta(cn, contraoferta: dict) -> None:
         contraoferta: Dict con id_producto, username_comprador, precio_oferta
     """
     print("   [REPO ventas] insert_contraoferta()", contraoferta)
-
+    
     cur = cn.cursor()
     cur.execute("INSERT INTO CONTRAOFERTA VALUES (?,?,?)", (contraoferta['id_producto'],
                 contraoferta['username'], contraoferta['precio']))
