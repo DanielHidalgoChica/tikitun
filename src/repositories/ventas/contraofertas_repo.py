@@ -57,7 +57,7 @@ def get_contraoferta(cn, id_producto: int, id_usuario : str) -> dict:
     print("   [REPO ventas] get_contraoferta()", id_producto, id_usuario)
 
     cur = cn.cursor()
-    cur.execute("SELECT * FROM CONTRAOFERTA WHERE id_producto = ? AND username = ?", id_producto, id_usuario)
+    cur.execute("SELECT * FROM CONTRAOFERTA WHERE id_producto = ? AND username = ?", (id_producto, id_usuario))
 
     # Convertir resultado a diccionario
     cols = [desc[0].lower() for desc in cur.description] if cur.description else []

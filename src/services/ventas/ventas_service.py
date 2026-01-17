@@ -67,7 +67,7 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
     venta = dict([
         ('id_producto', id_producto),
         ('username' , username_comprador),
-        ('recepcion_confirmada' , False),
+        ('recepcion_confirmada' , 0),
         ('precio_final', precio)
         ('valoracion', 0)
     ])
@@ -171,7 +171,7 @@ def aceptar_contraoferta(cn, id_producto: int, username_comprador: str,
     venta = dict([
         ('id_producto', id_producto),
         ('username' , username_comprador),
-        ('recepcion_confirmada' , False),
+        ('recepcion_confirmada' , 0),
         ('precio_final', precio)
         ('valoracion', 0)
     ])

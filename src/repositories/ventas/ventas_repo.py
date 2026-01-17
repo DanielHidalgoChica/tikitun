@@ -48,13 +48,13 @@ def get_venta(cn, id_producto: int) -> dict | None:
     return venta
 
 
-def update_estado_recepcion(cn, id_producto: int, recibido: bool) -> None:
+def update_estado_recepcion(cn, id_producto: int, recibido: int) -> None:
     """Actualiza el estado de recepción de un producto.
     
     Args:
         cn: Conexión a la base de datos
         id_producto: Producto
-        recibido: True si ya fue recibido
+        recibido: 1 si ya fue recibido, 0 si no
     """
     print("   [REPO ventas] update_estado_recepcion()", id_producto, recibido)
     
