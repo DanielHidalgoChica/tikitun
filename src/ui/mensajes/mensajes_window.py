@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
+import io
+from tkinter import messagebox, ttk, filedialog
+from PIL import Image, ImageTk
 from src.db.db_app import connect, begin_transaction, commit, rollback
 from src.services.mensajes import mensajes_service
 
@@ -98,6 +99,16 @@ def render_mensajes(container, mensajes: list[dict], username_actual: str):
             wraplength=280,
             justify=tk.LEFT
         ).pack(anchor=tk.W)
+
+        if msg.get("adjunto"):
+            img_data = msg["adjunto"]
+            img = Image.open(io.BytesIO(img_data))
+            img.thumbnail((220, 220))
+            img_tk = ImageTk.PhotoImage(img)
+
+            lbl_img = tk.Label(burbuja, image=img_tk, bg=burbuja["bg"])
+            lbl_img.image = img_tk  
+            lbl_img.pack(anchor="w", pady=4)
 
         # Pie con hora + leído
         estado = "✔✔" if msg.get("leido", 0) else "✔"
@@ -264,7 +275,36 @@ def show_mensajes_view(parent_frame, username="bob"):
     bottom = tk.Frame(right_panel, pady=6)
     bottom.pack(fill=tk.X, side=tk.BOTTOM)
 
-    btn_attach = tk.Button(bottom, text="📎", state=tk.DISABLED, width=3)
+    # Variable para guardar la imagen seleccionada
+    imagen_bytes = {"data": None, "filename": ""}
+
+    lbl_imagen = tk.Label(bottom, text="No seleccionada", fg="gray")
+    lbl_imagen.pack(anchor="w", padx=6)
+
+    def seleccionar_imagen():
+        filepath = filedialog.askopenfilename(
+            title="Seleccionar imagen",
+            filetypes=[("Imágenes", "*.jpg *.jpeg *.png"), ("Todos", "*.*")]
+        )
+        if not filepath:
+            return
+
+        try:
+            with open(filepath, "rb") as f:
+                imagen_bytes["data"] = f.read()
+                imagen_bytes["filename"] = filepath.split("/")[-1]
+
+            img = Image.open(filepath)
+            img.thumbnail((120, 120))
+            img_tk = ImageTk.PhotoImage(img)
+
+            lbl_imagen.config(image=img_tk, text="")
+            lbl_imagen.image = img_tk   
+
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo leer la imagen: {e}")
+
+    btn_attach = tk.Button(bottom, text="📎", width=3,  command=seleccionar_imagen)
     btn_attach.pack(side=tk.LEFT, padx=6)
 
     entry_msg = tk.Entry(bottom)
@@ -272,7 +312,7 @@ def show_mensajes_view(parent_frame, username="bob"):
 
     def enviar_mensaje(user: str):
         texto = entry_msg.get().strip()
-        if not texto:
+        if not texto and not imagen_bytes["data"]:
             return
         id_chat = getattr(messages_frame, "current_chat_id", None)
         if id_chat is None:
@@ -283,12 +323,21 @@ def show_mensajes_view(parent_frame, username="bob"):
         cn = None
         try:
             cn = begin_transaction()
-            mensajes_service.enviar_mensaje(cn, id_chat, user, texto)
+            mensajes_service.enviar_mensaje(cn,{
+                                    "id_chat": id_chat,
+                                    "emisor": user,
+                                    "texto": texto,
+                                    "adjunto": imagen_bytes["data"]})
             commit(cn)
             mensajes = mensajes_service.consultar_conversacion(cn, id_chat, user)
             commit(cn)
             print('guarda')
             # Recarga automática: re-renderiza la vista
+            # Reset UI
+            entry_msg.delete(0, tk.END)
+            lbl_imagen.config(image="", text="No seleccionada", fg="gray")
+            imagen_bytes["data"] = None
+            imagen_bytes["filename"] = ""
             render_mensajes(messages_frame, mensajes, user)
         except Exception as ex:
             if cn:

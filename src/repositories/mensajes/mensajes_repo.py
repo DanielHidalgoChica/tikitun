@@ -50,7 +50,7 @@ def insert_mensaje(cn, mensaje: dict) -> None:
         VALUES (:1, SYSTIMESTAMP, :2, :3, :4, :5)
     """
     cur = cn.cursor()
-    cur.execute(sql, (mensaje["id_chat"],mensaje["username"],mensaje["texto"],mensaje.get("adjunto"),0))
+    cur.execute(sql, (mensaje["id_chat"],mensaje["emisor"],mensaje["texto"],mensaje.get("adjunto"),0))
     cur.close()
     pass
 
@@ -69,7 +69,7 @@ def get_mensajes_conversacion(cn, username: str, id_chat: int) -> list[dict]:
     """
     print("   [REPO mensajes] get_mensajes_conversacion()", id_chat)
     sql = """
-        SELECT username, texto, fecha, leido
+        SELECT username, texto, fecha, adjunto, leido
         FROM Mensaje
         WHERE id_chat = :1
         ORDER BY fecha ASC
