@@ -221,8 +221,6 @@ def confirmar_recepcion(cn, id_producto: int, username_comprador: str) -> None:
         username_comprador: Comprador que confirma
     """
     print(" [SERVICE ventas] confirmar_recepcion()")
-    # TODO: Actualizar estado_recepcion = true
-    # TODO: Transferir saldo al vendedor
 
     ventas_repo.update_estado_recepcion(cn, id_producto, True)
 
@@ -250,8 +248,6 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
     puntuaciones_validas = [0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5]
 
     print(" [SERVICE ventas] puntuar_venta()")
-    # TODO: Validar puntuación en {0, 0.5, 1, ..., 5}
-    # TODO: Actualizar valoracion_media del vendedor
 
     if (puntuacion not in puntuaciones_validas):
         raise ValueError("La puntuación es incorrecta. Las puntuaciones válidas van de 0 a 5 con saltos de 0.5")
