@@ -65,7 +65,6 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
         - en_preferidas (bool) - si categoría está en preferidas del usuario
         - distancia_km (float) - distancia calculada usuario-vendedor
     """
-    print("   [REPO recomendaciones] get_recomendaciones()", username)
     cur = cn.cursor()
     
     # PASO 1: Obtener ubicación y rango del usuario
@@ -81,7 +80,6 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
         return []
     
     user_lat, user_lon, user_rango = row[0], row[1], row[2]
-    print(f"   [DEBUG] Usuario {username}: lat={user_lat}, lon={user_lon}, rango={user_rango} km")
     
     # PASO 2: Obtener categorías preferidas del usuario
     cur.execute("""
@@ -91,7 +89,6 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
     """, (username,))
     
     preferidas = set(row[0] for row in cur.fetchall())
-    print(f"   [DEBUG] Categorías preferidas de {username}: {preferidas}")
     
     # PASO 3: Query de productos + info vendedor
     cur.execute("""
@@ -140,17 +137,14 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
         
         rango_total = user_rango + vendedor_rango
         if distancia > rango_total:
-            print(f"   [DEBUG DESCARTADO] Producto {id_prod} ({titulo}): FUERA DE RANGO - distancia={distancia:.2f}km > rango_total={rango_total}km (usuario={user_rango}km + vendedor={vendedor_rango}km)")
             continue  # Vendedor fuera de rango, descartar
         
         # PASO 4b: Filtrar por categoría preferida
         en_preferidas = categoria in preferidas
         if not en_preferidas:
-            print(f"   [DEBUG DESCARTADO] Producto {id_prod} ({titulo}): CATEGORÍA NO PREFERIDA - categoria='{categoria}' no está en {preferidas}")
             continue  # Categoría no preferida, descartar
         
-        # Agregar a resultados (incluir datos de debug)
-        print(f"   [DEBUG INCLUIDO] Producto {id_prod} ({titulo}): promocion={promocion}, vendedor_rating={valoracion_vendedor}, distancia={distancia:.2f}km")
+        # Agregar a resultados
         productos.append({
             "id_producto": id_prod,
             "titulo": titulo,
@@ -176,7 +170,5 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
             -(prod["num_favs"] or 0)  # Negado para DESC - ordenar por popularidad
         )
     )
-    
-    print(f"   [DEBUG RESULTADO FINAL] Se retornan {len(productos)} productos de los consultados")
     
     return productos
