@@ -54,3 +54,29 @@ def set_archivada(cn, id_producto: int, archivada: bool) -> None:
     print("   [REPO conversaciones] set_archivada()", id_producto, archivada)
     # TODO: UPDATE CONVERSACION SET archivada = ? WHERE id_producto = ?
     pass
+
+def get_receptor_mensaje(cn, id_chat: int, emisor: str) -> str:
+    """
+    Dado un chat y el emisor, devuelve el username del receptor.
+    """
+    print("   [REPO conversaciones] get_receptor_chat()", id_chat, emisor)
+
+    sql = """
+        SELECT
+            CASE
+                WHEN c.username = :1 THEN p.username
+                ELSE c.username
+            END AS receptor
+        FROM Chat c
+        JOIN Producto p ON c.id_producto = p.id_producto
+        WHERE c.id_chat = :2
+    """
+    cur = cn.cursor()
+    try:
+        cur.execute(sql, (emisor, id_chat))
+        row = cur.fetchone()
+        if not row:
+            return None
+        return row[0]
+    finally:
+        cur.close()

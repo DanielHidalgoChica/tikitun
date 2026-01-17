@@ -41,9 +41,17 @@ def insert_mensaje(cn, mensaje: dict) -> None:
     Args:
         cn: Conexión a la base de datos
         mensaje: Dict con todos los campos del mensaje
+    Returns:
+        usuario receptor
     """
     print("   [REPO mensajes] insert_mensaje()", mensaje)
-    # TODO: INSERT INTO MENSAJE (...) VALUES (...)
+    sql = """
+        INSERT INTO Mensaje (id_chat, fecha, username, texto, adjunto, leido)
+        VALUES (:1, SYSTIMESTAMP, :2, :3, :4, :5)
+    """
+    cur = cn.cursor()
+    cur.execute(sql, (mensaje["id_chat"],mensaje["username"],mensaje["texto"],mensaje.get("adjunto"),0))
+    cur.close()
     pass
 
 

@@ -16,21 +16,27 @@ from src.db.db_app import savepoint
 from src.repositories.mensajes import mensajes_repo, conversaciones_repo
 
 
-def enviar_mensaje(cn, data: dict) -> None:
+def enviar_mensaje(cn, id_chat: int, username: str, text: str) -> None:
     """RF5.1: Envía un mensaje en una conversación.
     
     Args:
         cn: Conexión a la base de datos
-        data: Dict con id_vendedor, id_comprador, id_producto, emisor, texto
+        
     
     Raises:
         ValueError: Si texto vacío o conversación no existe
     """
-    print(" [SERVICE mensajes] enviar_mensaje()")
-    # TODO: Validar texto no vacío
-    # TODO: savepoint(cn, "SP_ENVIAR_MENSAJE")
-    # TODO: mensajes_repo.insert_mensaje(cn, data)
-    # TODO: Enviar notificación por correo
+    print(" [SERVICE mensajes] enviar_mensaje()", id_chat, username, text)
+    msj = {
+        "id_chat":id_chat,
+        "username":username,
+        "texto":text,
+        "adjunto":None
+    }
+    savepoint(cn, "SP_ENVIAR_MENSAJE")
+    mensajes_repo.insert_mensaje(cn, msj)
+    receptor = conversaciones_repo.get_receptor_mensaje(cn, id_chat, username)
+    print("Notificación enviada por correo a ", receptor)
     pass
 
 

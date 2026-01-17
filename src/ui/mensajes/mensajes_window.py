@@ -83,7 +83,7 @@ def show_mensajes_view(parent_frame, username="bob"):
     # Panel izquierdo: Lista de conversaciones
     left_panel = tk.Frame(main_container, relief=tk.RIDGE, borderwidth=2)
     left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
-    
+
     tk.Label(
         left_panel,
         text="Conversaciones",
@@ -143,6 +143,7 @@ def show_mensajes_view(parent_frame, username="bob"):
                         cn = begin_transaction()
                         mensajes = mensajes_service.consultar_conversacion(cn, id_chat, user)
                         commit(cn)
+                        messages_frame.current_chat_id = id_chat
                         print('guarda')
                         # Recarga automática: re-renderiza la vista
                         render_mensajes(messages_frame, mensajes, user)
@@ -174,7 +175,6 @@ def show_mensajes_view(parent_frame, username="bob"):
     canvas = tk.Canvas(right_panel)
     scrollbar = tk.Scrollbar(right_panel, orient=tk.VERTICAL, command=canvas.yview)
     messages_frame = tk.Frame(canvas)
-
     messages_frame.bind(
         "<Configure>",
         lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
@@ -196,17 +196,38 @@ def show_mensajes_view(parent_frame, username="bob"):
     entry_msg = tk.Entry(bottom)
     entry_msg.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=6)
 
-    def enviar_mensaje():
+    def enviar_mensaje(user: str):
         texto = entry_msg.get().strip()
         if not texto:
             return
-        print("Enviar:", texto)
+        id_chat = getattr(messages_frame, "current_chat_id", None)
+        if id_chat is None:
+            messagebox.showwarning("Aviso", "No hay ninguna conversación abierta")
+            return
+        print("Enviar:", id_chat, user, texto)
         entry_msg.delete(0, tk.END)
+        cn = None
+        try:
+            cn = begin_transaction()
+            mensajes_service.enviar_mensaje(cn, id_chat, user, texto)
+            commit(cn)
+            mensajes = mensajes_service.consultar_conversacion(cn, id_chat, user)
+            commit(cn)
+            print('guarda')
+            # Recarga automática: re-renderiza la vista
+            render_mensajes(messages_frame, mensajes, user)
+        except Exception as ex:
+            if cn:
+                rollback(cn)
+            messagebox.showerror("Error", str(ex))
+
+        
+        
 
     btn_send = tk.Button(bottom, text="Enviar", width=8, command=enviar_mensaje)
     btn_send.pack(side=tk.RIGHT, padx=6)
 
-    entry_msg.bind("<Return>", lambda e: enviar_mensaje())
+    entry_msg.bind("<Return>", lambda e: enviar_mensaje(username))
 
     # Nota informativa
     tk.Label(
