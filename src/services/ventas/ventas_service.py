@@ -107,7 +107,7 @@ def realizar_contraoferta(cn, id_producto: int, username_comprador: str,
         raise ValueError("El usuario no existe")
 
     precio = prod['precio']
-    propietario = prod['username']
+    propietario = prod['username_vendedor']
 
     if (username_comprador == propietario):
         raise ValueError("El propietario no puede realizar contraofertas a sus propios productos")
