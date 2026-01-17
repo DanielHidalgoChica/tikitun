@@ -32,8 +32,6 @@ def agregar_favorito(cn, username: str, id_producto: int) -> None:
     Raises:
         ValueError: Si producto no existe, no disponible, ya en favoritos, o usuario eliminado
     """
-    print(" [SERVICE favoritos] agregar_favorito()")
-    
     # Validar que el usuario existe y tiene cuenta activa
     usuario = usuarios_repo.get_usuario(cn, username)
     if not usuario:
@@ -73,8 +71,6 @@ def quitar_favorito(cn, username: str, id_producto: int) -> None:
     Raises:
         ValueError: Si el producto no está en favoritos
     """
-    print(" [SERVICE favoritos] quitar_favorito()")
-    
     if not favoritos_repo.is_favorito(cn, username, id_producto):
         raise ValueError("El producto no está en favoritos")
     
@@ -94,5 +90,4 @@ def consultar_favoritos(cn, username: str) -> list[dict]:
     Returns:
         Lista de productos favoritos con sus detalles
     """
-    print(" [SERVICE favoritos] consultar_favoritos()")
     return favoritos_repo.get_favoritos(cn, username)
