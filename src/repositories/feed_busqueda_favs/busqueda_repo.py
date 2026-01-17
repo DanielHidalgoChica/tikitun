@@ -49,6 +49,7 @@ def get_busqueda(cn, filtros: dict) -> list[dict]:
             p.promocion,
             p.disponible,
             p.num_favs,
+            p.imagen,
             u.valoracion_media
         FROM producto p
         JOIN usuario u ON p.username = u.username
@@ -92,7 +93,8 @@ def get_busqueda(cn, filtros: dict) -> list[dict]:
             "promocion": row[6] or 0,
             "disponible": row[7],
             "num_favs": row[8] or 0,
-            "valoracion_vendedor": row[9] or 0
+            "imagen": row[9],
+            "valoracion_vendedor": row[10] or 0
         })
     
     cur.close()

@@ -105,6 +105,7 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
             p.promocion,
             p.disponible,
             p.num_favs,
+            p.imagen,
             u_vendedor.ubi_latitud,
             u_vendedor.ubi_longitud,
             u_vendedor.rango,
@@ -125,10 +126,11 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
         promocion = row[6] or 0  # NULL → 0
         disponible = row[7]
         num_favs = row[8] or 0  # NULL → 0
-        vendedor_lat = row[9]
-        vendedor_lon = row[10]
-        vendedor_rango = row[11] or 0  # NULL → 0
-        valoracion_vendedor = row[12] or 0  # NULL → 0
+        imagen = row[9]  # BLOB puede ser NULL
+        vendedor_lat = row[10]
+        vendedor_lon = row[11]
+        vendedor_rango = row[12] or 0  # NULL → 0
+        valoracion_vendedor = row[13] or 0  # NULL → 0
         
         # PASO 4a: Filtrar por rango: distancia <= rango_usuario + rango_vendedor
         distancia = calcular_distancia_haversine(
@@ -159,6 +161,7 @@ def get_recomendaciones(cn, username: str) -> list[dict]:
             "promocion": promocion,
             "disponible": disponible,
             "num_favs": num_favs,
+            "imagen": imagen,
             "valoracion_vendedor": valoracion_vendedor,
             "en_preferidas": en_preferidas,
             "distancia_km": round(distancia, 2)
