@@ -41,7 +41,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Producto VALUES (
   1,
   'alice',
-  'Electrónica',
+  'Tecnología',
   'Auriculares Bluetooth',
   'Auriculares inalámbricos con cancelación de ruido',
   59.99,
@@ -162,7 +162,7 @@ INSERT INTO Contraoferta VALUES (
   20.00
 );
 
-INSERT INTO Preferidos VALUES ('alice', 'Electrónica');
+INSERT INTO Preferidos VALUES ('alice', 'Tecnología');
 INSERT INTO Preferidos VALUES ('bob', 'Libros');
 INSERT INTO Preferidos VALUES ('carol', 'Hogar');
 
