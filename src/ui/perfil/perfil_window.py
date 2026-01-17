@@ -11,7 +11,6 @@ def show_perfil_view(parent_frame, username="bob"):
     
     Consulta:
     - Información del perfil del usuario
-    - Lista de productos disponibles ofertados
     """
     # Limpiar el frame
     for widget in parent_frame.winfo_children():
@@ -25,9 +24,6 @@ def show_perfil_view(parent_frame, username="bob"):
                 messagebox.showerror("Error", "El usuario no existe o ha sido eliminado")
                 tk.Label(parent_frame, text="Usuario no encontrado").pack(pady=20)
                 return
-            
-            # Obtener productos disponibles
-            productos_disponibles = productos_repo.get_productos_usuario(cn, username)
     except Exception as e:
         messagebox.showerror("Error", f"Error cargando perfil: {e}")
         tk.Label(parent_frame, text="Error al cargar el perfil").pack(pady=20)
@@ -50,59 +46,65 @@ def show_perfil_view(parent_frame, username="bob"):
     val_texto = f"{valoracion:.1f}" if valoracion else "Sin valoraciones"
     tk.Label(frm_info, text=f"Valoración media: {val_texto} ⭐", font=("Arial", 11)).pack(anchor="w", pady=2)
     
-    # === SECCIÓN DE PRODUCTOS DISPONIBLES ===
-    frm_disponibles = tk.LabelFrame(parent_frame, text="Productos Disponibles para la Venta", padx=10, pady=10)
-    frm_disponibles.pack(padx=10, pady=10, fill=tk.BOTH, expand=False)
-    
-    if productos_disponibles:
-        # Crear tabla de productos disponibles
-        tree_disp = ttk.Treeview(
-            frm_disponibles,
-            columns=("ID", "Título", "Precio"),
-            height=min(5, len(productos_disponibles)),
-            show="headings"
-        )
-        tree_disp.column("ID", width=50)
-        tree_disp.column("Título", width=250)
-        tree_disp.column("Precio", width=100)
-        
-        tree_disp.heading("ID", text="ID")
-        tree_disp.heading("Título", text="Título")
-        tree_disp.heading("Precio", text="Precio")
-        
-        for prod in productos_disponibles:
-            tree_disp.insert("", tk.END, values=(
-                prod["id_producto"],
-                prod["titulo"],
-                f"€{prod['precio']:.2f}"
-            ))
-        
-        tree_disp.pack(fill=tk.BOTH, expand=True)
-    else:
-        tk.Label(frm_disponibles, text="No tienes productos disponibles en venta", fg="gray").pack(pady=20)
-    
     # === BOTONES DE ACCIÓN ===
-    frm_acciones = tk.Frame(parent_frame)
-    frm_acciones.pack(pady=15)
+    frm_acciones = tk.Frame(parent_frame, bg="white")
+    frm_acciones.pack(pady=20, padx=10, fill=tk.X)
+    
+    def on_mis_productos():
+        from src.ui.productos.mis_productos_window import show_mis_productos_view
+        show_mis_productos_view(parent_frame, username)
+    
+    # Botones principales
+    frm_principales = tk.Frame(frm_acciones, bg="white")
+    frm_principales.pack(fill=tk.X, pady=(0, 15))
     
     tk.Button(
-        frm_acciones,
-        text="Editar Perfil",
-        width=20,
-        state=tk.DISABLED
-    ).grid(row=0, column=0, padx=5)
+        frm_principales,
+        text="📦 Mis Productos",
+        command=on_mis_productos,
+        bg="#4CAF50",
+        fg="white",
+        font=("Arial", 10, "bold"),
+        padx=20,
+        pady=10
+    ).pack(fill=tk.X, pady=5)
     
     tk.Button(
-        frm_acciones,
-        text="Gestionar Monedero",
-        width=20,
-        state=tk.DISABLED
-    ).grid(row=0, column=1, padx=5)
-    
-    tk.Button(
-        frm_acciones,
-        text="Dar de Baja",
-        width=20,
+        frm_principales,
+        text="✏️ Editar Perfil",
         state=tk.DISABLED,
-        fg="red"
-    ).grid(row=0, column=2, padx=5)
+        bg="#2196F3",
+        fg="white",
+        font=("Arial", 10),
+        padx=20,
+        pady=10,
+        disabledforeground="white"
+    ).pack(fill=tk.X, pady=5)
+    
+    tk.Button(
+        frm_principales,
+        text="💰 Gestionar Monedero",
+        state=tk.DISABLED,
+        bg="#FF9800",
+        fg="white",
+        font=("Arial", 10),
+        padx=20,
+        pady=10,
+        disabledforeground="white"
+    ).pack(fill=tk.X, pady=5)
+    
+    # Separador visual
+    ttk.Separator(frm_acciones, orient="horizontal").pack(fill=tk.X, pady=10)
+    
+    # Botón de dar de baja (separado)
+    tk.Button(
+        frm_acciones,
+        text="🗑️ Dar de Baja",
+        state=tk.DISABLED,
+        bg="#F44336",
+        fg="white",
+        font=("Arial", 10),
+        padx=20,
+        pady=10,
+        disabledforeground="white"
+    ).pack(fill=tk.X, pady=5)
