@@ -37,9 +37,6 @@ INSERT INTO Usuario VALUES (
   0
 );
 
-INSERT INTO Categoria VALUES ('Electrónica');
-INSERT INTO Categoria VALUES ('Libros');
-INSERT INTO Categoria VALUES ('Hogar');
 
 INSERT INTO Producto VALUES (
   1,
@@ -50,6 +47,7 @@ INSERT INTO Producto VALUES (
   59.99,
   NULL,
   10.00,
+  0,
   1
 );
 
@@ -62,6 +60,7 @@ INSERT INTO Producto VALUES (
   25.00,
   NULL,
   NULL,
+  0,
   1
 );
 
@@ -74,6 +73,7 @@ INSERT INTO Producto VALUES (
   25.00,
   NULL,
   1,
+  0,
   1
 );
 
@@ -86,6 +86,7 @@ INSERT INTO Producto VALUES (
   18.50,
   NULL,
   5.00,
+  0,
   1
 );
 
@@ -101,6 +102,22 @@ INSERT INTO Chat VALUES (
   2,
   'carol',
   0
+);
+
+INSERT INTO Chat VALUES (
+  3,
+  3,
+  'bob',
+  1
+);
+
+INSERT INTO Mensaje VALUES (
+  3,
+  TIMESTAMP '2025-01-03 10:00:00',
+  'bob',
+  'Buena lampara',
+  NULL,
+  1
 );
 
 INSERT INTO Mensaje VALUES (
@@ -109,23 +126,23 @@ INSERT INTO Mensaje VALUES (
   'bob',
   'Hola, ¿siguen disponibles los auriculares?',
   NULL,
-  1
+  0
 );
 
 INSERT INTO Mensaje VALUES (
   1,
   TIMESTAMP '2025-01-01 10:05:00',
   'alice',
-  'Sí, están disponibles.',
+  'Si, estan disponibles.',
   NULL,
-  1
+  0
 );
 
 INSERT INTO Mensaje VALUES (
   2,
   TIMESTAMP '2025-01-02 12:00:00',
   'carol',
-  '¿El libro está en buen estado?',
+  '¿El libro esta en buen estado?',
   NULL,
   0
 );

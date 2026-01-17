@@ -115,6 +115,7 @@ def get_usuario(cn, username: str) -> dict | None:
         return None
     
     cur = cn.cursor()
+
     try:
         cur.execute(
             "SELECT username, correo, nombre_completo, contrasenia, "
@@ -134,9 +135,9 @@ def get_usuario(cn, username: str) -> dict | None:
             "ubi_latitud": row[4],
             "ubi_longitud": row[5],
             "rango": row[6],
-            "saldo": row[7],
+            "saldo": row[7] if row[7] is not None else 0.0,
             "valoracion_media": row[8],
-            "cuenta_eliminada": bool(row[9])
+            "cuenta_eliminada": bool(row[9]) if row[9] is not None else False
         }
     except Exception as e:
         print(f"Error obteniendo usuario {username}: {e}")
@@ -146,7 +147,6 @@ def get_usuario(cn, username: str) -> dict | None:
             cur.close()
         except Exception:
             pass
-
 
 def update_usuario(cn, username: str, cambios: dict) -> None:
     """Actualiza campos de un usuario.
@@ -169,9 +169,13 @@ def update_saldo(cn, username: str, nuevo_saldo: float) -> None:
         username: Usuario
         nuevo_saldo: Nuevo saldo del monedero
     """
-    print("   [REPO perfiles] update_saldo()", username, nuevo_saldo)
-    # TODO: UPDATE USUARIO SET saldo = ? WHERE username = ?
-    pass
+    cur = cn.cursor()
+    cur.execute("""
+        UPDATE Usuario
+        SET saldo = ?
+        WHERE username = ?
+    """, (nuevo_saldo, username))
+    cur.close()
 
 
 def soft_delete_usuario(cn, username: str) -> None:

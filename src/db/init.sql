@@ -24,6 +24,7 @@ CREATE TABLE Producto(
     precio FLOAT(10) NOT NULL,
     imagen BLOB,
     promocion FLOAT(2),
+    num_favs INT,
     disponible INT,
     CONSTRAINT FK_ProductoVendedor FOREIGN KEY (username) REFERENCES Usuario(username),
     CONSTRAINT FK_ProductoCategoria FOREIGN KEY (nombre_categoria) REFERENCES Categoria(nombre)
@@ -39,7 +40,7 @@ CREATE TABLE Chat(
 CREATE TABLE Mensaje(
     id_chat INT NOT NULL,
     fecha TIMESTAMP(6) NOT NULL,
-    username VARCHAR2(128) NOT NULL,
+    username VARCHAR2(128) NOT NULL, --Disparador: el mensaje debe mandarlo alguien del chat
     texto VARCHAR2(512) NOT NULL,
     adjunto BLOB,
     leido INT,
