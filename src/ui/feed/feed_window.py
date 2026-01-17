@@ -214,7 +214,7 @@ def show_feed_view(parent_frame, username="bob"):
             tk.Button(
                 btn_frame,
                 text="Ver más",
-                command=lambda id_prod=prod['id_producto']: show_detalle_view(parent_frame, id_prod, username)
+                command=lambda id_prod=prod['id_producto']: show_detalle_view(parent_frame, id_prod, username, origen="feed")
             ).pack(side=tk.LEFT, padx=3)
 
             # Handler para agregar a favoritos

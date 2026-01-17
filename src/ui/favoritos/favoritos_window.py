@@ -151,7 +151,7 @@ def show_favoritos_view(parent_frame, username="bob"):
             tk.Button(
                 btn_frame,
                 text="Ver producto",
-                command=lambda id_prod=prod['id_producto']: show_detalle_view(parent_frame, id_prod, username)
+                command=lambda id_prod=prod['id_producto']: show_detalle_view(parent_frame, id_prod, username, origen="favoritos")
             ).pack(side=tk.LEFT, padx=3)
 
             # Botón Quitar con recarga automática
