@@ -7,6 +7,7 @@ from tkinter import ttk, messagebox
 
 from src.db.db_app import connect, begin_transaction, commit, rollback
 from src.services.ventas.ventas_service import consultar_contraofertas, aceptar_contraoferta, rechazar_contraoferta
+from src.services.productos.consulta_service import consultar_producto
 
 def open_gestionar_contraofertas(parent, id_producto: int):
     win = tk.Toplevel(parent)
@@ -82,7 +83,9 @@ def open_gestionar_contraofertas(parent, id_producto: int):
         u, _ = tree.item(sel[0], "values")
         cn = begin_transaction()
         try:
-            aceptar_contraoferta(cn, id_producto, u)
+            prod = consultar_producto(cn, id_producto)
+            vendedor = prod["username_vendedor"]
+            aceptar_contraoferta(cn, id_producto, u, vendedor)
             commit(cn)
             messagebox.showinfo("Correcto", f"Contraoferta de {u} aceptada.", parent=win)
             cargar_contraofertas()
