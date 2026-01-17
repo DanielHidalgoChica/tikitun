@@ -295,23 +295,10 @@ def show_mensajes_view(parent_frame, username="bob"):
                 rollback(cn)
             messagebox.showerror("Error", str(ex))
 
-        
-        
-
     btn_send = tk.Button(bottom, text="Enviar", width=8, command=enviar_mensaje)
     btn_send.pack(side=tk.RIGHT, padx=6)
 
     entry_msg.bind("<Return>", lambda e: enviar_mensaje(username))
-
-    # Nota informativa
-    tk.Label(
-        parent_frame,
-        text="💡 Funcionalidad en desarrollo:\n"
-             "Podrás enviar/recibir mensajes relacionados con productos",
-        font=("Arial", 9),
-        fg="gray",
-        justify=tk.CENTER
-    ).pack(pady=10)
 
 def show_historico_view(parent_frame, username="bob"):
     """
@@ -440,13 +427,3 @@ def show_historico_view(parent_frame, username="bob"):
 
     canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-    # Nota informativa
-    tk.Label(
-        parent_frame,
-        text="💡 Funcionalidad en desarrollo:\n"
-             "Podrás enviar/recibir mensajes relacionados con productos",
-        font=("Arial", 9),
-        fg="gray",
-        justify=tk.CENTER
-    ).pack(pady=10)
