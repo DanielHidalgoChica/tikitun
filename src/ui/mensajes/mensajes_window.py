@@ -30,16 +30,7 @@ def render_mensajes(messages_frame, mensajes, mi_usuario):
         tk.Label(bubble, text=str(fecha), font=("Arial", 7),
                  fg="gray", bg=bg).pack(anchor=anchor)
 
-def enviar_mensaje():
-    texto = entry_msg.get().strip()
-    if not texto:
-        return
 
-    # Aquí deberías llamar a tu service/repo para guardar el mensaje
-    print("Enviar:", texto)
-
-    entry_msg.delete(0, tk.END)
-    
 def show_mensajes_view(parent_frame, username="bob"):
     """
     Muestra la vista de gestión de mensajes en el frame principal.
@@ -173,6 +164,28 @@ def show_mensajes_view(parent_frame, username="bob"):
     canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
+   #  Área de escritura (abajo del panel derecho)
+    bottom = tk.Frame(right_panel, pady=6)
+    bottom.pack(fill=tk.X, side=tk.BOTTOM)
+
+    btn_attach = tk.Button(bottom, text="📎", state=tk.DISABLED, width=3)
+    btn_attach.pack(side=tk.LEFT, padx=6)
+
+    entry_msg = tk.Entry(bottom)
+    entry_msg.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=6)
+
+    def enviar_mensaje():
+        texto = entry_msg.get().strip()
+        if not texto:
+            return
+        print("Enviar:", texto)
+        entry_msg.delete(0, tk.END)
+
+    btn_send = tk.Button(bottom, text="Enviar", width=8, command=enviar_mensaje)
+    btn_send.pack(side=tk.RIGHT, padx=6)
+
+    entry_msg.bind("<Return>", lambda e: enviar_mensaje())
+
     # Nota informativa
     tk.Label(
         parent_frame,
