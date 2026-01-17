@@ -83,17 +83,20 @@ def show_perfil_view(parent_frame, username="bob"):
         padx=20,
         pady=10
     ).pack(fill=tk.X, pady=5)
+
+    def on_gestionar_monedero():
+        from src.ui.perfil.monedero_window import show_monedero_view
+        show_monedero_view(parent_frame, username)
     
     tk.Button(
         frm_principales,
         text="💰 Gestionar Monedero",
-        state=tk.DISABLED,
+        command=on_gestionar_monedero,
         bg="#FF9800",
         fg="white",
         font=("Arial", 10),
         padx=20,
-        pady=10,
-        disabledforeground="white"
+        pady=10
     ).pack(fill=tk.X, pady=5)
     
     # Separador visual
