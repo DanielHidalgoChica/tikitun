@@ -56,7 +56,7 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
     if (precio > saldo_comprador):
         raise ValueError("No hay saldo suficiente para realizar la compra")
     
-    propietario = producto['username']
+    propietario = producto['username_vendedor']
     if (username_comprador == propietario):
         raise ValueError("El propietario no puede realizar contraofertas a sus propios productos")
     
@@ -72,7 +72,7 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
         ('valoracion', 0)
     ])
     ventas_repo.insert_venta(cn, venta)
-    
+
     # Marcar producto como no disponible
     productos_repo.soft_delete_producto(cn, id_producto)
 
@@ -152,7 +152,7 @@ def aceptar_contraoferta(cn, id_producto: int, username_comprador: str,
     if not producto:
         raise ValueError("El producto no existe")
     
-    propietario = producto['username']
+    propietario = producto['username_vendedor']
 
     if (username_vendedor != propietario):
         raise ValueError("El vendedor no es el propietario del producto")

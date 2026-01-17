@@ -1,23 +1,17 @@
 """
-Ventana mínima para mostrar las contraofertas asociadas a un producto.
+Ventana para mostrar y gestionar contraofertas asociadas a un producto.
 """
+
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from src.db.db_app import connect
-from src.services.ventas.ventas_service import consultar_contraofertas
+from src.db.db_app import connect, begin_transaction, commit, rollback
+from src.services.ventas.ventas_service import consultar_contraofertas, aceptar_contraoferta, rechazar_contraoferta
 
-
-def open_mostrar_contraofertas(parent, id_producto: int):
-    """Abre una ventana que lista las contraofertas para un producto.
-
-    Args:
-        parent: ventana padre
-        id_producto: ID del producto cuyas contraofertas mostrar
-    """
+def open_gestionar_contraofertas(parent, id_producto: int):
     win = tk.Toplevel(parent)
-    win.title(f"Contraofertas - Producto {id_producto}")
-    win.geometry("520x320")
+    win.title(f"Gestionar contraofertas - Producto {id_producto}")
+    win.geometry("540x360")
     win.resizable(False, False)
 
     header = tk.Frame(win, padx=12, pady=8)
@@ -42,44 +36,78 @@ def open_mostrar_contraofertas(parent, id_producto: int):
     lbl_info = tk.Label(win, text="", anchor="w")
     lbl_info.pack(fill=tk.X, padx=12)
 
-    # Cargar contraofertas
-    try:
-        with connect() as cn:
-            resultados = consultar_contraofertas(cn, id_producto)
-    except Exception as e:
-        messagebox.showerror("Error", f"No se pudieron cargar las contraofertas: {e}", parent=win)
-        win.destroy()
-        return
+    def cargar_contraofertas():
+        for item in tree.get_children():
+            tree.delete(item)
+        try:
+            with connect() as cn:
+                resultados = consultar_contraofertas(cn, id_producto)
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudieron cargar las contraofertas: {e}", parent=win)
+            win.destroy()
+            return
 
-    if not resultados:
-        lbl_info.config(text="No hay contraofertas para este producto.")
-    else:
-        lbl_info.config(text=f"Mostrando {len(resultados)} contraoferta(s).")
-        for r in resultados:
-            # soportar dicts, namedtuples o tuplas (id_producto, username, precio)
-            if isinstance(r, dict):
-                u = r.get("username") or r.get("usuario")
-                p = r.get("precio")
-            elif hasattr(r, "_asdict"):
-                d = r._asdict()
-                u = d.get("username") or d.get("usuario")
-                p = d.get("precio")
-            else:
-                # asumir tupla con username en idx 1 y precio en idx 2
+        if not resultados:
+            lbl_info.config(text="No hay contraofertas para este producto.")
+        else:
+            lbl_info.config(text=f"Mostrando {len(resultados)} contraoferta(s).")
+            for r in resultados:
+                if isinstance(r, dict):
+                    u = r.get("username") or r.get("usuario")
+                    p = r.get("precio")
+                elif hasattr(r, "_asdict"):
+                    d = r._asdict()
+                    u = d.get("username") or d.get("usuario")
+                    p = d.get("precio")
+                else:
+                    try:
+                        u = r[1]
+                        p = r[2]
+                    except Exception:
+                        u = str(r)
+                        p = ""
                 try:
-                    u = r[1]
-                    p = r[2]
+                    p_display = f"{float(p):.2f}"
                 except Exception:
-                    u = str(r)
-                    p = ""
-            try:
-                p_display = f"{float(p):.2f}"
-            except Exception:
-                p_display = str(p)
-            tree.insert("", tk.END, values=(u, p_display))
+                    p_display = str(p)
+                tree.insert("", tk.END, values=(u, p_display))
 
-    # Botón cerrar
+    cargar_contraofertas()
+
+    def aceptar():
+        sel = tree.selection()
+        if not sel:
+            messagebox.showwarning("Atención", "Selecciona una contraoferta para aceptar.", parent=win)
+            return
+        u, _ = tree.item(sel[0], "values")
+        cn = begin_transaction()
+        try:
+            aceptar_contraoferta(cn, id_producto, u)
+            commit(cn)
+            messagebox.showinfo("Correcto", f"Contraoferta de {u} aceptada.", parent=win)
+            cargar_contraofertas()
+        except Exception as ex:
+            rollback(cn)
+            messagebox.showerror("Error", str(ex), parent=win)
+
+    def rechazar():
+        sel = tree.selection()
+        if not sel:
+            messagebox.showwarning("Atención", "Selecciona una contraoferta para rechazar.", parent=win)
+            return
+        u, _ = tree.item(sel[0], "values")
+        cn = begin_transaction()
+        try:
+            rechazar_contraoferta(cn, id_producto, u)
+            commit(cn)
+            messagebox.showinfo("Correcto", f"Contraoferta de {u} rechazada.", parent=win)
+            cargar_contraofertas()
+        except Exception as ex:
+            rollback(cn)
+            messagebox.showerror("Error", str(ex), parent=win)
+
     btn_frame = tk.Frame(win, pady=10)
     btn_frame.pack(fill=tk.X)
-    tk.Button(btn_frame, text="Cerrar", command=win.destroy, width=12).pack(padx=12)
-
+    tk.Button(btn_frame, text="Aceptar", command=aceptar, bg="#4CAF50", fg="white", width=14).pack(side=tk.LEFT, padx=5)
+    tk.Button(btn_frame, text="Rechazar", command=rechazar, bg="#F44336", fg="white", width=14).pack(side=tk.LEFT, padx=5)
+    tk.Button(btn_frame, text="Cerrar", command=win.destroy, width=14).pack(side=tk.RIGHT, padx=5)

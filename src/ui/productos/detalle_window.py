@@ -206,8 +206,8 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
             open_promocionar_producto(win, id_producto, username_actual)
         
         def on_mostrar_contraofertas():
-            from src.ui.productos.contraofertas_window import open_mostrar_contraofertas
-            open_mostrar_contraofertas(win, id_producto)
+            from src.ui.productos.contraofertas_window import open_gestionar_contraofertas
+            open_gestionar_contraofertas(win, id_producto)
         
         tk.Button(
             btn_frame,
@@ -503,8 +503,8 @@ def show_detalle_view(parent, id_producto: int, username_actual: str, origen: st
                 messagebox.showerror("Error", f"Error: {e}")
         
         def on_mostrar_contraofertas():
-            from src.ui.productos.contraofertas_window import open_mostrar_contraofertas
-            open_mostrar_contraofertas(parent, id_producto)
+            from src.ui.productos.contraofertas_window import open_gestionar_contraofertas
+            open_gestionar_contraofertas(parent, id_producto)
 
         tk.Button(btn_frame, text="✏️ Editar", command=on_editar, width=12).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="🚀 Promocionar", command=on_promocionar, width=12, fg="orange").pack(side=tk.LEFT, padx=5)
