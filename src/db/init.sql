@@ -34,7 +34,8 @@ CREATE TABLE Chat(
     id_chat INT PRIMARY KEY,
     id_producto INT,
     username VARCHAR2(128),
-    archivado INT
+    archivado INT, 
+    CONSTRAINT PK_UsernameIDProd UNIQUE (id_producto, username)
 );
 
 CREATE TABLE Mensaje(

@@ -127,6 +127,38 @@ def render_mensajes(container, mensajes: list[dict], username_actual: str):
         else:
             burbuja.pack(side=tk.LEFT, anchor=tk.W)
 
+def abrir_nuevo_chat(parent_frame, username):
+    win = tk.Toplevel()
+    win.title("Nuevo chat")
+    win.geometry("300x180")
+
+    tk.Label(win, text="Crear nueva conversación", font=("Arial", 11, "bold")).pack(pady=10)
+
+    tk.Label(win, text="ID del producto").pack(anchor="w", padx=12)
+    entry_id = tk.Entry(win)
+    entry_id.pack(fill=tk.X, padx=12)
+
+    def crear_chat():
+        val = entry_id.get().strip()
+        if not val.isdigit():
+            messagebox.showerror("Error", "Introduce un ID de producto válido")
+            return
+
+        id_producto = int(val)
+
+        try:
+            cn = begin_transaction()
+            mensajes_service.crear_conversacion(cn, username, id_producto)
+            messagebox.showinfo("OK", "Chat creado")
+            win.destroy()
+            commit(cn)
+            show_mensajes_view(parent_frame, username)  # recarga
+        except Exception as ex:
+            rollback(cn)
+            messagebox.showerror("Error", str(ex))
+
+    tk.Button(win, text="Crear", command=crear_chat).pack(pady=12)
+
 
 def show_mensajes_view(parent_frame, username="bob"):
     """
@@ -157,6 +189,10 @@ def show_mensajes_view(parent_frame, username="bob"):
         text="🔍 Buscar mensajes",
         command=lambda: abrir_busqueda(username)
     ).pack(pady=5)
+
+    btn_nuevo = tk.Button(parent_frame, text="➕ Nuevo chat", command=lambda: abrir_nuevo_chat(parent_frame, username))
+    btn_nuevo.pack(side=tk.LEFT, padx=4)
+
 
     # Contenedor principal dividido en dos
     main_container = tk.Frame(parent_frame)

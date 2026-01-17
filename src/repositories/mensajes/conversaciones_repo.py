@@ -5,7 +5,65 @@ Responsable: Aitor de la Iglesia
 Operaciones sobre la tabla CONVERSACION.
 """
 
+def _get_next_id_chat(cn) -> int:
+    """Obtiene el siguiente ID disponible para un chat.
+    
+    Oracle no tiene AUTOINCREMENT, así que usamos MAX(id_chat) + 1.
+    """
+    cur = cn.cursor()
+    cur.execute("SELECT COALESCE(MAX(id_chat), 0) + 1 FROM Chat")
+    row = cur.fetchone()
+    cur.close()
+    return row[0] if row else 1
+
+def puede_crear_conversacion(cn, username: str, id_producto: int) -> bool:
+    """
+    Comprueba si un usuario puede crear una conversación sobre un producto.
+
+    Reglas:
+    - No se puede si el producto pertenece al propio usuario
+    - No se puede si ya existe una conversación entre ese usuario y ese producto
+    """
+    sql = """
+    SELECT
+        p.username AS vendedor,
+        COUNT(c.id_chat) AS chats_existentes
+    FROM Producto p
+    LEFT JOIN Chat c 
+        ON c.id_producto = p.id_producto
+       AND c.username = :username
+    WHERE p.id_producto = :id_producto
+    GROUP BY p.username
+    """
+
+    cur = cn.cursor()
+    cur.execute(sql, {"username": username, "id_producto": id_producto})
+    row = cur.fetchone()
+    cur.close()
+
+    if not row:
+        raise ValueError("El producto no existe")
+
+    vendedor, chats = row
+
+    if vendedor == username:
+        return False   # es tu propio producto
+
+    if chats > 0:
+        return False   # ya hay chat creado
+
+    return True
+
 def crear_conversacion(cn, username: str, id_producto: int) -> None:
+    """
+    Crea un nuevo chat
+    """
+    cur = cn.cursor()
+    cur.execute("""
+                INSERT INTO Chat (id_chat, id_producto, username, archivado)
+                VALUES (:1,:2,:3,:4)
+                """, (_get_next_id_chat(cn), id_producto, username, 0))
+    cur.close()
     pass
 
 def get_conversaciones_usuario(cn, username: str) -> list[dict]:
