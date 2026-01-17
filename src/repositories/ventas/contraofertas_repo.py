@@ -75,7 +75,6 @@ def delete_contraoferta(cn, id_producto: int, username_comprador: str) -> None:
         username_comprador: Comprador de la contraoferta
     """
     print("   [REPO ventas] delete_contraoferta()", id_producto, username_comprador)
-    # TODO: DELETE FROM CONTRAOFERTA WHERE id_producto = ? AND username_comprador = ?
 
     cur = cn.cursor()
     cur.execute("DELETE FROM CONTRAOFERTA WHERE id_producto = ? AND username_comprador = ?",

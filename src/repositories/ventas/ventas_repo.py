@@ -90,8 +90,8 @@ def get_ventas_usuario(cn, username : str) -> list[dict]:
     print("   [REPO ventas] get_ventas_usuario()", username)
 
     cur = cn.cursor()
-    cur.execute("SELECT * FROM VENDIDO WHERE id_producto IN (SELECT id_producto FROM PRODUCTO WHERE username = ?)",
-                username)
+    cur.execute("SELECT * FROM VENDIDO WHERE id_producto IN (SELECT id_producto FROM PRODUCTO WHERE username = ?) AND recepcion_confirmada = ?",
+                username, 0)
 
     # Convertir resultados a lista de dicts
     cols = [desc[0].lower() for desc in cur.description] if cur.description else []

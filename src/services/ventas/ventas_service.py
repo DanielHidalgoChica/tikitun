@@ -72,7 +72,7 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
         ('valoracion', 0)
     ])
     ventas_repo.insert_venta(cn, venta)
-
+    
     # Marcar producto como no disponible
     productos_repo.soft_delete_producto(cn, id_producto)
 
