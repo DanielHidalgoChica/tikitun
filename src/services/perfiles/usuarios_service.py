@@ -13,6 +13,8 @@ Requisitos Funcionales implementados:
 
 from src.db.db_app import savepoint
 from src.repositories.perfiles import usuarios_repo
+from src.services.productos.productos_service import get_productos_usuario, eliminar_producto
+from src.services.ventas.ventas_service import obtener_ventas_usuario, consultar_contraofertas
 import re
 
 
@@ -241,8 +243,29 @@ def dar_baja_usuario(cn, username: str, contraseña: str) -> None:
     Raises:
         ValueError: Si tiene ventas activas o contraseña incorrecta
     """
-    print(" [SERVICE perfiles] dar_baja_usuario()")
-    # TODO: Verificar que no tiene ventas activas
-    # TODO: Marcar cuenta_eliminada = true
-    # TODO: Marcar productos como no disponibles
-    pass
+    # Verificar existencia y contraseña
+    usuario = usuarios_repo.get_usuario(cn, username)
+    if not usuario or usuario.get("cuenta_eliminada"):
+        raise ValueError("El usuario no existe o ya ha sido eliminado.")
+    
+    if not usuarios_repo.verificar_contraseña(cn, username, contraseña):
+        raise ValueError("La contraseña introducida es incorrecta.")
+
+    # Validar que no hay ventas activas (Vendedor)      // FALTA COMO COMPRADOR
+    ventas_activas = obtener_ventas_usuario(cn, username)
+    if len(ventas_activas) > 0:
+        raise ValueError("No puedes darte de baja: tienes ventas o compras en curso.")
+    
+    # Validar contraofertas activas
+    productos = get_productos_usuario(cn, username)
+    for p in productos:
+        contraofertas = consultar_contraofertas(cn, p['id_producto'])
+        if len(contraofertas) > 0:
+            raise ValueError(f"El producto '{p['titulo']}' tiene contraofertas activas. Debes resolverlas primero.")
+        
+    # Desactivar productos y ejecutar baja (Borrado lógico)
+    for p in productos:
+        if p.get("disponible"):
+            eliminar_producto(cn, p['id_producto'], username)
+    
+    usuarios_repo.soft_delete_usuario(cn, username)

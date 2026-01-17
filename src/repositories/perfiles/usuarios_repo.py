@@ -208,9 +208,27 @@ def soft_delete_usuario(cn, username: str) -> None:
         cn: Conexión a la base de datos
         username: Usuario a dar de baja
     """
-    print("   [REPO perfiles] soft_delete_usuario()", username)
-    # TODO: UPDATE USUARIO SET cuenta_eliminada = true, ... WHERE username = ?
-    pass
+    cur = cn.cursor()
+    try:
+        # Se conservan las claves (username), se limpian datos personales
+        # y se marca cuenta_eliminada como true (1)
+        cur.execute("""
+            UPDATE Usuario 
+            SET correo = '', 
+                nombre_completo = 'Usuario Eliminado', 
+                contrasenia = '********', 
+                ubi_latitud = NULL, 
+                ubi_longitud = NULL, 
+                rango = NULL,
+                saldo = 0,
+                cuenta_eliminada = 1 
+            WHERE username = ?
+        """, (username,))
+        
+        # Opcional: Limpiar categorías preferidas
+        cur.execute("DELETE FROM Preferidos WHERE username = ?", (username,))
+    finally:
+        cur.close()
 
 
 def get_categorias_disponibles(cn) -> list[str]:
