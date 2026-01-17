@@ -97,23 +97,23 @@ INSERT INTO Mensaje VALUES (
   'bob',
   'Hola, ¿siguen disponibles los auriculares?',
   NULL,
-  1
+  0
 );
 
 INSERT INTO Mensaje VALUES (
   1,
   TIMESTAMP '2025-01-01 10:05:00',
   'alice',
-  'Sí, están disponibles.',
+  'Si, estan disponibles.',
   NULL,
-  1
+  0
 );
 
 INSERT INTO Mensaje VALUES (
   2,
   TIMESTAMP '2025-01-02 12:00:00',
   'carol',
-  '¿El libro está en buen estado?',
+  '¿El libro esta en buen estado?',
   NULL,
   0
 );
