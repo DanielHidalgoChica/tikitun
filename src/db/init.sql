@@ -24,6 +24,7 @@ CREATE TABLE Producto(
     precio FLOAT(10) NOT NULL,
     imagen BLOB,
     promocion FLOAT(2),
+    num_favs INT,
     disponible INT,
     CONSTRAINT FK_ProductoVendedor FOREIGN KEY (username) REFERENCES Usuario(username),
     CONSTRAINT FK_ProductoCategoria FOREIGN KEY (nombre_categoria) REFERENCES Categoria(nombre)

@@ -11,6 +11,7 @@ Requisitos Funcionales implementados:
 from src.db.db_app import savepoint
 from src.repositories.feed_busqueda_favs import favoritos_repo
 from src.repositories.productos import productos_repo
+from src.repositories.perfiles import usuarios_repo
 
 
 def agregar_favorito(cn, username: str, id_producto: int) -> None:
@@ -21,6 +22,7 @@ def agregar_favorito(cn, username: str, id_producto: int) -> None:
     - RS3.2.2: El producto debe estar disponible
     - Usuario no puede marcar sus propios productos
     - No duplicar favoritos
+    - Usuario debe tener cuenta activa (cuenta_eliminada = 0)
     
     Args:
         cn: Conexión a la base de datos
@@ -28,9 +30,16 @@ def agregar_favorito(cn, username: str, id_producto: int) -> None:
         id_producto: Producto a marcar
     
     Raises:
-        ValueError: Si producto no existe, no disponible, o ya en favoritos
+        ValueError: Si producto no existe, no disponible, ya en favoritos, o usuario eliminado
     """
     print(" [SERVICE favoritos] agregar_favorito()")
+    
+    # Validar que el usuario existe y tiene cuenta activa
+    usuario = usuarios_repo.get_usuario(cn, username)
+    if not usuario:
+        raise ValueError("El usuario no existe")
+    if usuario.get("cuenta_eliminada"):
+        raise ValueError("No puedes realizar esta acción con una cuenta eliminada")
     
     # Validar que el producto existe
     producto = productos_repo.get_producto(cn, id_producto)
