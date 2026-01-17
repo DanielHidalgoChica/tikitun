@@ -3,32 +3,53 @@ from tkinter import messagebox
 from src.db.db_app import connect, begin_transaction, commit, rollback
 from src.services.mensajes import mensajes_service
 
-def render_mensajes(messages_frame, mensajes, mi_usuario):
-    for widget in messages_frame.winfo_children():
-        widget.destroy()
+def render_mensajes(container, mensajes: list[dict], username_actual: str):
+    # Limpiar mensajes anteriores
+    for w in container.winfo_children():
+        w.destroy()
 
     for msg in mensajes:
-        autor = msg['username']
-        texto = msg['texto']
-        fecha = msg['fecha']
+        es_mio = msg["username"] == username_actual
 
-        es_mio = autor == mi_usuario
-        bg = "#DCF8C6" if es_mio else "#F1F0F0"
-        anchor = tk.E if es_mio else tk.W
-        justify = tk.RIGHT if es_mio else tk.LEFT
+        # Frame contenedor por mensaje
+        fila = tk.Frame(container)
+        fila.pack(fill=tk.X, pady=2, padx=5)
 
-        # Burbuja
-        bubble = tk.Frame(messages_frame, bg=bg, padx=8, pady=4)
-        bubble.pack(anchor=anchor, pady=4, padx=10)
+        # Frame burbuja
+        burbuja = tk.Frame(
+            fila,
+            bg="#DCF8C6" if es_mio else "#FFFFFF",
+            padx=8,
+            pady=5,
+            relief=tk.RIDGE,
+            borderwidth=1
+        )
 
-        tk.Label(bubble, text=autor, font=("Arial", 8, "bold"),
-                 bg=bg, justify=justify).pack(anchor=anchor)
+        # Texto del mensaje
+        tk.Label(
+            burbuja,
+            text=msg["texto"],
+            bg=burbuja["bg"],
+            wraplength=280,
+            justify=tk.LEFT
+        ).pack(anchor=tk.W)
 
-        tk.Label(bubble, text=texto, wraplength=300,
-                 bg=bg, justify=justify).pack(anchor=anchor)
+        # Pie con hora + leído
+        estado = "✔✔" if msg.get("leido", 0) else "✔"
+        pie = tk.Label(
+            burbuja,
+            text=f"{msg['fecha']}  {estado}",
+            font=("Arial", 7),
+            fg="gray",
+            bg=burbuja["bg"]
+        )
+        pie.pack(anchor=tk.E)
 
-        tk.Label(bubble, text=str(fecha), font=("Arial", 7),
-                 fg="gray", bg=bg).pack(anchor=anchor)
+        # Alineación izquierda/derecha
+        if es_mio:
+            burbuja.pack(side=tk.RIGHT, anchor=tk.E)
+        else:
+            burbuja.pack(side=tk.LEFT, anchor=tk.W)
 
 
 def show_mensajes_view(parent_frame, username="bob"):

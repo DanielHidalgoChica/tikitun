@@ -61,7 +61,7 @@ def get_mensajes_conversacion(cn, username: str, id_chat: int) -> list[dict]:
     """
     print("   [REPO mensajes] get_mensajes_conversacion()", id_chat)
     sql = """
-        SELECT username, texto, fecha
+        SELECT username, texto, fecha, leido
         FROM Mensaje
         WHERE id_chat = :1
         ORDER BY fecha ASC
