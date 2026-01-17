@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 from src.db.db_app import connect
-from src.repositories.perfiles import usuarios_repo
-from src.repositories.productos import productos_repo
+from src.services.perfiles import usuarios_service
 
 
 def show_perfil_view(parent_frame, username="bob"):
@@ -19,7 +18,7 @@ def show_perfil_view(parent_frame, username="bob"):
     # Cargar datos del usuario
     try:
         with connect() as cn:
-            usuario = usuarios_repo.get_usuario(cn, username)
+            usuario = usuarios_service.get_usuario(cn, username)
             if usuario is None or usuario.get("cuenta_eliminada"):
                 messagebox.showerror("Error", "El usuario no existe o ha sido eliminado")
                 tk.Label(parent_frame, text="Usuario no encontrado").pack(pady=20)

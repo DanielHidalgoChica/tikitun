@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 import re
 from src.db.db_app import connect, begin_transaction, commit, rollback
-from src.repositories.perfiles import usuarios_repo
+from src.services.perfiles import usuarios_service
 
 
 def show_editar_perfil_view(parent_frame, username: str):
@@ -35,13 +35,13 @@ def show_editar_perfil_view(parent_frame, username: str):
     # Cargar datos del usuario
     try:
         with connect() as cn:
-            usuario = usuarios_repo.get_usuario(cn, username)
+            usuario = usuarios_service.get_usuario(cn, username)
             if not usuario:
                 messagebox.showerror("Error", "Usuario no encontrado")
                 return
             
-            categorias_disponibles = usuarios_repo.get_categorias_disponibles(cn)
-            categorias_preferidas = usuarios_repo.get_categorias_preferidas(cn, username)
+            categorias_disponibles = usuarios_service.get_categorias_disponibles(cn)
+            categorias_preferidas = usuarios_service.get_categorias_preferidas(cn, username)
     except Exception as e:
         messagebox.showerror("Error", f"Error cargando datos: {e}")
         return
@@ -148,105 +148,33 @@ def show_editar_perfil_view(parent_frame, username: str):
     
     def validar_y_guardar():
         """Valida y guarda los cambios del perfil."""
-        # Validar nombre completo
-        nombre = nombre_var.get().strip()
-        
-        # Validar correo
-        correo = correo_var.get().strip()
-        if correo and not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", correo):
-            messagebox.showerror("Error", "Formato de correo inválido")
-            return
-        
-        # Validar ubicación
-        lat = lat_var.get().strip()
-        lon = lon_var.get().strip()
-        
-        if lat or lon:
-            if not lat or not lon:
-                messagebox.showerror("Error", "Debes proporcionar ambas coordenadas (latitud y longitud) o ninguna")
-                return
-            try:
-                lat = float(lat)
-                lon = float(lon)
-                if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
-                    messagebox.showerror("Error", "Coordenadas fuera de rango")
-                    return
-            except ValueError:
-                messagebox.showerror("Error", "Latitud y longitud deben ser números")
-                return
-        
-        # Validar rango
-        rango = rango_var.get().strip()
-        if rango:
-            try:
-                rango = float(rango)
-                if rango <= 0:
-                    messagebox.showerror("Error", "El rango debe ser mayor a 0")
-                    return
-            except ValueError:
-                messagebox.showerror("Error", "El rango debe ser un número")
-                return
-        
-        # Validar categorías
-        categorias_seleccionadas = [cat for cat, var in cat_vars.items() if var.get()]
-        if not categorias_seleccionadas:
-            messagebox.showerror("Error", "Debes seleccionar al menos una categoría preferida")
-            return
-        if len(categorias_seleccionadas) > 6:
-            messagebox.showerror("Error", "Máximo 6 categorías permitidas")
-            return
-        
-        # Guardar cambios
-        cn = begin_transaction()
+        # Preparar datos para enviar a la capa de servicios
+        cambios = {
+            "nombre_completo": nombre_var.get().strip(),
+            "correo": correo_var.get().strip(),
+            "ubi_latitud": lat_var.get().strip(),
+            "ubi_longitud": lon_var.get().strip(),
+            "rango": rango_var.get().strip(),
+            "categorias": [cat for cat, var in cat_vars.items() if var.get()]
+        }
+
         try:
-            # Preparar cambios
-            cambios = {}
-            if nombre:
-                cambios["nombre_completo"] = nombre
-            if correo and correo != usuario.get("correo"):
-                # Verificar unicidad de correo
-                cur = cn.cursor()
-                cur.execute(
-                    "SELECT username FROM Usuario WHERE correo = ? AND username != ?",
-                    (correo, username)
-                )
-                if cur.fetchone():
-                    messagebox.showerror("Error", "Este correo ya está en uso")
-                    rollback(cn)
-                    return
-                cur.close()
-                cambios["correo"] = correo
-            
-            if lat is not None and lon is not None:
-                cambios["ubi_latitud"] = lat
-                cambios["ubi_longitud"] = lon
-            elif not lat and not lon:
-                cambios["ubi_latitud"] = None
-                cambios["ubi_longitud"] = None
-            
-            if rango:
-                cambios["rango"] = rango
-            
-            # Actualizar usuario
-            if cambios:
-                usuarios_repo.update_usuario(cn, username, cambios)
-            
-            # Actualizar categorías preferidas
-            usuarios_repo.update_categorias_preferidas(cn, username, categorias_seleccionadas)
-            
+            # Llamar a la capa de servicios para validar y guardar los cambios
+            usuarios_service.modificar_perfil(cn, username, cambios)
             commit(cn)
             messagebox.showinfo("Éxito", "Perfil actualizado correctamente")
             
-            # Volver a la vista de perfil
+            # Redirigir a la vista de perfil después de guardar
             from src.ui.perfil.perfil_window import show_perfil_view
             show_perfil_view(parent_frame, username)
-            
         except ValueError as e:
             rollback(cn)
             messagebox.showerror("Error", str(e))
         except Exception as e:
             rollback(cn)
-            messagebox.showerror("Error", f"Error guardando cambios: {e}")
+            messagebox.showerror("Error", f"Error inesperado: {e}")
+        finally:
+            cn.close()
     
     def volver():
         """Vuelve a la vista de perfil sin guardar."""
