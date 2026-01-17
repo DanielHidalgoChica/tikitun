@@ -121,5 +121,35 @@ def search_mensajes(cn, username: str, filtros: dict) -> list[dict]:
         Mensajes que coinciden
     """
     print("   [REPO mensajes] search_mensajes()", username, filtros)
-    # TODO: SELECT con WHERE y LIKE para búsqueda
-    return []
+    sql = """
+        SELECT m.id_chat, m.username, m.texto, m.fecha, p.titulo
+        FROM Mensaje m
+        JOIN Chat c ON m.id_chat = c.id_chat
+        JOIN Producto p ON c.id_producto = p.id_producto
+        WHERE (c.username = :u OR p.username = :u)
+    """
+    params = [username, username]
+
+    if filtros.get("usuario"):
+        sql += " AND m.username = :usuario"
+        params.append(filtros["usuario"])
+
+    if filtros.get("texto"):
+        sql += " AND LOWER(m.texto) LIKE :texto"
+        params.append(f"%{filtros['texto'].lower()}%")
+
+    if filtros.get("fecha"):
+        sql += " AND TRUNC(m.fecha) = TO_DATE(:fecha, 'YYYY-MM-DD')"
+        params.append(filtros["fecha"])
+
+    if not filtros["incluir_archivados"]:
+        sql += " AND c.archivado = 0"
+        
+    sql += " ORDER BY m.fecha DESC"
+
+    cur = cn.cursor()
+    cur.execute(sql, params)
+    cols = [c[0].lower() for c in cur.description]
+    rows = [dict(zip(cols, r)) for r in cur.fetchall()]
+    cur.close()
+    return rows

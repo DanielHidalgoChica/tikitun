@@ -138,7 +138,7 @@ def buscar_mensajes(cn, username: str, filtros: dict) -> list[dict]:
     Returns:
         Mensajes que coinciden con filtros
     """
-    print(" [SERVICE mensajes] buscar_mensajes()")
+    print(" [SERVICE mensajes] buscar_mensajes()", username, filtros)
     return mensajes_repo.search_mensajes(cn, username, filtros)
 
 

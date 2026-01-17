@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk
 from src.db.db_app import connect, begin_transaction, commit, rollback
 from src.services.mensajes import mensajes_service
 
@@ -42,11 +43,21 @@ def abrir_busqueda(username):
     entry_fecha = tk.Entry(win)
     entry_fecha.pack(fill=tk.X, padx=10)
 
+     # ─── Toggle Archivados ──────────────────
+    incluir_archivados = tk.BooleanVar(value=False)
+    chk_arch = ttk.Checkbutton(
+        win,
+        text="Incluir chats archivados",
+        variable=incluir_archivados
+    )
+    chk_arch.pack(anchor="w", padx=10, pady=8) 
+
     def ejecutar_busqueda():
         filtros = {
             "usuario": entry_user.get().strip(),
             "texto": entry_text.get().strip(),
             "fecha": entry_fecha.get().strip(),
+            "incluir_archivados": incluir_archivados.get()
         }
         try:
             with connect() as cn:
