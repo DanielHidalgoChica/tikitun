@@ -16,7 +16,7 @@ from src.db.db_app import savepoint
 from src.repositories.mensajes import mensajes_repo, conversaciones_repo
 
 
-def enviar_mensaje(cn, id_chat: int, username: str, text: str) -> None:
+def enviar_mensaje(cn, msj: dict) -> None:
     """RF5.1: Envía un mensaje en una conversación.
     
     Args:
@@ -26,16 +26,11 @@ def enviar_mensaje(cn, id_chat: int, username: str, text: str) -> None:
     Raises:
         ValueError: Si texto vacío o conversación no existe
     """
-    print(" [SERVICE mensajes] enviar_mensaje()", id_chat, username, text)
-    msj = {
-        "id_chat":id_chat,
-        "username":username,
-        "texto":text,
-        "adjunto":None
-    }
+    print(" [SERVICE mensajes] enviar_mensaje()", msj)
+    
     savepoint(cn, "SP_ENVIAR_MENSAJE")
     mensajes_repo.insert_mensaje(cn, msj)
-    receptor = conversaciones_repo.get_receptor_mensaje(cn, id_chat, username)
+    receptor = conversaciones_repo.get_receptor_mensaje(cn, msj["id_chat"], msj["emisor"])
     print("Notificación enviada por correo a ", receptor)
     pass
 
@@ -113,19 +108,6 @@ def consultar_conversacion(cn, id_chat: int, username: str) -> list[dict]:
     out = mensajes_repo.get_mensajes_conversacion(cn, username, id_chat)
     mensajes_repo.mark_as_read(cn, id_chat, username)
     return out
-
-
-def adjuntar_archivo(cn, data: dict) -> None:
-    """RF5.3: Adjunta un archivo a un mensaje.
-    
-    Args:
-        cn: Conexión a la base de datos
-        data: Dict con id_producto, comprador, vendedor, emisor, archivo
-    """
-    print(" [SERVICE mensajes] adjuntar_archivo()")
-    # TODO: Implementar
-    pass
-
 
 def buscar_mensajes(cn, username: str, filtros: dict) -> list[dict]:
     """RF5.4: Busca mensajes según filtros.
