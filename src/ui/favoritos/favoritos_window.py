@@ -5,7 +5,6 @@ from src.services.feed_busqueda_favs.favoritos_service import (
     consultar_favoritos,
     quitar_favorito
 )
-from src.ui.productos.detalle_window import show_detalle_view
 
 from src.ui.productos.detalle_window import show_detalle_view
 
