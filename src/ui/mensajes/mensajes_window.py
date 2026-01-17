@@ -3,6 +3,60 @@ from tkinter import messagebox
 from src.db.db_app import connect, begin_transaction, commit, rollback
 from src.services.mensajes import mensajes_service
 
+def mostrar_resultados_busqueda(resultados):
+    win = tk.Toplevel()
+    win.title("Resultados de búsqueda")
+    win.geometry("500x400")
+
+    canvas = tk.Canvas(win)
+    scrollbar = tk.Scrollbar(win, orient=tk.VERTICAL, command=canvas.yview)
+    frame = tk.Frame(canvas)
+
+    frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+    canvas.create_window((0, 0), window=frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    for r in resultados:
+        texto = f"[{r['fecha']}] @{r['username']} · {r['titulo']}\n{r['texto']}"
+        tk.Label(frame, text=texto, wraplength=460, justify=tk.LEFT, anchor="w").pack(fill=tk.X, padx=8, pady=4)
+
+def abrir_busqueda(username):
+    win = tk.Toplevel()
+    win.title("Buscar mensajes")
+    win.geometry("420x320")
+
+    tk.Label(win, text="Buscar en mensajes", font=("Arial", 12, "bold")).pack(pady=8)
+
+    tk.Label(win, text="Usuario").pack(anchor="w", padx=10)
+    entry_user = tk.Entry(win)
+    entry_user.pack(fill=tk.X, padx=10)
+
+    tk.Label(win, text="Texto contiene").pack(anchor="w", padx=10, pady=(8,0))
+    entry_text = tk.Entry(win)
+    entry_text.pack(fill=tk.X, padx=10)
+
+    tk.Label(win, text="Fecha (YYYY-MM-DD)").pack(anchor="w", padx=10, pady=(8,0))
+    entry_fecha = tk.Entry(win)
+    entry_fecha.pack(fill=tk.X, padx=10)
+
+    def ejecutar_busqueda():
+        filtros = {
+            "usuario": entry_user.get().strip(),
+            "texto": entry_text.get().strip(),
+            "fecha": entry_fecha.get().strip(),
+        }
+        try:
+            with connect() as cn:
+                resultados = mensajes_service.buscar_mensajes(cn, username, filtros)
+            mostrar_resultados_busqueda(resultados)
+        except Exception as ex:
+            messagebox.showerror("Error", str(ex))
+
+    tk.Button(win, text="Buscar", command=ejecutar_busqueda).pack(pady=12)
+
 def render_mensajes(container, mensajes: list[dict], username_actual: str):
     # Limpiar mensajes anteriores
     for w in container.winfo_children():
@@ -76,6 +130,12 @@ def show_mensajes_view(parent_frame, username="bob"):
         font=("Arial", 16, "bold")
     ).pack(pady=20)
     
+    tk.Button(
+        parent_frame,
+        text="🔍 Buscar mensajes",
+        command=lambda: abrir_busqueda(username)
+    ).pack(pady=5)
+
     # Contenedor principal dividido en dos
     main_container = tk.Frame(parent_frame)
     main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
