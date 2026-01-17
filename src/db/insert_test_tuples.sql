@@ -91,6 +91,22 @@ INSERT INTO Chat VALUES (
   0
 );
 
+INSERT INTO Chat VALUES (
+  3,
+  3,
+  'bob',
+  1
+);
+
+INSERT INTO Mensaje VALUES (
+  3,
+  TIMESTAMP '2025-01-03 10:00:00',
+  'bob',
+  'Buena lampara',
+  NULL,
+  1
+);
+
 INSERT INTO Mensaje VALUES (
   1,
   TIMESTAMP '2025-01-01 10:00:00',

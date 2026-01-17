@@ -90,6 +90,9 @@ def show_mensajes_view(parent_frame, username="bob"):
         font=("Arial", 12, "bold")
     ).pack(pady=10)
     
+    btn_hist = tk.Button(left_panel, text="📂 Ver histórico", command=lambda: show_historico_view(parent_frame, username))
+    btn_hist.pack(pady=4)
+
     conversaciones_inicio = []
     try:
         with connect() as cn:
@@ -228,6 +231,144 @@ def show_mensajes_view(parent_frame, username="bob"):
     btn_send.pack(side=tk.RIGHT, padx=6)
 
     entry_msg.bind("<Return>", lambda e: enviar_mensaje(username))
+
+    # Nota informativa
+    tk.Label(
+        parent_frame,
+        text="💡 Funcionalidad en desarrollo:\n"
+             "Podrás enviar/recibir mensajes relacionados con productos",
+        font=("Arial", 9),
+        fg="gray",
+        justify=tk.CENTER
+    ).pack(pady=10)
+
+def show_historico_view(parent_frame, username="bob"):
+    """
+    Muestra una vista de los chats archivados
+    """
+    # Limpiar el frame
+    for widget in parent_frame.winfo_children():
+        widget.destroy()
+    
+    # Título
+    tk.Label(
+        parent_frame,
+        text="📧 Archivo de Chats",
+        font=("Arial", 16, "bold")
+    ).pack(pady=20)
+    
+    # Contenedor principal dividido en dos
+    main_container = tk.Frame(parent_frame)
+    main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+    
+    # Panel izquierdo: Lista de conversaciones
+    left_panel = tk.Frame(main_container, relief=tk.RIDGE, borderwidth=2)
+    left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+
+    tk.Label(
+        left_panel,
+        text="Conversaciones",
+        font=("Arial", 12, "bold")
+    ).pack(pady=10)
+    
+    btn_hist = tk.Button(left_panel, text="Volver", command=lambda: show_mensajes_view(parent_frame, username))
+    btn_hist.pack(pady=4)
+
+    conversaciones_inicio = []
+    try:
+        with connect() as cn:
+            conversaciones_inicio = mensajes_service.listar_conversaciones_archivadas(cn, username)
+    except Exception as ex:
+        messagebox.showerror("Error", f"No se pudieron cargar las conversaciones: {str(ex)}")
+        conversaciones_inicio = []
+
+    if not conversaciones_inicio:
+        tk.Label(
+            left_panel,
+            text="No tienes chats archivados",
+            font=("Arial", 11),
+            fg="gray",
+        ).pack(expand=True)
+
+    else:
+        for conv in conversaciones_inicio:
+            conv_frame = tk.Frame(left_panel, relief=tk.RAISED, borderwidth=1)
+            conv_frame.pack(fill=tk.X, padx=5, pady=3)
+            
+            tk.Label(
+                conv_frame,
+                text=f"@{conv['usuario']}",
+                font=("Arial", 10, "bold")
+            ).pack(anchor=tk.W, padx=5, pady=2)
+            
+            tk.Label(
+                conv_frame,
+                text=f"Re: {conv['producto']}",
+                font=("Arial", 9),
+                fg="gray"
+            ).pack(anchor=tk.W, padx=5)
+            
+            tk.Label(
+                conv_frame,
+                text=conv['ultimo_mensaje'],
+                font=("Arial", 9)
+            ).pack(anchor=tk.W, padx=5, pady=2)
+
+            # Botones
+            btn_frame = tk.Frame(conv_frame)
+            btn_frame.pack(side=tk.RIGHT, padx=10)
+
+            # Botón Seleccionar con recarga automática
+            def seleccionar_chat(id_chat, user):
+                """Factory para crear handler del botón Seleccionar."""
+                def on_seleccionar():
+                    cn = None
+                    try:
+                        cn = begin_transaction()
+                        mensajes = mensajes_service.consultar_conversacion(cn, id_chat, user)
+                        commit(cn)
+                        messages_frame.current_chat_id = id_chat
+                        print('guarda')
+                        # Recarga automática: re-renderiza la vista
+                        render_mensajes(messages_frame, mensajes, user)
+                    except Exception as ex:
+                        if cn:
+                            rollback(cn)
+                        messagebox.showerror("Error", str(ex))
+                return on_seleccionar
+            
+            tk.Button(
+                btn_frame,
+                text="Abrir",
+                fg="black",
+                command=seleccionar_chat(conv.get('id_chat'), username)
+            ).pack(side=tk.LEFT, padx=3)
+            
+        
+    # Panel derecho: Mensajes de la conversación seleccionada
+    right_panel = tk.Frame(main_container, relief=tk.RIDGE, borderwidth=2)
+    right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
+    
+    tk.Label(
+    right_panel,
+    text="Mensajes",
+    font=("Arial", 12, "bold")
+    ).pack(pady=10)
+
+    # Canvas + Scrollbar
+    canvas = tk.Canvas(right_panel)
+    scrollbar = tk.Scrollbar(right_panel, orient=tk.VERTICAL, command=canvas.yview)
+    messages_frame = tk.Frame(canvas)
+    messages_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    canvas.create_window((0, 0), window=messages_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     # Nota informativa
     tk.Label(

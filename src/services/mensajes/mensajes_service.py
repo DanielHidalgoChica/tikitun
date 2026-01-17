@@ -68,6 +68,34 @@ def listar_conversaciones_inicio(cn, username: str) -> list[dict]:
                 })
     return out
 
+def listar_conversaciones_archivadas(cn, username: str) -> list[dict]:
+    """Obtiene los chats que se mostraran al inicio.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Usuario
+    
+    Returns:
+        Lista de conversaciones (como comprador o vendedor)
+    """
+    print(" [SERVICE mensajes] consultar_conversaciones_inicio()")
+    all = []
+    out = []
+    all = conversaciones_repo.get_conversaciones_usuario(cn, username)
+    
+    for chat in all:
+        print(chat)
+        if chat['archivado'] == 1:
+            last = mensajes_repo.ultimo_mensaje(cn, chat['id_chat'])
+            otro = chat['vendedor'] if chat['comprador'] == username else chat['comprador']
+            out.append({
+                'id_chat': chat['id_chat'],
+                'usuario': otro,
+                'producto': chat['titulo'],
+                'ultimo_mensaje' : last['texto']
+                })
+    return out
+
 def consultar_conversacion(cn, id_chat: int, username: str) -> list[dict]:
     """RF5.2: Obtiene todos los mensajes de una conversación.
     
