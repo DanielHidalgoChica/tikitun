@@ -175,7 +175,7 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
     btn_frame.pack(pady=20)
     
     if es_vendedor:
-        # El vendedor puede editar o eliminar
+        # El vendedor puede editar, eliminar, promocionar o ver las contraofertas disponibles
         def on_editar():
             from src.ui.productos.editar_window import open_editar_producto
             win.destroy()
@@ -205,6 +205,9 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
             from src.ui.productos.promocionar_window import open_promocionar_producto
             open_promocionar_producto(win, id_producto, username_actual)
         
+        def on_mostrar_contraofertas():
+            from src.ui.productos.contraofertas_window import open_mostrar_contraofertas
+            open_mostrar_contraofertas(win, id_producto)
         tk.Button(
             btn_frame,
             text="✏️ Editar",
@@ -227,6 +230,15 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
             width=12,
             fg="orange"
         ).pack(side=tk.LEFT, padx=5)
+
+        tk.Button(
+            parent,
+            text="📨 Ver contraofertas",
+            command=lambda: on_mostrar_contraofertas(),
+            width=18,
+            font=("Arial", 10, "bold")
+        ).pack(pady=5)
+
     else:
         # El comprador puede comprar, hacer contraoferta o añadir a favoritos
         def on_comprar():
