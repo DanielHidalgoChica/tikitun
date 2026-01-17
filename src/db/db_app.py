@@ -13,6 +13,10 @@ import re
 
 load_dotenv()
 
+# --- Configuración de encoding para Oracle (UTF-8) ---
+# Esto asegura que los caracteres especiales (tildes, ñ, etc.) se manejen correctamente
+os.environ["NLS_LANG"] = ".AL32UTF8"
+
 # --- Configuración desde .env ---
 ORACLE_HOST = os.getenv("ORACLE_HOST", "oracle0.ugr.es")
 ORACLE_PORT = os.getenv("ORACLE_PORT", "1521")

@@ -1,5 +1,6 @@
 import tkinter as tk
-from src.ui.productos.publicar_window import open_publicar_producto
+from src.ui.productos.publicar_window import show_publicar_view
+from src.ui.productos.mis_productos_window import show_mis_productos_view
 from src.ui.perfil.perfil_window import show_perfil_view
 from src.ui.feed.feed_window import show_feed_view
 from src.ui.mensajes.mensajes_window import show_mensajes_view
@@ -108,7 +109,10 @@ def run_app(username="bob"):
     btn_mensajes = create_menu_button(sidebar, "Mensajes", "📧", lambda: show_mensajes_view(content_frame, username))
     btn_mensajes.pack(pady=5, padx=10)
     
-    btn_crear = create_menu_button(sidebar, "Crear", "+", lambda: open_publicar_producto(root))
+    btn_mis_productos = create_menu_button(sidebar, "Mis Productos", "📦", lambda: show_mis_productos_view(content_frame, username))
+    btn_mis_productos.pack(pady=5, padx=10)
+    
+    btn_crear = create_menu_button(sidebar, "Publicar", "➕", lambda: show_publicar_view(content_frame, username))
     btn_crear.pack(pady=5, padx=10)
     
     # Developer button: abre diálogo para inicializar la BD

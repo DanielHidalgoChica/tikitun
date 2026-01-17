@@ -28,17 +28,43 @@ def get_usuario(cn, username: str) -> dict | None:
     Returns:
         Dict con datos del usuario o None si no existe
     """
-    print("   [REPO perfiles] get_usuario()", username)
-    # TODO: SELECT * FROM USUARIO WHERE username = ?
-    
-    # Demo (eliminar cuando implementes)
     if not username:
         return None
+    
+    cur = cn.cursor()
+    cur.execute("""
+        SELECT 
+            username,
+            correo,
+            nombre_completo,
+            contrasenia,
+            ubi_latitud,
+            ubi_longitud,
+            rango,
+            saldo,
+            valoracion_media,
+            cuenta_eliminada
+        FROM Usuario
+        WHERE username = ?
+    """, (username,))
+    
+    row = cur.fetchone()
+    cur.close()
+    
+    if not row:
+        return None
+    
     return {
-        "username": username,
-        "saldo": 100.00,
-        "nombre_completo": "Usuario Demo",
-        "cuenta_eliminada": False
+        "username": row[0],
+        "correo": row[1],
+        "nombre_completo": row[2],
+        "contrasenia": row[3],
+        "ubi_latitud": row[4],
+        "ubi_longitud": row[5],
+        "rango": row[6],
+        "saldo": row[7] if row[7] is not None else 0.0,
+        "valoracion_media": row[8],
+        "cuenta_eliminada": bool(row[9]) if row[9] is not None else False
     }
 
 
@@ -63,9 +89,13 @@ def update_saldo(cn, username: str, nuevo_saldo: float) -> None:
         username: Usuario
         nuevo_saldo: Nuevo saldo del monedero
     """
-    print("   [REPO perfiles] update_saldo()", username, nuevo_saldo)
-    # TODO: UPDATE USUARIO SET saldo = ? WHERE username = ?
-    pass
+    cur = cn.cursor()
+    cur.execute("""
+        UPDATE Usuario
+        SET saldo = ?
+        WHERE username = ?
+    """, (nuevo_saldo, username))
+    cur.close()
 
 
 def soft_delete_usuario(cn, username: str) -> None:
