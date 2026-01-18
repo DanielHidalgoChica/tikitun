@@ -224,7 +224,6 @@ def soft_delete_usuario(cn, username: str) -> None:
             WHERE username = ?
         """, (username,))
         
-        # Opcional: Limpiar categorías preferidas
         cur.execute("DELETE FROM Preferidos WHERE username = ?", (username,))
         
         # Confirmar los cambios en la base de datos
