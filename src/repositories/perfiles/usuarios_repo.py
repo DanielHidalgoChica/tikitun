@@ -348,3 +348,23 @@ def verificar_contraseña(cn, username: str, contraseña: str) -> bool:
         except Exception:
             pass
 
+
+def update_valoracion(cn, username: str, valoracion: float) -> None:
+    """Actualiza la valoración media de un usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Usuario a actualizar
+        valoracion: Nueva valoración media (0-5)
+    """
+    cursor = cn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE Usuario
+            SET valoracion_media = ?
+            WHERE username = ?
+        """, [valoracion, username])
+        cn.commit()
+    finally:
+        cursor.close()
+
