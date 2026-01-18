@@ -7,7 +7,10 @@ from src.ui.mensajes.mensajes_window import show_mensajes_view
 from src.ui.favoritos.favoritos_window import show_favoritos_view
 from src.ui.productos.productos_comprados_window import show_productos_comprados_view
 from src.db import db_app
+from src.ui.theme import *
 import tkinter.messagebox as messagebox
+import os
+from PIL import Image, ImageTk
 
 
 def run_app(username="bob"):
@@ -23,23 +26,46 @@ def run_app(username="bob"):
     root.minsize(800, 500)
     
     # ===== HEADER =====
-    header_frame = tk.Frame(root, bg="#4CAF50", height=50)
+    header_frame = tk.Frame(root, bg=PRIMARY_COLOR, height=70)
     header_frame.pack(fill=tk.X)
     header_frame.pack_propagate(False)
     
+    # Logo y nombre
+    logo_frame = tk.Frame(header_frame, bg=PRIMARY_COLOR)
+    logo_frame.pack(side=tk.LEFT, padx=10, pady=8)
+    
+    # Cargar y mostrar logo desde archivo
+    try:
+        logo_path = os.path.join(os.path.dirname(__file__), "../../images/logo.png")
+        if os.path.exists(logo_path):
+            logo_img = Image.open(logo_path)
+            logo_img.thumbnail((50, 50), Image.Resampling.LANCZOS)
+            logo_photo = ImageTk.PhotoImage(logo_img)
+            logo_label = tk.Label(logo_frame, image=logo_photo, bg=PRIMARY_COLOR)
+            logo_label.image = logo_photo  # Mantener referencia
+            logo_label.pack(side=tk.LEFT, padx=(0, 10))
+        else:
+            # Fallback a emoji si no existe la imagen
+            tk.Label(logo_frame, text="🎵", font=("Arial", 24, "bold"),
+                    bg=PRIMARY_COLOR, fg="white").pack(side=tk.LEFT, padx=(0, 10))
+    except Exception as e:
+        # Fallback a emoji si hay error al cargar
+        tk.Label(logo_frame, text="🎵", font=("Arial", 24, "bold"),
+                bg=PRIMARY_COLOR, fg="white").pack(side=tk.LEFT, padx=(0, 10))
+    
     tk.Label(
-        header_frame,
-        text="TikiTun",
+        logo_frame,
+        text="TikiTún",
         font=("Arial", 18, "bold"),
-        bg="#4CAF50",
+        bg=PRIMARY_COLOR,
         fg="white"
-    ).pack(side=tk.LEFT, padx=20, pady=10)
+    ).pack(side=tk.LEFT)
     
     tk.Label(
         header_frame,
         text=f"@{username}",
         font=("Arial", 11),
-        bg="#4CAF50",
+        bg=PRIMARY_COLOR,
         fg="white"
     ).pack(side=tk.RIGHT, padx=20, pady=10)
     
@@ -48,7 +74,7 @@ def run_app(username="bob"):
     main_container.pack(fill=tk.BOTH, expand=True)
     
     # ===== MENÚ LATERAL =====
-    sidebar = tk.Frame(main_container, bg="#f0f0f0", width=150)
+    sidebar = tk.Frame(main_container, bg=BG_SECONDARY, width=150)
     sidebar.pack(side=tk.LEFT, fill=tk.Y)
     sidebar.pack_propagate(False)
     
@@ -61,8 +87,8 @@ def run_app(username="bob"):
             parent,
             text=f"{icon}\n{text}",
             font=("Arial", 10),
-            bg="#f0f0f0",
-            fg="#333",
+            bg=BG_SECONDARY,
+            fg=TEXT_PRIMARY,
             relief=tk.FLAT,
             width=12,
             height=3,
@@ -73,11 +99,11 @@ def run_app(username="bob"):
         # Efectos hover
         def on_enter(e):
             if btn != active_button["current"]:
-                btn.config(bg="#e0e0e0")
+                btn.config(bg=BG_TERTIARY)
         
         def on_leave(e):
             if btn != active_button["current"]:
-                btn.config(bg="#f0f0f0")
+                btn.config(bg=BG_SECONDARY)
         
         btn.bind("<Enter>", on_enter)
         btn.bind("<Leave>", on_leave)
@@ -88,10 +114,10 @@ def run_app(username="bob"):
         """Maneja el click en un botón del menú."""
         # Restaurar estilo del botón anterior
         if active_button["current"]:
-            active_button["current"].config(bg="#f0f0f0", fg="#333")
+            active_button["current"].config(bg=BG_SECONDARY, fg=TEXT_PRIMARY)
         
         # Aplicar estilo al botón activo
-        btn.config(bg="#4CAF50", fg="white")
+        btn.config(bg=PRIMARY_COLOR, fg="white")
         active_button["current"] = btn
         
         # Ejecutar comando
@@ -145,12 +171,12 @@ def run_app(username="bob"):
     btn_dev.pack(pady=20, padx=10)
     
     # ===== ÁREA DE CONTENIDO =====
-    content_frame = tk.Frame(main_container, bg="white")
+    content_frame = tk.Frame(main_container, bg=BG_PRIMARY)
     content_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
     
     # Mostrar Feed por defecto
     show_feed_view(content_frame, username)
-    btn_feed.config(bg="#4CAF50", fg="white")
+    btn_feed.config(bg=PRIMARY_COLOR, fg="white")
     active_button["current"] = btn_feed
     
     root.mainloop()
