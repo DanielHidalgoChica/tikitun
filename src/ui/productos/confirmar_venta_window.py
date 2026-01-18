@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 from src.db.db_app import connect, begin_transaction, commit, rollback
-from src.services.ventas.ventas_service import confirmar_recepcion, puntuar_venta, obtener_ventas_usuario
+from src.services.ventas.ventas_service import confirmar_recepcion, puntuar_venta, obtener_ventas_como_comprador
 from src.services.productos.consulta_service import consultar_producto
 
 
@@ -20,10 +20,12 @@ def open_confirmar_venta(parent, id_producto: int, username: str):
     frame = tk.Frame(win, padx=20, pady=20)
     frame.pack(fill=tk.BOTH, expand=True)
 
+    ventas = None
+
     try:
         with connect() as cn:
             prod = consultar_producto(cn, id_producto)
-            ventas = obtener_ventas_usuario(cn, username)
+            ventas = obtener_ventas_como_comprador(cn, username)
     except Exception as e:
         messagebox.showerror("Error", str(e), parent=win)
         win.destroy()
@@ -86,7 +88,7 @@ def open_confirmar_venta(parent, id_producto: int, username: str):
 
             cn = begin_transaction()
             try:
-                confirmar_recepcion(cn, id_producto)
+                confirmar_recepcion(cn, id_producto, username)
                 puntuar_venta(cn, id_producto, puntuacion)
                 commit(cn)
 
@@ -104,7 +106,7 @@ def open_confirmar_venta(parent, id_producto: int, username: str):
         except ValueError:
             messagebox.showerror(
                 "Error",
-                "Introduce una puntuación válida entre 0 y 5",
+                "Introduce una puntuación válida entre 0 y 5, con saltos de 0.5",
                 parent=win
             )
 
