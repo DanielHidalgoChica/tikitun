@@ -116,10 +116,10 @@ def show_productos_usuario_view(parent, current_user: str, profile_user: str):
     
     # Mostrar cada producto como una tarjeta
     for producto in productos:
-        crear_tarjeta_producto_readonly(scrollable_frame, producto, current_user, parent)
+        crear_tarjeta_producto_readonly(scrollable_frame, producto, current_user, parent, profile_user)
 
 
-def crear_tarjeta_producto_readonly(parent, producto: dict, current_user: str, content_frame):
+def crear_tarjeta_producto_readonly(parent, producto: dict, current_user: str, content_frame, profile_user: str):
     """Crea una tarjeta visual para un producto (solo lectura, con opción de ver/comprar).
     
     Args:
@@ -127,6 +127,7 @@ def crear_tarjeta_producto_readonly(parent, producto: dict, current_user: str, c
         producto: Dict con datos del producto
         current_user: Usuario actualmente logueado
         content_frame: Frame de contenido principal
+        profile_user: Usuario dueño del producto
     """
     # Frame de la tarjeta
     card = tk.Frame(
@@ -235,7 +236,6 @@ def crear_tarjeta_producto_readonly(parent, producto: dict, current_user: str, c
     btn_frame.pack(side=tk.RIGHT, padx=10)
     
     id_producto = producto.get("id_producto")
-    profile_user = producto.get("username")
     
     def on_ver_mas():
         from src.ui.productos.detalle_window import show_detalle_view
