@@ -55,23 +55,14 @@ DECLARE
 BEGIN
     -- Obtener dueño del producto
     SELECT username INTO vendedor FROM PRODUCTO
-    WHERE id_producto = :new.id_producto;
+    WHERE id_producto = :new.id_producto AND disponible=1;
     -- Comparar comprador con vendedor
     IF vendedor = :new.username THEN
         RAISE_APPLICATION_ERROR(-20051, 'No puedes hablar contigo mismo');
     END IF;
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
-        RAISE_APPLICATION_ERROR(-20052, 'El producto no existe');
+        RAISE_APPLICATION_ERROR(-20052, 'El producto no existe o no está disponible');
 END;
 /
 
-SELECT trigger_name,
-       table_name,
-       status,
-       triggering_event,
-       trigger_type
-FROM user_triggers
-ORDER BY table_name, trigger_name;
-
-DROP TRIGGER TR_Archivado_Al_Finalizar;
