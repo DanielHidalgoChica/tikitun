@@ -13,7 +13,8 @@ Requisitos Funcionales implementados:
 
 from src.db.db_app import savepoint
 from src.repositories.ventas import ventas_repo, contraofertas_repo
-from src.repositories.productos import productos_repo, get_productos_usuario
+from src.services.productos.productos_service import get_productos_usuario
+from src.repositories.productos import productos_repo
 from src.repositories.perfiles import usuarios_repo
 
 
