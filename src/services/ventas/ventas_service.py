@@ -110,7 +110,7 @@ def realizar_contraoferta(cn, id_producto: int, username_comprador: str,
     propietario = prod['username_vendedor']
     saldo_comprador = comprador['saldo']
 
-    if (precio > saldo_comprador):
+    if (precio_oferta > saldo_comprador):
         raise ValueError("No hay saldo suficiente para realizar la compra")
 
     if (username_comprador == propietario):
@@ -294,7 +294,7 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
     num_ventas = len(ventas_vendedor)
     valoracion_media = 0
 
-    if(num_ventas == 0):
+    if(num_ventas == 1):
         valoracion_media = puntuacion
     else:
         valoracion_media = ((num_ventas*vendedor['valoracion_media'])+puntuacion)/(num_ventas+1)
