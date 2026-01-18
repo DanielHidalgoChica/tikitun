@@ -97,5 +97,6 @@ CREATE OR REPLACE TRIGGER TR_Update_Contraofertas
 BEGIN
     DELETE FROM Contraoferta
     WHERE id_producto = :new.id_producto
-    AND precio >= : new.precio
+    AND precio >= : new.precio;
 END;
+/
