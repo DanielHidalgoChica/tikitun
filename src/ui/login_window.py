@@ -51,7 +51,15 @@ def show_login(parent=None) -> tuple[bool, str]:
         if ok:
             result["ok"] = True
             result["username"] = username
-            root.destroy()
+            if own_root:
+                # Ventana propia: destruirla para que app.py continúe
+                root.destroy()
+            else:
+                # Ventana reutilizada (después de logout): limpiar y mostrar main_window
+                for widget in root.winfo_children():
+                    widget.destroy()
+                from src.ui.main_window import setup_main_window
+                setup_main_window(root, username)
         else:
             messagebox.showerror("Error", "Usuario o contraseña incorrectos")
 
