@@ -1,126 +1,84 @@
 """
-Vista de "Productos comprados" - Lista los productos comprados por el usuario actual.
-Permite confirmar la recepción de productos y puntuar las ventas.
+Vista de "Productos comprados" - Lista los productos comprados pendientes de recibir.
+Permite al comprador confirmar la recepción y puntuar las ventas.
 """
 import tkinter as tk
 from tkinter import ttk, messagebox
-from src.services.ventas.ventas_service import obtener_productos_comprados, obtener_ventas_usuario
+from src.services.ventas.ventas_service import obtener_productos_comprados, obtener_ventas_como_comprador
 from src.db.db_app import connect
 
 
 def show_productos_comprados_view(parent, username: str):
-    """Muestra la vista de productos comprados del usuario en el área de contenido.
-    
-    Args:
-        parent: Frame contenedor (content_frame)
-        username: Usuario actual
-    """
+    """Muestra la vista de productos comprados pendientes de recibir."""
     # Limpiar contenido anterior
     for widget in parent.winfo_children():
         widget.destroy()
-    
-    # Frame principal
+
     frame = tk.Frame(parent, bg="white", padx=20, pady=20)
     frame.pack(fill=tk.BOTH, expand=True)
-    
-    # Título
+
+    # Header
     header = tk.Frame(frame, bg="white")
     header.pack(fill=tk.X, pady=(0, 20))
-    
+
     tk.Label(
         header,
-        text="📦 Productos comprados",
+        text="📦 Productos pendientes de confirmar",
         font=("Arial", 18, "bold"),
         bg="white"
     ).pack(side=tk.LEFT)
-    
-    # Botón refrescar
+
     def refrescar():
         show_productos_comprados_view(parent, username)
-    
-    tk.Button(
-        header,
-        text="🔄 Refrescar",
-        command=refrescar
-    ).pack(side=tk.RIGHT)
-    
-    # Cargar productos del usuario
+
+    tk.Button(header, text="🔄 Refrescar", command=refrescar).pack(side=tk.RIGHT)
+
+    # Obtener productos pendientes
     productos = []
     try:
         with connect() as cn:
             productos = obtener_productos_comprados(cn, username)
+            # Filtrar solo los pendientes
+            productos = [p for p in productos if p['recepcion_confirmada'] == 0]
     except Exception as e:
         messagebox.showerror("Error", f"No se pudieron cargar los productos: {e}")
-    
+
     if not productos:
-        tk.Label(
-            frame,
-            text="No tienes productos comprados.",
-            font=("Arial", 12),
-            bg="white",
-            fg="gray"
-        ).pack(pady=50)
+        tk.Label(frame, text="No tienes productos pendientes.",
+                 font=("Arial", 12), bg="white", fg="gray").pack(pady=50)
         return
-    
-    # Lista de productos
-    tk.Label(
-        frame,
-        text=f"{len(productos)} producto(s)",
-        font=("Arial", 10),
-        bg="white",
-        fg="gray"
-    ).pack(anchor="w", pady=(0, 10))
-    
-    # Contenedor con scroll
+
+    tk.Label(frame, text=f"{len(productos)} producto(s) pendiente(s)",
+             font=("Arial", 10), bg="white", fg="gray").pack(anchor="w", pady=(0, 10))
+
+    # Scrollable frame
     canvas = tk.Canvas(frame, bg="white", highlightthickness=0)
     scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
     scrollable_frame = tk.Frame(canvas, bg="white")
-    
+
     scrollable_frame.bind(
         "<Configure>",
         lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
     )
-    
+
     canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
     canvas.configure(yscrollcommand=scrollbar.set)
-    
+
     canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-    
-    # Mostrar cada producto como una tarjeta
+
     for producto in productos:
         crear_tarjeta_producto(scrollable_frame, producto, username, parent)
 
 
-
-
 def crear_tarjeta_producto(parent, producto: dict, username: str, content_frame):
-    """Crea una tarjeta visual para un producto.
+    """Crea una tarjeta visual para un producto."""
     
-    Args:
-        parent: Frame padre
-        producto: Dict con datos del producto
-        username: Usuario actual
-        content_frame: Frame de contenido principal (para refrescar)
-    """
-    venta = None
-
-    try:
-        with connect() as cn:
-            ventas = obtener_ventas_usuario(cn, username)
-            id_producto = producto["id_producto"]
-            venta = next((v for v in ventas if v["id_producto"] == id_producto), None)
-    except Exception as e:
-        messagebox.showerror("Error", f"No se pudieron cargar los productos: {e}")
-    
-    if not venta:
-        messagebox.showerror(
-            "Error",
-            f"No se encontró información de la venta para el producto {id_producto}"
-        )
-        return
+    # No necesitas volver a consultar la venta
+    venta = producto  # ya incluye recepcion_confirmada, precio_final, valoracion
 
     completada = venta["recepcion_confirmada"]
+    
     # Frame de la tarjeta
     card = tk.Frame(
         parent,
@@ -187,7 +145,7 @@ def crear_tarjeta_producto(parent, producto: dict, username: str, content_frame)
         fg="gray"
     ).pack(side=tk.LEFT)
     
-    # Botones (solo si disponible)
+    # Botones (solo si pendiente)
     if completada==0:
         btn_frame = tk.Frame(card, bg=card.cget("bg"))
         btn_frame.pack(side=tk.RIGHT)
@@ -195,7 +153,8 @@ def crear_tarjeta_producto(parent, producto: dict, username: str, content_frame)
         id_producto = producto.get("id_producto")
         
         def on_confirmar_venta():
-            from src.ui.productos.confirmar_venta_window import show_confirmar_venta_view
-            show_confirmar_venta_view(content_frame, id_producto, username)
+            from src.ui.productos.confirmar_venta_window import open_confirmar_venta
+            open_confirmar_venta(content_frame, id_producto, username)
         
         tk.Button(btn_frame, text="👁", command=on_confirmar_venta, width=3).pack(side=tk.LEFT, padx=2)
+

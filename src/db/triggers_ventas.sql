@@ -80,22 +80,3 @@ EXCEPTION
         RAISE_APPLICATION_ERROR(-20002, 'El producto no existe');
 END;
 /
-
--- ============================================================================
--- TRIGGER 3: TR_Update_Contraofertas
--- ============================================================================
--- Elimina las contraofertas no válidas asociadas a un producto cuando
--- se actualiza un producto en venta
--- 
--- Dispara: AFTER UPDATE OF PRODUCTO
--- Acción: Eliminar las contraofertas cuyo precio sea superior o igual al nuevo precio
-CREATE OR REPLACE TRIGGER TR_Update_Contraofertas
-    AFTER
-    UPDATE OF precio
-    ON Producto 
-    FOR EACH ROW
-BEGIN
-    DELETE FROM Contraoferta
-    WHERE id_producto = :new.id_producto
-    AND precio >= : new.precio
-END;

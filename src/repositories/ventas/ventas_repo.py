@@ -54,10 +54,10 @@ def update_estado_recepcion(cn, id_producto: int, recibido: int) -> None:
         id_producto: Producto
         recibido: 1 si ya fue recibido, 0 si no
     """
-    print("   [REPO ventas] update_estado_recepcion()", id_producto, recibido)
+    print("   [REPO ventas] update_estado_recepcion()", (id_producto, recibido))
     
     cur = cn.cursor()
-    cur.execute("UPDATE VENDIDO SET estado_recepcion = ? WHERE id_producto = ?", (recibido, id_producto))
+    cur.execute("UPDATE VENDIDO SET recepcion_confirmada = ? WHERE id_producto = ?", (recibido, id_producto))
     cur.close()
 
 def update_puntuacion_venta(cn, id_producto: int, puntuacion : float) -> None:
@@ -76,7 +76,7 @@ def update_puntuacion_venta(cn, id_producto: int, puntuacion : float) -> None:
     cur.close()
 
 def get_ventas_usuario(cn, username : str) -> list[dict]:
-    """Devuelve todas las ventas asociadas a productos del usuario.
+    """Devuelve todas las ventas pendientes asociadas a productos del usuario.
 
     Args:
         cn: Conexión a la base de datos
@@ -89,7 +89,7 @@ def get_ventas_usuario(cn, username : str) -> list[dict]:
 
     cur = cn.cursor()
     cur.execute("SELECT * FROM VENDIDO WHERE id_producto IN (SELECT id_producto FROM PRODUCTO WHERE username = ?) AND recepcion_confirmada = ?",
-                username, 0)
+                (username, 0))
 
     # Convertir resultados a lista de dicts
     cols = [desc[0].lower() for desc in cur.description] if cur.description else []
@@ -99,22 +99,39 @@ def get_ventas_usuario(cn, username : str) -> list[dict]:
 
     return rows
 
-def get_productos_comprados(cn, username : str) -> list[dict]:
+def get_productos_comprados(cn, username: str) -> list[dict]:
     """
-    Devuelve los productos comprados por el usuario.
+    Devuelve los productos comprados por el usuario, incluyendo info de la venta.
+    """
+    cur = cn.cursor()
+    consulta = """
+        SELECT P.*, V.recepcion_confirmada, V.precio_final, V.valoracion
+        FROM PRODUCTO P
+        JOIN VENDIDO V ON P.id_producto = V.id_producto
+        WHERE V.username = ?
+    """
+    cur.execute(consulta, (username,))
+    
+    cols = [desc[0].lower() for desc in cur.description] if cur.description else []
+    rows = [dict(zip(cols, row)) for row in cur.fetchall()]
+    
+    cur.close()
+    return rows
+
+def get_ventas_como_comprador(cn, username : str) -> list[dict]:
+    """Devuelve todas las ventas pendientes asociadas a productos comprados por el usuario
 
     Args:
         cn: Conexión a la base de datos
         username: Comprador
     
     Returns:
-        Lista de productos
+        Lista de ventas
     """
-    print("   [REPO ventas] get_productos_comprados()", username)
+    print("   [REPO ventas] get_ventas_usuario()", username)
 
     cur = cn.cursor()
-    consulta = "SELECT * FROM PRODUCTO WHERE id_producto IN (SELECT id_producto FROM VENDIDO WHERE username = ?)"
-    cur.execute(consulta, username)
+    cur.execute("SELECT * FROM VENDIDO WHERE username = ? AND recepcion_confirmada = ?", (username, 0))
 
     # Convertir resultados a lista de dicts
     cols = [desc[0].lower() for desc in cur.description] if cur.description else []

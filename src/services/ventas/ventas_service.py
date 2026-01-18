@@ -13,9 +13,8 @@ Requisitos Funcionales implementados:
 
 from src.db.db_app import savepoint
 from src.repositories.ventas import ventas_repo, contraofertas_repo
-from src.services.productos.productos_service import get_productos_usuario
-from src.repositories.productos import productos_repo
-from src.repositories.perfiles import usuarios_repo
+from src.services.productos import productos_service
+from src.services.perfiles import usuarios_service
 
 
 def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> None:
@@ -43,11 +42,11 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
     print(" [SERVICE ventas] realizar_compra_directa()")
 
     # Validación restricciones semánticas
-    comprador = usuarios_repo.get_usuario(cn, username_comprador)
+    comprador = usuarios_service.get_usuario(cn, username_comprador)
     if not comprador:
         raise ValueError("El usuario no existe")
 
-    producto = productos_repo.get_producto(cn, id_producto)
+    producto = productos_service.consultar_producto(cn, id_producto)
     if not producto:
         raise ValueError("El producto no existe")
 
@@ -62,7 +61,7 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
         raise ValueError("El propietario no puede realizar contraofertas a sus propios productos")
     
     # Retirar dinero del comprador.
-    usuarios_repo.update_saldo(cn, username_comprador, saldo_comprador-precio)
+    usuarios_service.update_saldo(cn, username_comprador, saldo_comprador-precio)
 
     # Crear registro de venta
     venta = dict([
@@ -75,7 +74,7 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
     ventas_repo.insert_venta(cn, venta)
 
     # Marcar producto como no disponible
-    productos_repo.soft_delete_producto(cn, id_producto)
+    productos_service.eliminar_producto(cn, id_producto, propietario)
 
 
 def realizar_contraoferta(cn, id_producto: int, username_comprador: str, 
@@ -99,11 +98,11 @@ def realizar_contraoferta(cn, id_producto: int, username_comprador: str,
     print(" [SERVICE ventas] realizar_contraoferta()")
     
     # Validación de las restricciones semánticas
-    prod = productos_repo.get_producto(cn, id_producto)
+    prod = productos_service.consultar_producto(cn, id_producto)
     if not prod:
         raise ValueError("El producto no existe")
-
-    comprador = usuarios_repo.get_usuario(cn, username_comprador)
+    
+    comprador = usuarios_service.get_usuario(cn, username_comprador)
     if not comprador:
         raise ValueError("El usuario no existe")
 
@@ -141,15 +140,15 @@ def aceptar_contraoferta(cn, id_producto: int, username_comprador: str,
     print(" [SERVICE ventas] aceptar_contraoferta()")
 
     # Validación restricciones semánticas
-    comprador = usuarios_repo.get_usuario(cn, username_comprador)
+    comprador = usuarios_service.get_usuario(cn, username_comprador)
     if not comprador:
         raise ValueError("El usuario comprador no existe")
     
-    vendedor = usuarios_repo.get_usuario(cn, username_vendedor)
+    vendedor = usuarios_service.get_usuario(cn, username_vendedor)
     if not vendedor:
         raise ValueError("El usuario vendedor no existe")
 
-    producto = productos_repo.get_producto(cn, id_producto)
+    producto = productos_service.consultar_producto(cn, id_producto)
     if not producto:
         raise ValueError("El producto no existe")
     
@@ -166,7 +165,7 @@ def aceptar_contraoferta(cn, id_producto: int, username_comprador: str,
     saldo_comprador = comprador['saldo']
     
     # Retirar dinero del comprador.
-    usuarios_repo.update_saldo(cn, username_comprador, saldo_comprador-precio)
+    usuarios_service.update_saldo(cn, username_comprador, saldo_comprador-precio)
 
     # Crear registro de venta y eliminar la contraoferta
     venta = dict([
@@ -181,7 +180,7 @@ def aceptar_contraoferta(cn, id_producto: int, username_comprador: str,
     ventas_repo.insert_venta(cn, venta)
 
     # Marcar producto como no disponible
-    productos_repo.soft_delete_producto(cn, id_producto)
+    productos_service.eliminar_producto(cn, id_producto, propietario)
 
 
 def rechazar_contraoferta(cn, id_producto: int, username_comprador: str) -> None:
@@ -223,13 +222,13 @@ def confirmar_recepcion(cn, id_producto: int, username_comprador: str) -> None:
     """
     print(" [SERVICE ventas] confirmar_recepcion()")
 
-    ventas_repo.update_estado_recepcion(cn, id_producto, True)
+    ventas_repo.update_estado_recepcion(cn, id_producto, 1)
 
     venta = ventas_repo.get_venta(cn, id_producto)
-    producto = productos_repo.get_producto(cn, id_producto)
-    vendedor = usuarios_repo.get_usuario(cn, producto['username'])
+    producto = productos_service.consultar_producto(cn, id_producto)
+    vendedor = usuarios_service.get_usuario(cn, producto['username_vendedor'])
 
-    usuarios_repo.update_saldo(cn, vendedor, vendedor['saldo']+venta['precio'])
+    usuarios_service.update_saldo(cn, vendedor, vendedor['saldo']+venta['precio_final'])
 
 
 def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
@@ -257,11 +256,11 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
     ventas_repo.update_puntuacion_venta(cn, id_producto, puntuacion)
     
     # Actualizar valoración media del vendedor
-    producto = productos_repo.get_producto(cn, id_producto)
+    producto = productos_service.consultar_producto(cn, id_producto)
     username_vendedor = producto['username']
     ventas_vendedor = ventas_repo.get_ventas_usuario(cn, username_vendedor)
 
-    vendedor = usuarios_repo.get_usuario(cn, username_vendedor)
+    vendedor = usuarios_service.get_usuario(cn, username_vendedor)
     num_ventas = len(ventas_vendedor)
     valoracion_media = 0
 
@@ -271,7 +270,7 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
         valoracion_media = ((num_ventas*vendedor['valoracion_media'])+puntuacion)/(num_ventas+1)
     
     vendedor['valoracion_media']=valoracion_media
-    usuarios_repo.update_usuario(cn, vendedor)
+    usuarios_service.update_saldo(cn, vendedor)
 
 def obtener_ventas_usuario(cn, username : str) -> list[dict]:
     """Devuelve todas las ventas asociadas a productos del usuario.
@@ -299,9 +298,22 @@ def obtener_productos_comprados(cn, username : str) -> list[dict]:
     return ventas_repo.get_productos_comprados(cn, username)
 
 def eliminar_contraofertas(cn, username : str):
-    productos = get_productos_usuario(cn, username)
+    productos = usuarios_service.get_productos_usuario(cn, username)
 
     id_productos = [prod["id_producto"] for prod in productos]
 
     for id in id_productos:
         contraofertas_repo.delete_contraoferta(cn, id, username)
+
+
+def obtener_ventas_como_comprador(cn, username : str) -> list[dict]:
+    """Devuelve todas las ventas asociadas a productos del usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Comprador
+    
+    Returns:
+        Lista de ventas
+    """
+    return ventas_repo.get_ventas_como_comprador(cn, username)
