@@ -1,28 +1,50 @@
--- =====================================================
--- SCRIPT PARA ELIMINAR TODA LA BASE DE DATOS TIKITUN
--- =====================================================
--- Ejecutar este script para hacer un DROP completo
--- El orden es importante por las foreign keys
--- =====================================================
-
--- Primero las tablas con dependencias (hijas)
-DROP TABLE Vendido;
-DROP TABLE Preferidos;
-DROP TABLE Contraoferta;
-DROP TABLE Favorito;
-DROP TABLE Mensaje;
-DROP TABLE Chat;
-DROP TABLE Producto;
-
--- Después las tablas maestras (padres)
-DROP TABLE Categoria;
-DROP TABLE Usuario;
-
-COMMIT;
-
--- =====================================================
--- NOTA: Si alguna tabla no existe, Oracle dará error
--- Para ignorar errores, usar en SQLcl/SQL*Plus:
---   SET DEFINE OFF
---   WHENEVER SQLERROR CONTINUE
--- =====================================================
+BEGIN
+   FOR cur_rec IN (SELECT object_name, object_type
+                   FROM user_objects
+                   WHERE object_type IN
+                             ('TABLE',
+                              'VIEW',
+                              'MATERIALIZED VIEW',
+                              'PACKAGE',
+                              'PROCEDURE',
+                              'FUNCTION',
+                              'SEQUENCE',
+                              'SYNONYM',
+                              'PACKAGE BODY'
+                             ))
+   LOOP
+      BEGIN
+         IF cur_rec.object_type = 'TABLE'
+         THEN
+            EXECUTE IMMEDIATE 'DROP '
+                              || cur_rec.object_type
+                              || ' "'
+                              || cur_rec.object_name
+                              || '" CASCADE CONSTRAINTS';
+         ELSE
+            EXECUTE IMMEDIATE 'DROP '
+                              || cur_rec.object_type
+                              || ' "'
+                              || cur_rec.object_name
+                              || '"';
+         END IF;
+      EXCEPTION
+         WHEN OTHERS
+         THEN
+            DBMS_OUTPUT.put_line ('FAILED: DROP '
+                                  || cur_rec.object_type
+                                  || ' "'
+                                  || cur_rec.object_name
+                                  || '"'
+                                 );
+      END;
+   END LOOP;
+   FOR cur_rec IN (SELECT * 
+                   FROM all_synonyms 
+                   WHERE table_owner IN (SELECT USER FROM dual))
+   LOOP
+      BEGIN
+         EXECUTE IMMEDIATE 'DROP PUBLIC SYNONYM ' || cur_rec.synonym_name;
+      END;
+   END LOOP;
+END;
