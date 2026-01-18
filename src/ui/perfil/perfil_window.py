@@ -166,3 +166,24 @@ def show_perfil_view(parent_frame, current_user, profile_user=None):
             padx=20,
             pady=10
         ).pack(fill=tk.X, pady=5)
+
+        # Botón de cerrar sesión
+        def on_logout():
+            confirmacion = messagebox.askyesno("Cerrar sesión", "¿Estás seguro de que quieres cerrar sesión?")
+            if confirmacion:
+                from src.ui.login_window import show_login
+                root = parent_frame.winfo_toplevel()
+                for widget in root.winfo_children():
+                    widget.destroy()
+                show_login(root)
+
+        tk.Button(
+            frm_acciones,
+            text="🚪 Cerrar Sesión",
+            command=on_logout,
+            bg="#9E9E9E",
+            fg="white",
+            font=("Arial", 10),
+            padx=20,
+            pady=10
+        ).pack(fill=tk.X, pady=5)
