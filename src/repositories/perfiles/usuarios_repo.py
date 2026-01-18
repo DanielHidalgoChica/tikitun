@@ -337,7 +337,7 @@ def verificar_contraseña(cn, username: str, contraseña: str) -> bool:
             return False
         
         contraseña_bd = row[0]
-        # Comparación de texto plano (sin hash, como indicó el usuario)
+        # Comparación de texto plano
         return contraseña_bd == contraseña
     except Exception as e:
         print(f"Error verificando contraseña para {username}: {e}")
