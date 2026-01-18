@@ -6,7 +6,7 @@ Implementa RF1.5: Transferir saldo a cuenta bancaria.
 import tkinter as tk
 from tkinter import messagebox, ttk
 from src.db.db_app import connect, begin_transaction, commit, rollback
-from src.repositories.perfiles import usuarios_repo
+from src.services.perfiles import usuarios_service
 
 
 def show_monedero_view(parent_frame, username: str):
@@ -35,7 +35,7 @@ def show_monedero_view(parent_frame, username: str):
     # Cargar datos del usuario
     try:
         with connect() as cn:
-            usuario = usuarios_repo.get_usuario(cn, username)
+            usuario = usuarios_service.get_usuario(cn, username)
             if not usuario:
                 messagebox.showerror("Error", "Usuario no encontrado")
                 return
@@ -179,14 +179,14 @@ def crear_tab_recarga(parent, username: str, content_frame, saldo_actual: float)
         # Realizar transacción
         cn = begin_transaction()
         try:
-            usuario_actual = usuarios_repo.get_usuario(cn, username)
+            usuario_actual = usuarios_service.get_usuario(cn, username)
             if not usuario_actual:
                 messagebox.showerror("Error", "Usuario no encontrado")
                 rollback(cn)
                 return
             
             nuevo_saldo = usuario_actual.get("saldo", 0.0) + cantidad
-            usuarios_repo.update_saldo(cn, username, nuevo_saldo)
+            usuarios_service.update_saldo(cn, username, nuevo_saldo)
             commit(cn)
             
             messagebox.showinfo(
@@ -298,14 +298,14 @@ def crear_tab_retirada(parent, username: str, content_frame, saldo_actual: float
         # Realizar transacción
         cn = begin_transaction()
         try:
-            usuario_actual = usuarios_repo.get_usuario(cn, username)
+            usuario_actual = usuarios_service.get_usuario(cn, username)
             if not usuario_actual:
                 messagebox.showerror("Error", "Usuario no encontrado")
                 rollback(cn)
                 return
             
             # Verificar contraseña
-            if not usuarios_repo.verificar_contraseña(cn, username, contraseña):
+            if not usuarios_service.verificar_credenciales(cn, username, contraseña):
                 rollback(cn)
                 messagebox.showerror("Error", "Contraseña incorrecta")
                 return
@@ -318,7 +318,7 @@ def crear_tab_retirada(parent, username: str, content_frame, saldo_actual: float
                 return
             
             nuevo_saldo = saldo_bd - cantidad
-            usuarios_repo.update_saldo(cn, username, nuevo_saldo)
+            usuarios_service.update_saldo(cn, username, nuevo_saldo)
             commit(cn)
             
             messagebox.showinfo(

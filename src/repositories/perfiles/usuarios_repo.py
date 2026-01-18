@@ -111,9 +111,6 @@ def get_usuario(cn, username: str) -> dict | None:
     Returns:
         Dict con datos del usuario o None si no existe
     """
-    if not username:
-        return None
-    
     cur = cn.cursor()
 
     try:
@@ -180,6 +177,7 @@ def update_usuario(cn, username: str, cambios: dict) -> None:
     cur = cn.cursor()
     try:
         cur.execute(sql, values)
+        cn.commit()  # Commit the transaction to save changes
     finally:
         cur.close()
 
@@ -198,6 +196,7 @@ def update_saldo(cn, username: str, nuevo_saldo: float) -> None:
         SET saldo = ?
         WHERE username = ?
     """, (nuevo_saldo, username))
+    cn.commit()  # Commit the transaction
     cur.close()
 
 
@@ -208,9 +207,30 @@ def soft_delete_usuario(cn, username: str) -> None:
         cn: Conexión a la base de datos
         username: Usuario a dar de baja
     """
-    print("   [REPO perfiles] soft_delete_usuario()", username)
-    # TODO: UPDATE USUARIO SET cuenta_eliminada = true, ... WHERE username = ?
-    pass
+    cur = cn.cursor()
+    try:
+        # Se conservan las claves (username), se limpian datos personales
+        # y se marca cuenta_eliminada como true (1)
+        cur.execute("""
+            UPDATE Usuario 
+            SET correo = '', 
+                nombre_completo = 'Usuario Eliminado', 
+                contrasenia = '********', 
+                ubi_latitud = NULL, 
+                ubi_longitud = NULL, 
+                rango = NULL,
+                saldo = 0,
+                cuenta_eliminada = 1 
+            WHERE username = ?
+        """, (username,))
+        
+        # Opcional: Limpiar categorías preferidas
+        cur.execute("DELETE FROM Preferidos WHERE username = ?", (username,))
+        
+        # Confirmar los cambios en la base de datos
+        cn.commit()
+    finally:
+        cur.close()
 
 
 def get_categorias_disponibles(cn) -> list[str]:
@@ -280,13 +300,15 @@ def update_categorias_preferidas(cn, username: str, categorias: list[str]) -> No
     try:
         # Eliminar categorías previas
         cur.execute("DELETE FROM Preferidos WHERE username = ?", (username,))
-        
+        cn.commit()  # Commit the deletion
+
         # Insertar nuevas categorías
         for cat in categorias:
             cur.execute(
                 "INSERT INTO Preferidos (username, nombre) VALUES (?, ?)",
                 (username, cat)
             )
+        cn.commit()  # Commit the insertion
     finally:
         cur.close()
 
@@ -326,3 +348,25 @@ def verificar_contraseña(cn, username: str, contraseña: str) -> bool:
             cur.close()
         except Exception:
             pass
+
+
+def obtener_ventas_como_comprador(cn, username: str) -> list[dict]:
+    """
+    Obtiene las ventas activas como comprador para un usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+
+    Returns:
+        Una lista de diccionarios con las ventas activas como comprador.
+    """
+    cursor = cn.cursor()
+    query = """
+        SELECT v.*
+        FROM Vendido v
+        WHERE v.username = ? AND v.recepcion_confirmada = 0
+    """
+    cursor.execute(query, (username,))
+    ventas = cursor.fetchall()
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in ventas]

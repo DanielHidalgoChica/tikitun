@@ -13,6 +13,8 @@ Requisitos Funcionales implementados:
 
 from src.db.db_app import savepoint
 from src.repositories.perfiles import usuarios_repo
+from src.services.productos.productos_service import get_productos_usuario, eliminar_producto
+from src.services.ventas.ventas_service import obtener_ventas_usuario, consultar_contraofertas
 import re
 
 
@@ -155,30 +157,73 @@ def consultar_perfil(cn, username: str) -> dict:
         ValueError: Si usuario no existe o cuenta eliminada
     """
     print(" [SERVICE perfiles] consultar_perfil()")
-    # TODO: Implementar
-    pass
+    usuario = usuarios_repo.get_usuario(cn, username)
+    if usuario is None or usuario.get("cuenta_eliminada"):
+        raise ValueError("Usuario no existe o cuenta eliminada")
+    
+    # Devolver sólo campos permitidos
+    return {k: usuario[k] for k in (
+        "username", "nombre_completo", "correo", "ubicacion", "rango", "categorias", "mayoria_edad", "aceptacion_politicas", "saldo", "valoracion_media"
+    )}
 
 
 def modificar_perfil(cn, username: str, cambios: dict) -> None:
-    """RF1.3: Modifica datos del perfil de usuario.
+    """RF1.3: Modifica los datos de un perfil de usuario existente.
     
     RS aplicadas:
-    - RS1.3: Nombre de usuario y correo únicos
-    - RS1.7: Entre 1 y 6 categorías de preferencia
-    - RS1.13: Usuario debe existir y no estar eliminado
-    - RS1.18: Rango de interés positivo
+    - RS1.3: Usuario debe existir y no estar eliminado
+    - RS1.7: Campos a modificar válidos y en formato correcto
     
     Args:
         cn: Conexión a la base de datos
-        username: Usuario a modificar
-        cambios: Dict con campos a actualizar
+        username: Nombre de usuario a modificar
+        cambios: Diccionario con los cambios a aplicar (campos válidos: nombre_completo, correo, ubicacion, rango, categorias, mayor_edad, acepta_politica)
     
     Raises:
-        ValueError: Si no cumple validaciones
+        ValueError: Si usuario no existe, cuenta eliminada o cambios inválidos
     """
-    print(" [SERVICE perfiles] modificar_perfil()")
-    # TODO: Implementar validaciones y actualización
-    pass
+    try:
+
+        # Validar existencia del usuario
+        usuario = usuarios_repo.get_usuario(cn, username)
+        if not usuario or usuario.get("cuenta_eliminada"):
+            raise ValueError("El usuario no existe o ha sido eliminado")
+
+        correo = cambios.get("correo")
+        if correo:
+            if not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", correo):
+                raise ValueError("Formato de correo inválido")
+
+        lat = cambios.get("ubi_latitud")
+        lon = cambios.get("ubi_longitud")
+        if lat or lon:
+            if not lat or not lon:
+                raise ValueError("Debes proporcionar ambas coordenadas (latitud y longitud) o ninguna")
+            try:
+                lat = float(lat)
+                lon = float(lon)
+                if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+                    raise ValueError("Coordenadas fuera de rango")
+            except ValueError:
+                raise ValueError("Latitud y longitud deben ser números")
+
+        rango = cambios.get("rango")
+        if rango:
+            try:
+                rango = float(rango)
+                if rango <= 0:
+                    raise ValueError("El rango debe ser mayor a 0")
+            except ValueError:
+                raise ValueError("El rango debe ser un número")
+
+        categorias = cambios.get("categorias", [])
+        if not (1 <= len(categorias) <= 6):
+            raise ValueError("Debe seleccionar entre 1 y 6 categorías preferidas")
+
+        usuarios_repo.update_usuario(cn, username, cambios)
+        usuarios_repo.update_categorias_preferidas(cn, username, categorias)
+    except Exception as e:
+        raise
 
 
 def añadir_saldo(cn, username: str, cantidad: float) -> None:
@@ -197,10 +242,18 @@ def añadir_saldo(cn, username: str, cantidad: float) -> None:
         ValueError: Si cantidad no es positiva o usuario no existe
     """
     print(" [SERVICE perfiles] añadir_saldo()")
-    # TODO: Implementar validaciones
-    # TODO: savepoint(cn, "SP_AÑADIR_SALDO")
-    # TODO: usuarios_repo.update_saldo(cn, username, nuevo_saldo)
-    pass
+    usuario = usuarios_repo.get_usuario(cn, username)
+    if usuario is None or usuario.get("cuenta_eliminada"):
+        raise ValueError("Usuario no existe o cuenta eliminada")
+    
+    if cantidad <= 0:
+        raise ValueError("La cantidad a añadir debe ser positiva")
+    
+    # Calcular nuevo saldo
+    nuevo_saldo = round(usuario["saldo"] + cantidad, 2)
+    
+    # Actualizar saldo (repositorio maneja la persistencia)
+    usuarios_repo.update_saldo(cn, username, nuevo_saldo)
 
 
 def transferir_saldo(cn, username: str, cantidad: float, contraseña: str) -> None:
@@ -221,9 +274,22 @@ def transferir_saldo(cn, username: str, cantidad: float, contraseña: str) -> No
         ValueError: Si saldo insuficiente o contraseña incorrecta
     """
     print(" [SERVICE perfiles] transferir_saldo()")
-    # TODO: Implementar validaciones
-    # TODO: savepoint(cn, "SP_TRANSFERIR_SALDO")
-    pass
+    usuario = usuarios_repo.get_usuario(cn, username)
+    if usuario is None or usuario.get("cuenta_eliminada"):
+        raise ValueError("Usuario no existe o cuenta eliminada")
+    
+    if cantidad <= 0 or cantidad > usuario["saldo"]:
+        raise ValueError("Cantidad a transferir inválida")
+    
+    # Verificar contraseña
+    if not usuarios_repo.verificar_contraseña(cn, username, contraseña):
+        raise ValueError("La contraseña introducida es incorrecta.")
+    
+    # Calcular nuevo saldo
+    nuevo_saldo = round(usuario["saldo"] - cantidad, 2)
+    
+    # Actualizar saldo (repositorio maneja la persistencia)
+    usuarios_repo.update_saldo(cn, username, nuevo_saldo)
 
 
 def dar_baja_usuario(cn, username: str, contraseña: str) -> None:
@@ -241,8 +307,83 @@ def dar_baja_usuario(cn, username: str, contraseña: str) -> None:
     Raises:
         ValueError: Si tiene ventas activas o contraseña incorrecta
     """
-    print(" [SERVICE perfiles] dar_baja_usuario()")
-    # TODO: Verificar que no tiene ventas activas
-    # TODO: Marcar cuenta_eliminada = true
-    # TODO: Marcar productos como no disponibles
-    pass
+    # Verificar existencia y contraseña
+    usuario = usuarios_repo.get_usuario(cn, username)
+    if not usuario or usuario.get("cuenta_eliminada"):
+        raise ValueError("El usuario no existe o ya ha sido eliminado.")
+    
+    if not usuarios_repo.verificar_contraseña(cn, username, contraseña):
+        raise ValueError("La contraseña introducida es incorrecta.")
+
+    # Validar que no hay ventas activas (Vendedor)
+    ventas_activas = obtener_ventas_usuario(cn, username)
+    if len(ventas_activas) > 0:
+        raise ValueError("No puedes darte de baja: tienes ventas en curso.")
+    
+    # Validar que no hay ventas activas (Comprador)
+    ventas_como_comprador = usuarios_repo.obtener_ventas_como_comprador(cn, username)
+    if len(ventas_como_comprador) > 0:
+        raise ValueError("No puedes darte de baja: tienes compras en curso que no han sido confirmadas.")
+    
+    # Validar contraofertas activas
+    productos = get_productos_usuario(cn, username)
+    for p in productos:
+        contraofertas = consultar_contraofertas(cn, p['id_producto'])
+        if len(contraofertas) > 0:
+            raise ValueError(f"El producto '{p['titulo']}' tiene contraofertas activas. Debes resolverlas primero.")
+        
+    # Desactivar productos y ejecutar baja (Borrado lógico)
+    for p in productos:
+        if p.get("disponible"):
+            eliminar_producto(cn, p['id_producto'], username)
+    
+    usuarios_repo.soft_delete_usuario(cn, username)
+
+
+def get_usuario(cn, username: str) -> dict | None:
+    """Obtiene un usuario por username.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+
+    Returns:
+        Dict con datos del usuario o None si no existe
+    """
+    return usuarios_repo.get_usuario(cn, username)
+
+
+def get_categorias_disponibles(cn) -> list[str]:
+    """Obtiene la lista de categorías disponibles de la base de datos.
+
+    Args:
+        cn: Conexión a la base de datos
+
+    Returns:
+        Lista de nombres de categorías
+    """
+    return usuarios_repo.get_categorias_disponibles(cn)
+
+
+def get_categorias_preferidas(cn, username: str) -> list[str]:
+    """Obtiene las categorías preferidas de un usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+
+    Returns:
+        Lista de categorías preferidas del usuario
+    """
+    return usuarios_repo.get_categorias_preferidas(cn, username)
+
+
+def update_saldo(cn, username: str, nuevo_saldo: float) -> None:
+    """Actualiza el saldo del monedero del usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Usuario
+        nuevo_saldo: Nuevo saldo del monedero
+    """
+    usuarios_repo.update_saldo(cn, username, nuevo_saldo)

@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import messagebox
 from src.services.perfiles import usuarios_service
 from src.db.db_app import connect
-from src.repositories.perfiles import usuarios_repo
 import re
 
 
@@ -96,7 +95,8 @@ def show_login(parent=None) -> tuple[bool, str]:
     categorias_disponibles = []
     try:
         with connect() as cn:
-            categorias_disponibles = usuarios_repo.get_categorias_disponibles(cn)
+            categorias_disponibles = usuarios_service.get_categorias_disponibles(cn)
+
     except Exception as e:
         categorias_disponibles = []
     
