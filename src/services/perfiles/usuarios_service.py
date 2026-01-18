@@ -14,7 +14,7 @@ Requisitos Funcionales implementados:
 from src.db.db_app import savepoint
 from src.repositories.perfiles import usuarios_repo
 from src.services.productos.productos_service import get_productos_usuario, eliminar_producto
-from src.services.ventas.ventas_service import obtener_ventas_usuario, consultar_contraofertas
+from src.services.ventas.ventas_service import obtener_ventas_usuario, consultar_contraofertas, obtener_ventas_como_comprador
 import re
 
 
@@ -321,7 +321,7 @@ def dar_baja_usuario(cn, username: str, contraseña: str) -> None:
         raise ValueError("No puedes darte de baja: tienes ventas en curso.")
     
     # Validar que no hay ventas activas (Comprador)
-    ventas_como_comprador = usuarios_repo.obtener_ventas_como_comprador(cn, username)
+    ventas_como_comprador = obtener_ventas_como_comprador(cn, username)
     if len(ventas_como_comprador) > 0:
         raise ValueError("No puedes darte de baja: tienes compras en curso que no han sido confirmadas.")
     
