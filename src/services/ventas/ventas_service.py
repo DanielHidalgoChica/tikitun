@@ -228,7 +228,7 @@ def confirmar_recepcion(cn, id_producto: int, username_comprador: str) -> None:
     producto = consulta_service.consultar_producto(cn, id_producto)
     vendedor = usuarios_service.get_usuario(cn, producto['username_vendedor'])
 
-    usuarios_service.update_saldo(cn, vendedor, vendedor['saldo']+venta['precio_final'])
+    usuarios_service.update_saldo(cn, vendedor['username'], vendedor['saldo']+venta['precio_final'])
 
 
 def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
@@ -257,7 +257,7 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
     
     # Actualizar valoración media del vendedor
     producto = consulta_service.consultar_producto(cn, id_producto)
-    username_vendedor = producto['username']
+    username_vendedor = producto['username_vendedor']
     ventas_vendedor = ventas_repo.get_ventas_usuario(cn, username_vendedor)
 
     vendedor = usuarios_service.get_usuario(cn, username_vendedor)
@@ -270,7 +270,6 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
         valoracion_media = ((num_ventas*vendedor['valoracion_media'])+puntuacion)/(num_ventas+1)
     
     vendedor['valoracion_media']=valoracion_media
-    usuarios_service.update_saldo(cn, vendedor)
 
 def obtener_ventas_usuario(cn, username : str) -> list[dict]:
     """Devuelve todas las ventas asociadas a productos del usuario.
