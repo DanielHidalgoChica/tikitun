@@ -315,10 +315,15 @@ def dar_baja_usuario(cn, username: str, contraseña: str) -> None:
     if not usuarios_repo.verificar_contraseña(cn, username, contraseña):
         raise ValueError("La contraseña introducida es incorrecta.")
 
-    # Validar que no hay ventas activas (Vendedor)      // FALTA COMO COMPRADOR
+    # Validar que no hay ventas activas (Vendedor)
     ventas_activas = obtener_ventas_usuario(cn, username)
     if len(ventas_activas) > 0:
-        raise ValueError("No puedes darte de baja: tienes ventas o compras en curso.")
+        raise ValueError("No puedes darte de baja: tienes ventas en curso.")
+    
+    # Validar que no hay ventas activas (Comprador)
+    ventas_como_comprador = usuarios_repo.obtener_ventas_como_comprador(cn, username)
+    if len(ventas_como_comprador) > 0:
+        raise ValueError("No puedes darte de baja: tienes compras en curso que no han sido confirmadas.")
     
     # Validar contraofertas activas
     productos = get_productos_usuario(cn, username)
