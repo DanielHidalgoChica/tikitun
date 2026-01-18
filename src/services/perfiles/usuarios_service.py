@@ -387,3 +387,14 @@ def update_saldo(cn, username: str, nuevo_saldo: float) -> None:
         nuevo_saldo: Nuevo saldo del monedero
     """
     usuarios_repo.update_saldo(cn, username, nuevo_saldo)
+
+
+def update_valoracion(cn, username: str, valoracion: float) -> None:
+    """Actualiza la valoración media de un usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Usuario a actualizar
+        valoracion: Nueva valoración media (0-5)
+    """
+    usuarios_repo.update_valoracion(cn, username, valoracion)
