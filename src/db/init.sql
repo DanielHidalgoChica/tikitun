@@ -54,6 +54,7 @@ CREATE TABLE Mensaje(
 CREATE TABLE Favorito(
     id_producto INT,
     username VARCHAR2(128),
+    CONSTRAINT PK_Favorito PRIMARY KEY (id_producto, username),
     CONSTRAINT FK_FavoritoProducto FOREIGN KEY (id_producto) REFERENCES Producto(id_producto),
     CONSTRAINT FK_FavoritoUsuario FOREIGN KEY (username) REFERENCES Usuario(username)
 );
