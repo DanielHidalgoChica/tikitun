@@ -1,0 +1,176 @@
+================================================================================
+                    POLÍTICA DE PRIVACIDAD DE TIKITUN
+                    Última actualización: 18 de enero de 2026
+================================================================================
+
+1. INFORMACIÓN DEL RESPONSABLE DEL TRATAMIENTO
+--------------------------------------------------------------------------------
+Responsable: TikiTun S.L.
+CIF: B-12345678
+Dirección: Calle de la Innovación, 42, 18071 Granada, España
+Correo electrónico: privacidad@tikitun.es
+Delegado de Protección de Datos (DPO): dpo@tikitun.es
+
+2. DATOS PERSONALES QUE RECOPILAMOS
+--------------------------------------------------------------------------------
+En TikiTun recopilamos los siguientes datos personales:
+
+   a) Datos identificativos:
+      - Nombre de usuario (username)
+      - Nombre completo
+      - Correo electrónico
+      - Contraseña (almacenada de forma cifrada)
+
+   b) Datos de localización:
+      - Coordenadas geográficas (latitud y longitud)
+      - Rango de búsqueda preferido
+
+   c) Datos económicos:
+      - Saldo del monedero virtual
+      - Historial de transacciones (compras y ventas)
+      - Información de contraofertas
+
+   d) Datos de preferencias:
+      - Categorías de productos de interés
+      - Productos marcados como favoritos
+
+   e) Datos de comunicación:
+      - Mensajes intercambiados con otros usuarios
+      - Conversaciones relacionadas con productos
+
+   f) Datos de valoración:
+      - Valoraciones recibidas de otros usuarios
+      - Valoración media del perfil
+
+3. IDENTIFICACIÓN DE DATOS SENSIBLES
+--------------------------------------------------------------------------------
+Según el Reglamento General de Protección de Datos (RGPD), los siguientes 
+datos tratados por TikiTun requieren especial protección:
+
+   ★ DATOS DE LOCALIZACIÓN: Las coordenadas geográficas permiten conocer
+     la ubicación aproximada del usuario, lo cual constituye información
+     sensible que podría revelar patrones de comportamiento.
+
+   ★ DATOS ECONÓMICOS: El saldo, transacciones e historial de compras/ventas
+     son datos financieros que requieren máxima protección.
+
+   ★ COMUNICACIONES PRIVADAS: Los mensajes entre usuarios son comunicaciones
+     privadas protegidas por el derecho al secreto de las comunicaciones.
+
+4. FINALIDAD DEL TRATAMIENTO
+--------------------------------------------------------------------------------
+Sus datos personales serán tratados para las siguientes finalidades:
+
+   • Gestión de su cuenta de usuario y autenticación
+   • Facilitar transacciones de compraventa entre usuarios
+   • Personalización de recomendaciones de productos
+   • Búsqueda de productos por proximidad geográfica
+   • Comunicación entre compradores y vendedores
+   • Sistema de valoraciones y reputación
+   • Gestión del monedero virtual (ingresos y retiradas)
+   • Envío de notificaciones relacionadas con sus actividades
+   • Cumplimiento de obligaciones legales
+
+5. BASE LEGAL DEL TRATAMIENTO
+--------------------------------------------------------------------------------
+El tratamiento de sus datos se fundamenta en:
+
+   • Consentimiento explícito: Al crear su cuenta y aceptar esta política
+   • Ejecución del contrato: Para prestar los servicios de la plataforma
+   • Interés legítimo: Para prevención del fraude y seguridad
+   • Obligación legal: Cumplimiento de normativa fiscal y mercantil
+
+6. DERECHOS DEL USUARIO (ARCO-POL)
+--------------------------------------------------------------------------------
+Conforme al RGPD y la LOPDGDD, usted tiene derecho a:
+
+   ✓ ACCESO: Conocer qué datos personales tratamos sobre usted
+   ✓ RECTIFICACIÓN: Corregir datos inexactos o incompletos
+   ✓ SUPRESIÓN ("Derecho al olvido"): Solicitar la eliminación de sus datos
+   ✓ OPOSICIÓN: Oponerse a determinados tratamientos de sus datos
+   ✓ PORTABILIDAD: Recibir sus datos en formato estructurado y legible
+   ✓ LIMITACIÓN: Solicitar la limitación del tratamiento en ciertos casos
+
+Para ejercer estos derechos, contacte con: derechos@tikitun.es
+Plazo de respuesta: máximo 30 días desde la recepción de la solicitud.
+
+7. CONSERVACIÓN DE LOS DATOS
+--------------------------------------------------------------------------------
+   • Datos de cuenta activa: Mientras mantenga su cuenta activa
+   • Datos tras baja voluntaria: 30 días (periodo de recuperación)
+   • Datos de transacciones: 6 años (obligación fiscal/mercantil)
+   • Mensajes: 2 años desde el último mensaje de la conversación
+
+8. DESTINATARIOS DE LOS DATOS
+--------------------------------------------------------------------------------
+Sus datos podrán ser comunicados a:
+
+   • Otros usuarios: Datos públicos del perfil (username, valoración)
+   • Autoridades competentes: Cuando exista obligación legal
+   • Proveedores de servicios: Hosting, mantenimiento (bajo contrato)
+
+NO vendemos ni cedemos sus datos a terceros con fines comerciales.
+
+9. MEDIDAS DE SEGURIDAD
+--------------------------------------------------------------------------------
+Implementamos medidas técnicas y organizativas apropiadas:
+
+   • Cifrado de contraseñas mediante algoritmos seguros
+   • Conexiones seguras a la base de datos
+   • Control de acceso basado en autenticación
+   • Copias de seguridad periódicas
+   • Auditorías de seguridad regulares
+
+10. TRANSFERENCIAS INTERNACIONALES
+--------------------------------------------------------------------------------
+Sus datos se almacenan en servidores ubicados en la Unión Europea.
+No realizamos transferencias internacionales fuera del Espacio Económico 
+Europeo.
+
+11. COOKIES Y TECNOLOGÍAS SIMILARES
+--------------------------------------------------------------------------------
+Esta aplicación de escritorio no utiliza cookies. La información de sesión
+se mantiene únicamente durante el uso de la aplicación y no se almacena
+de forma persistente en su dispositivo.
+
+12. MENORES DE EDAD
+--------------------------------------------------------------------------------
+TikiTun está dirigido a mayores de 18 años. Al registrarse, el usuario
+confirma ser mayor de edad. No recopilamos conscientemente datos de menores.
+
+13. MODIFICACIONES DE LA POLÍTICA
+--------------------------------------------------------------------------------
+Nos reservamos el derecho de modificar esta política. Cualquier cambio será
+notificado a través de la aplicación. La fecha de última actualización se
+indica al inicio de este documento.
+
+14. TRÁMITES LEGALES Y REGISTRO
+--------------------------------------------------------------------------------
+TikiTun cumple con:
+
+   • Reglamento (UE) 2016/679 (RGPD)
+   • Ley Orgánica 3/2018 de Protección de Datos (LOPDGDD)
+   • Ley 34/2002 de Servicios de la Sociedad de la Información (LSSI)
+
+Organismos competentes:
+   • Agencia Española de Protección de Datos (AEPD): www.aepd.es
+   • Registro de Actividades de Tratamiento inscrito ante la AEPD
+
+Si considera que sus derechos no han sido atendidos correctamente, puede
+presentar una reclamación ante la AEPD:
+   - Web: www.aepd.es
+   - Dirección: C/ Jorge Juan, 6, 28001 Madrid
+
+15. CONTACTO
+--------------------------------------------------------------------------------
+Para cualquier consulta relacionada con esta política:
+
+   📧 Email: privacidad@tikitun.es
+   📍 Dirección: Calle de la Innovación, 42, 18071 Granada, España
+   📞 Teléfono: +34 958 123 456
+
+================================================================================
+Al crear una cuenta en TikiTun, usted declara haber leído y comprendido
+esta Política de Privacidad y consiente el tratamiento de sus datos
+personales conforme a lo aquí establecido.
+================================================================================
