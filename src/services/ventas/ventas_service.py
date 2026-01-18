@@ -288,7 +288,7 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
     # Actualizar valoración media del vendedor
     producto = consulta_service.consultar_producto(cn, id_producto)
     username_vendedor = producto['username_vendedor']
-    ventas_vendedor = ventas_repo.get_ventas_usuario(cn, username_vendedor)
+    ventas_vendedor = ventas_repo.get_ventas_completadas_usuario(cn, username_vendedor)
 
     vendedor = usuarios_service.get_usuario(cn, username_vendedor)
     num_ventas = len(ventas_vendedor)

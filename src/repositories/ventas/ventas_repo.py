@@ -140,3 +140,27 @@ def get_ventas_como_comprador(cn, username : str) -> list[dict]:
     cur.close()
 
     return rows
+
+def get_ventas_completadas_usuario(cn, username : str) -> list[dict]:
+    """Devuelve todas las ventas completadas asociadas a productos del usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Comprador
+    
+    Returns:
+        Lista de ventas
+    """
+    print("   [REPO ventas] get_ventas_usuario()", username)
+
+    cur = cn.cursor()
+    cur.execute("SELECT * FROM VENDIDO WHERE id_producto IN (SELECT id_producto FROM PRODUCTO WHERE username = ?) AND recepcion_confirmada = ?",
+                (username, 1))
+
+    # Convertir resultados a lista de dicts
+    cols = [desc[0].lower() for desc in cur.description] if cur.description else []
+    rows = [dict(zip(cols, row)) for row in cur.fetchall()]
+
+    cur.close()
+
+    return rows
