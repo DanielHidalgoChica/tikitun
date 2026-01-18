@@ -106,6 +106,6 @@ COMMIT;
 -- | TR_Archivado_Al_Confirmar_Recepcion          | RS3.1| Archiva chats al confirmar recepción                    |
 -- | TR_Archivado_Al_No_Estar_Disponible_Si_No_Lo_Compraste | RS3.2| Archiva chats de no compradores al retirar producto     |
 -- | TR_Archivado_Al_Eliminar_Usuario             | RS3.3| Archiva chats al eliminar una cuenta                    |
--- | TR_No_Chat_Reflexivo                         | RS3.4| Impide crear chats sobre productos propios              |
+-- | TR_No_Chat_Reflexivo                         | RS3.4| Impide crear chats sobre productos propios o no diponibles        |
 --
 -- =====================================================
