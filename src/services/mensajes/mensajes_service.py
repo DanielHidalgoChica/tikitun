@@ -56,7 +56,6 @@ def listar_conversaciones_inicio(cn, username: str) -> list[dict]:
             if last == None:
                 last = {}
                 last['texto'] = "Sin mensajes"
-                print("Sin mensajes")
             otro = chat['vendedor'] if chat['comprador'] == username else chat['comprador']
             out.append({
                 'id_chat': chat['id_chat'],
@@ -85,6 +84,9 @@ def listar_conversaciones_archivadas(cn, username: str) -> list[dict]:
         print(chat)
         if chat['archivado'] == 1:
             last = mensajes_repo.ultimo_mensaje(cn, chat['id_chat'])
+            if last == None:
+                last = {}
+                last['texto'] = "Sin mensajes"
             otro = chat['vendedor'] if chat['comprador'] == username else chat['comprador']
             out.append({
                 'id_chat': chat['id_chat'],
@@ -135,5 +137,4 @@ def crear_conversacion(cn, username: str, id_producto: int) -> bool:
         return True
     else: 
         return False
-    pass
 

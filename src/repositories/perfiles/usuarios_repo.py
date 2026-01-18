@@ -337,7 +337,7 @@ def verificar_contraseña(cn, username: str, contraseña: str) -> bool:
             return False
         
         contraseña_bd = row[0]
-        # Comparación de texto plano (sin hash, como indicó el usuario)
+        # Comparación de texto plano
         return contraseña_bd == contraseña
     except Exception as e:
         print(f"Error verificando contraseña para {username}: {e}")
@@ -348,24 +348,3 @@ def verificar_contraseña(cn, username: str, contraseña: str) -> bool:
         except Exception:
             pass
 
-
-def obtener_ventas_como_comprador(cn, username: str) -> list[dict]:
-    """
-    Obtiene las ventas activas como comprador para un usuario.
-
-    Args:
-        cn: Conexión a la base de datos
-        username: Nombre de usuario
-
-    Returns:
-        Una lista de diccionarios con las ventas activas como comprador.
-    """
-    cursor = cn.cursor()
-    query = """
-        SELECT v.*
-        FROM Vendido v
-        WHERE v.username = ? AND v.recepcion_confirmada = 0
-    """
-    cursor.execute(query, (username,))
-    ventas = cursor.fetchall()
-    return [dict(zip([column[0] for column in cursor.description], row)) for row in ventas]
