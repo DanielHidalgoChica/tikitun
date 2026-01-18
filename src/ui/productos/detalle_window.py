@@ -255,7 +255,7 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
                 messagebox.showerror("Error", f"Error al comprar producto: {e}")
         
         def on_contraoferta():
-            from src.ui.productos.realizar_contraoferta_win import open_realizar_contraoferta
+            from tikitun.src.ui.productos.realizar_contraoferta_window import open_realizar_contraoferta
             open_realizar_contraoferta(id_producto, username_actual)
         
         def on_favorito():
@@ -525,7 +525,7 @@ def show_detalle_view(parent, id_producto: int, username_actual: str, origen: st
                 messagebox.showerror("Error", f"Error al comprar producto: {e}")
         
         def on_contraoferta():
-            from src.ui.productos.realizar_contraoferta_win import open_realizar_contraoferta
+            from tikitun.src.ui.productos.realizar_contraoferta_window import open_realizar_contraoferta
             open_realizar_contraoferta(id_producto, username_actual)
         
         def on_favorito():

@@ -273,4 +273,26 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
     usuarios_repo.update_usuario(cn, vendedor)
 
 def obtener_ventas_usuario(cn, username : str) -> list[dict]:
+    """Devuelve todas las ventas asociadas a productos del usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Comprador
+    
+    Returns:
+        Lista de ventas
+    """
     return ventas_repo.get_ventas_usuario(username)
+
+def obtener_productos_comprados(cn, username : str) -> list[dict]:
+    """
+    Devuelve los productos comprados por el usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Comprador
+    
+    Returns:
+        Lista de productos
+    """
+    return ventas_repo.get_productos_comprados(cn, username)

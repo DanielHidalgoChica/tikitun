@@ -5,6 +5,7 @@ from src.ui.perfil.perfil_window import show_perfil_view
 from src.ui.feed.feed_window import show_feed_view
 from src.ui.mensajes.mensajes_window import show_mensajes_view
 from src.ui.favoritos.favoritos_window import show_favoritos_view
+from src.ui.productos.productos_comprados_window import show_productos_comprados_view
 from src.db import db_app
 import tkinter.messagebox as messagebox
 
@@ -101,19 +102,22 @@ def run_app(username="bob"):
     btn_feed.pack(pady=(20, 5), padx=10)
     
     btn_perfil = create_menu_button(sidebar, "Perfil", "👤", lambda: show_perfil_view(content_frame, username))
-    btn_perfil.pack(pady=5, padx=10)
+    btn_perfil.pack(pady=5, padx=12)
     
     btn_favoritos = create_menu_button(sidebar, "Favoritos", "♥", lambda: show_favoritos_view(content_frame, username))
-    btn_favoritos.pack(pady=5, padx=10)
+    btn_favoritos.pack(pady=5, padx=12)
     
     btn_mensajes = create_menu_button(sidebar, "Mensajes", "📧", lambda: show_mensajes_view(content_frame, username))
-    btn_mensajes.pack(pady=5, padx=10)
+    btn_mensajes.pack(pady=5, padx=12)
     
     btn_mis_productos = create_menu_button(sidebar, "Mis Productos", "📦", lambda: show_mis_productos_view(content_frame, username))
-    btn_mis_productos.pack(pady=5, padx=10)
+    btn_mis_productos.pack(pady=5, padx=12)
     
     btn_crear = create_menu_button(sidebar, "Publicar", "➕", lambda: show_publicar_view(content_frame, username))
-    btn_crear.pack(pady=5, padx=10)
+    btn_crear.pack(pady=5, padx=12)
+
+    btn_crear = create_menu_button(sidebar, "Productos comprados", "📦", lambda: show_productos_comprados_view(content_frame, username))
+    btn_crear.pack(pady=5, padx=12)
     
     # Developer button: abre diálogo para inicializar la BD
     def on_developer_init():

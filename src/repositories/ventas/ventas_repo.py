@@ -100,3 +100,28 @@ def get_ventas_usuario(cn, username : str) -> list[dict]:
     cur.close()
 
     return rows
+
+def get_productos_comprados(cn, username : str) -> list[dict]:
+    """
+    Devuelve los productos comprados por el usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Comprador
+    
+    Returns:
+        Lista de productos
+    """
+    print("   [REPO ventas] get_productos_comprados()", username)
+
+    cur = cn.cursor()
+    consulta = "SELECT * FROM PRODUCTO WHERE id_producto IN (SELECT id_producto FROM VENDIDO WHERE username = ?)"
+    cur.execute(consulta, username)
+
+    # Convertir resultados a lista de dicts
+    cols = [desc[0].lower() for desc in cur.description] if cur.description else []
+    rows = [dict(zip(cols, row)) for row in cur.fetchall()]
+
+    cur.close()
+
+    return rows
