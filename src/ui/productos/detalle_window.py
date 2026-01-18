@@ -304,14 +304,15 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
     ).pack(side=tk.LEFT, padx=5)
 
 
-def show_detalle_view(parent, id_producto: int, username_actual: str, origen: str = "mis_productos"):
+def show_detalle_view(parent, id_producto: int, username_actual: str, origen: str = "mis_productos", profile_user: str = None):
     """Muestra el detalle de un producto en el content_frame (vista embebida).
     
     Args:
         parent: Frame contenedor (content_frame)
         id_producto: ID del producto a mostrar
         username_actual: Usuario que está viendo el producto
-        origen: De dónde se llamó ("mis_productos", "feed", "favoritos")
+        origen: De dónde se llamó ("mis_productos", "feed", "favoritos", "perfil_usuario")
+        profile_user: Usuario del perfil (solo se usa si origen es "perfil_usuario")
     """
     from src.services.productos.productos_service import consultar_producto
     
@@ -323,6 +324,9 @@ def show_detalle_view(parent, id_producto: int, username_actual: str, origen: st
         elif origen == "favoritos":
             from src.ui.favoritos.favoritos_window import show_favoritos_view
             show_favoritos_view(parent, username_actual)
+        elif origen == "perfil_usuario" and profile_user:
+            from src.ui.productos.productos_usuario_window import show_productos_usuario_view
+            show_productos_usuario_view(parent, username_actual, profile_user)
         else:  # mis_productos o default
             from src.ui.productos.mis_productos_window import show_mis_productos_view
             show_mis_productos_view(parent, username_actual)

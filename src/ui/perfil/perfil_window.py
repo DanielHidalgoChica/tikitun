@@ -67,8 +67,12 @@ def show_perfil_view(parent_frame, current_user, profile_user=None):
     
     # Botón de ver productos del usuario (visible para todos)
     def on_ver_productos():
-        from src.ui.productos.mis_productos_window import show_mis_productos_view
-        show_mis_productos_view(parent_frame, username)
+        if es_mi_perfil:
+            from src.ui.productos.mis_productos_window import show_mis_productos_view
+            show_mis_productos_view(parent_frame, username)
+        else:
+            from src.ui.productos.productos_usuario_window import show_productos_usuario_view
+            show_productos_usuario_view(parent_frame, current_user, username)
     
     tk.Button(
         frm_principales,
