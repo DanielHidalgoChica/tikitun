@@ -5,8 +5,8 @@ from src.services.feed_busqueda_favs.favoritos_service import (
     consultar_favoritos,
     quitar_favorito
 )
-
 from src.ui.productos.detalle_window import show_detalle_view
+from src.ui.theme import *
 
 from io import BytesIO
 
@@ -40,7 +40,8 @@ def show_favoritos_view(parent_frame, username="bob"):
     tk.Label(
         parent_frame,
         text="♥ Mis Favoritos",
-        font=("Arial", 16, "bold")
+        font=("Arial", 16, "bold"),
+        fg=PRIMARY_COLOR
     ).pack(pady=20)
 
     # Información
@@ -48,13 +49,13 @@ def show_favoritos_view(parent_frame, username="bob"):
         parent_frame,
         text="Productos que has guardado como favoritos",
         font=("Arial", 10),
-        fg="gray"
+        fg=TEXT_SECONDARY
     ).pack(pady=5)
 
     # Frame scrollable para productos favoritos
-    canvas = tk.Canvas(parent_frame, height=400)
+    canvas = tk.Canvas(parent_frame, height=400, bg=BG_PRIMARY, highlightthickness=0)
     scrollbar = tk.Scrollbar(parent_frame, orient="vertical", command=canvas.yview)
-    scrollable_frame = tk.Frame(canvas)
+    scrollable_frame = tk.Frame(canvas, bg=BG_PRIMARY)
 
     scrollable_frame.bind(
         "<Configure>",
@@ -62,7 +63,7 @@ def show_favoritos_view(parent_frame, username="bob"):
     )
 
     canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.configure(yscrollcommand=scrollbar.set, bg=BG_PRIMARY)
 
     # Obtener favoritos reales de la BD
     favoritos = []
@@ -80,7 +81,7 @@ def show_favoritos_view(parent_frame, username="bob"):
             text="No tienes productos favoritos aún\n\n"
                  "Explora el Feed y marca productos con ♥",
             font=("Arial", 11),
-            fg="gray",
+            fg=TEXT_SECONDARY,
             justify=tk.CENTER
         ).pack(pady=50)
     else:
@@ -107,8 +108,8 @@ def show_favoritos_view(parent_frame, username="bob"):
                         prod_frame,
                         text="🖼️",
                         font=("Arial", 24),
-                        fg="gray",
-                        bg="#f0f0f0",
+                        fg=TEXT_SECONDARY,
+                        bg=BG_SECONDARY,
                         width=3,
                         height=2
                     ).pack(side=tk.LEFT, padx=10, pady=5)
@@ -118,8 +119,8 @@ def show_favoritos_view(parent_frame, username="bob"):
                     prod_frame,
                     text="🖼️",
                     font=("Arial", 24),
-                    fg="gray",
-                    bg="#f0f0f0",
+                    fg=TEXT_SECONDARY,
+                    bg=BG_SECONDARY,
                     width=3,
                     height=2
                 ).pack(side=tk.LEFT, padx=10, pady=5)
