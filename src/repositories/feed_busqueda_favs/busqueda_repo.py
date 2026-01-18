@@ -33,8 +33,6 @@ def get_busqueda(cn, filtros: dict) -> list[dict]:
     categoria = filtros.get("categoria")
     orden = filtros.get("orden", "rating")
     
-    print(f"   [REPO busqueda] get_busqueda() q='{q}', categoria='{categoria}', orden='{orden}'")
-    
     cur = cn.cursor()
     
     # Construir query dinámica
@@ -49,6 +47,7 @@ def get_busqueda(cn, filtros: dict) -> list[dict]:
             p.promocion,
             p.disponible,
             p.num_favs,
+            p.imagen,
             u.valoracion_media
         FROM producto p
         JOIN usuario u ON p.username = u.username
@@ -75,9 +74,6 @@ def get_busqueda(cn, filtros: dict) -> list[dict]:
     else:  # default: rating
         query += " ORDER BY u.valoracion_media DESC"
     
-    print(f"   [DEBUG BUSQUEDA] Query: {query}")
-    print(f"   [DEBUG BUSQUEDA] Params: {params}")
-    
     cur.execute(query, params)
     
     productos = []
@@ -92,12 +88,11 @@ def get_busqueda(cn, filtros: dict) -> list[dict]:
             "promocion": row[6] or 0,
             "disponible": row[7],
             "num_favs": row[8] or 0,
-            "valoracion_vendedor": row[9] or 0
+            "imagen": row[9],
+            "valoracion_vendedor": row[10] or 0
         })
     
     cur.close()
-    
-    print(f"   [DEBUG BUSQUEDA] Encontrados {len(productos)} productos")
     
     return productos
 
@@ -111,14 +106,10 @@ def get_categorias(cn) -> list[str]:
     Returns:
         Lista de nombres de categorías ordenados alfabéticamente
     """
-    print("   [REPO busqueda] get_categorias()")
-    
     cur = cn.cursor()
     cur.execute("SELECT nombre FROM categoria ORDER BY nombre ASC")
     
     categorias = [row[0] for row in cur.fetchall()]
     cur.close()
-    
-    print(f"   [DEBUG BUSQUEDA] Categorías obtenidas de la BD: {categorias}")
     
     return categorias
