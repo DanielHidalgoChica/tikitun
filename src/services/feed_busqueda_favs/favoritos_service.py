@@ -33,10 +33,9 @@ def agregar_favorito(cn, username: str, id_producto: int) -> None:
         ValueError: Si producto no existe, no disponible, ya en favoritos, o usuario eliminado
     """
     # Validar que el usuario existe y tiene cuenta activa
-    usuario = usuarios_repo.get_usuario(cn, username)
-    if not usuario:
+    if not usuarios_repo.get_usuario(cn, username):
         raise ValueError("El usuario no existe")
-    if usuario.get("cuenta_eliminada"):
+    if usuarios_repo.get_cuenta_eliminada(cn, username):
         raise ValueError("No puedes realizar esta acción con una cuenta eliminada")
     
     # Validar que el producto existe

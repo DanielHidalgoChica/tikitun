@@ -21,6 +21,58 @@ import re
 _PW_REQUIRES = [r"[A-Z]", r"[a-z]", r"[0-9]", r"[^A-Za-z0-9]"]
 
 
+def get_cuenta_eliminada(cn, username: str) -> bool:
+    """Verifica si la cuenta de un usuario está eliminada.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+    
+    Returns:
+        True si la cuenta está eliminada, False en caso contrario
+    """
+    return usuarios_repo.get_cuenta_eliminada(cn, username)
+
+
+def get_nombre_completo(cn, username: str) -> str | None:
+    """Obtiene el nombre completo de un usuario.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+    
+    Returns:
+        Nombre completo del usuario o None si no existe
+    """
+    return usuarios_repo.get_nombre_completo(cn, username)
+
+
+def get_saldo(cn, username: str) -> float:
+    """Obtiene el saldo de un usuario.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+    
+    Returns:
+        Saldo del usuario o 0.0 si no existe
+    """
+    return usuarios_repo.get_saldo(cn, username)
+
+
+def get_valoracion_media(cn, username: str) -> float | None:
+    """Obtiene la valoración media de un usuario.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+    
+    Returns:
+        Valoración media del usuario o None si no tiene valoraciones
+    """
+    return usuarios_repo.get_valoracion_media(cn, username)
+
+
 def verificar_credenciales(cn, username: str, contraseña: str) -> bool:
     """Verifica si las credenciales de un usuario son correctas.
     
@@ -157,14 +209,16 @@ def consultar_perfil(cn, username: str) -> dict:
         ValueError: Si usuario no existe o cuenta eliminada
     """
     print(" [SERVICE perfiles] consultar_perfil()")
-    usuario = usuarios_repo.get_usuario(cn, username)
-    if usuario is None or usuario.get("cuenta_eliminada"):
+    if usuarios_repo.get_usuario(cn, username) is None or get_cuenta_eliminada(cn, username):
         raise ValueError("Usuario no existe o cuenta eliminada")
     
     # Devolver sólo campos permitidos
-    return {k: usuario[k] for k in (
-        "username", "nombre_completo", "correo", "ubicacion", "rango", "categorias", "mayoria_edad", "aceptacion_politicas", "saldo", "valoracion_media"
-    )}
+    return {
+        "username": username,
+        "nombre_completo": get_nombre_completo(cn, username),
+        "saldo": get_saldo(cn, username),
+        "valoracion_media": get_valoracion_media(cn, username)
+    }
 
 
 def modificar_perfil(cn, username: str, cambios: dict) -> None:
@@ -185,8 +239,7 @@ def modificar_perfil(cn, username: str, cambios: dict) -> None:
     try:
 
         # Validar existencia del usuario
-        usuario = usuarios_repo.get_usuario(cn, username)
-        if not usuario or usuario.get("cuenta_eliminada"):
+        if usuarios_repo.get_usuario(cn, username) is None or get_cuenta_eliminada(cn, username):
             raise ValueError("El usuario no existe o ha sido eliminado")
 
         correo = cambios.get("correo")
@@ -242,15 +295,15 @@ def añadir_saldo(cn, username: str, cantidad: float) -> None:
         ValueError: Si cantidad no es positiva o usuario no existe
     """
     print(" [SERVICE perfiles] añadir_saldo()")
-    usuario = usuarios_repo.get_usuario(cn, username)
-    if usuario is None or usuario.get("cuenta_eliminada"):
+    if usuarios_repo.get_usuario(cn, username) is None or get_cuenta_eliminada(cn, username):
         raise ValueError("Usuario no existe o cuenta eliminada")
     
     if cantidad <= 0:
         raise ValueError("La cantidad a añadir debe ser positiva")
     
     # Calcular nuevo saldo
-    nuevo_saldo = round(usuario["saldo"] + cantidad, 2)
+    saldo_actual = get_saldo(cn, username)
+    nuevo_saldo = round(saldo_actual + cantidad, 2)
     
     # Actualizar saldo (repositorio maneja la persistencia)
     usuarios_repo.update_saldo(cn, username, nuevo_saldo)
@@ -274,11 +327,11 @@ def transferir_saldo(cn, username: str, cantidad: float, contraseña: str) -> No
         ValueError: Si saldo insuficiente o contraseña incorrecta
     """
     print(" [SERVICE perfiles] transferir_saldo()")
-    usuario = usuarios_repo.get_usuario(cn, username)
-    if usuario is None or usuario.get("cuenta_eliminada"):
+    if usuarios_repo.get_usuario(cn, username) is None or get_cuenta_eliminada(cn, username):
         raise ValueError("Usuario no existe o cuenta eliminada")
     
-    if cantidad <= 0 or cantidad > usuario["saldo"]:
+    saldo_actual = get_saldo(cn, username)
+    if cantidad <= 0 or cantidad > saldo_actual:
         raise ValueError("Cantidad a transferir inválida")
     
     # Verificar contraseña
@@ -286,7 +339,7 @@ def transferir_saldo(cn, username: str, cantidad: float, contraseña: str) -> No
         raise ValueError("La contraseña introducida es incorrecta.")
     
     # Calcular nuevo saldo
-    nuevo_saldo = round(usuario["saldo"] - cantidad, 2)
+    nuevo_saldo = round(saldo_actual - cantidad, 2)
     
     # Actualizar saldo (repositorio maneja la persistencia)
     usuarios_repo.update_saldo(cn, username, nuevo_saldo)
@@ -308,8 +361,7 @@ def dar_baja_usuario(cn, username: str, contraseña: str) -> None:
         ValueError: Si tiene ventas activas o contraseña incorrecta
     """
     # Verificar existencia y contraseña
-    usuario = usuarios_repo.get_usuario(cn, username)
-    if not usuario or usuario.get("cuenta_eliminada"):
+    if usuarios_repo.get_usuario(cn, username) is None or get_cuenta_eliminada(cn, username):
         raise ValueError("El usuario no existe o ya ha sido eliminado.")
     
     if not usuarios_repo.verificar_contraseña(cn, username, contraseña):

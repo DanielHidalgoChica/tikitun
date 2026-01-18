@@ -101,6 +101,126 @@ def insert_usuario(cn, usuario: dict) -> None:
             pass
 
 
+def get_cuenta_eliminada(cn, username: str) -> bool:
+    """Verifica si la cuenta de un usuario está eliminada.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+    
+    Returns:
+        True si la cuenta está eliminada, False en caso contrario
+    """
+    cur = cn.cursor()
+    try:
+        cur.execute(
+            "SELECT cuenta_eliminada FROM Usuario WHERE username = ?",
+            (username,)
+        )
+        row = cur.fetchone()
+        if row is None:
+            return True  # Si no existe, se considera como eliminada
+        return bool(row[0]) if row[0] is not None else False
+    except Exception as e:
+        print(f"Error verificando cuenta eliminada de {username}: {e}")
+        return True
+    finally:
+        try:
+            cur.close()
+        except Exception:
+            pass
+
+
+def get_nombre_completo(cn, username: str) -> str | None:
+    """Obtiene el nombre completo de un usuario.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+    
+    Returns:
+        Nombre completo del usuario o None si no existe
+    """
+    cur = cn.cursor()
+    try:
+        cur.execute(
+            "SELECT nombre_completo FROM Usuario WHERE username = ?",
+            (username,)
+        )
+        row = cur.fetchone()
+        if row is None:
+            return None
+        return row[0]
+    except Exception as e:
+        print(f"Error obteniendo nombre completo de {username}: {e}")
+        return None
+    finally:
+        try:
+            cur.close()
+        except Exception:
+            pass
+
+
+def get_saldo(cn, username: str) -> float:
+    """Obtiene el saldo de un usuario.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+    
+    Returns:
+        Saldo del usuario o 0.0 si no existe
+    """
+    cur = cn.cursor()
+    try:
+        cur.execute(
+            "SELECT saldo FROM Usuario WHERE username = ?",
+            (username,)
+        )
+        row = cur.fetchone()
+        if row is None:
+            return 0.0
+        return row[0] if row[0] is not None else 0.0
+    except Exception as e:
+        print(f"Error obteniendo saldo de {username}: {e}")
+        return 0.0
+    finally:
+        try:
+            cur.close()
+        except Exception:
+            pass
+
+
+def get_valoracion_media(cn, username: str) -> float | None:
+    """Obtiene la valoración media de un usuario.
+    
+    Args:
+        cn: Conexión a la base de datos
+        username: Nombre de usuario
+    
+    Returns:
+        Valoración media del usuario o None si no existe
+    """
+    cur = cn.cursor()
+    try:
+        cur.execute(
+            "SELECT valoracion_media FROM Usuario WHERE username = ?",
+            (username,)
+        )
+        row = cur.fetchone()
+        if row is None:
+            return None
+        return row[0]
+    except Exception as e:
+        print(f"Error obteniendo valoración media de {username}: {e}")
+        return None
+    finally:
+        try:
+            cur.close()
+        except Exception:
+            pass
+
+
 def get_usuario(cn, username: str) -> dict | None:
     """Obtiene un usuario por username.
     

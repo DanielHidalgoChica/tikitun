@@ -29,11 +29,16 @@ def show_perfil_view(parent_frame, current_user, profile_user=None):
     # Cargar datos del usuario
     try:
         with connect() as cn:
-            usuario = usuarios_service.get_usuario(cn, username)
-            if usuario is None or usuario.get("cuenta_eliminada"):
+            # Verificar existencia y estado de la cuenta
+            if usuarios_service.get_usuario(cn, username) is None or usuarios_service.get_cuenta_eliminada(cn, username):
                 messagebox.showerror("Error", "El usuario no existe o ha sido eliminado")
                 tk.Label(parent_frame, text="Usuario no encontrado").pack(pady=20)
                 return
+            # Obtener datos específicos mediante services
+            nombre_completo = usuarios_service.get_nombre_completo(cn, username)
+            valoracion = usuarios_service.get_valoracion_media(cn, username)
+            if es_mi_perfil:
+                saldo = usuarios_service.get_saldo(cn, username)
     except Exception as e:
         messagebox.showerror("Error", f"Error cargando perfil: {e}")
         tk.Label(parent_frame, text="Error al cargar el perfil").pack(pady=20)
@@ -44,16 +49,14 @@ def show_perfil_view(parent_frame, current_user, profile_user=None):
     frm_info.pack(padx=10, pady=10, fill=tk.X)
     
     # Nombre completo y username
-    tk.Label(frm_info, text=f"Nombre: {usuario.get('nombre_completo', 'N/A')}", font=("Arial", 12, "bold")).pack(anchor="w", pady=5)
+    tk.Label(frm_info, text=f"Nombre: {nombre_completo or 'N/A'}", font=("Arial", 12, "bold")).pack(anchor="w", pady=5)
     tk.Label(frm_info, text=f"Usuario: @{username}", font=("Arial", 11)).pack(anchor="w", pady=2)
     
     # Saldo (solo visible si es mi perfil)
     if es_mi_perfil:
-        saldo = usuario.get("saldo", 0.0)
         tk.Label(frm_info, text=f"Saldo: €{saldo:.2f}", font=("Arial", 11)).pack(anchor="w", pady=2)
     
-    # Valoración media
-    valoracion = usuario.get("valoracion_media", 0)
+    # Mostrar valoración media
     val_texto = f"{valoracion:.1f}" if valoracion else "Sin valoraciones"
     tk.Label(frm_info, text=f"Valoración media: {val_texto} ⭐", font=("Arial", 11)).pack(anchor="w", pady=2)
     
