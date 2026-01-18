@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 from src.db.db_app import connect
-from src.repositories.perfiles import usuarios_repo
-from src.repositories.productos import productos_repo
+from src.services.perfiles import usuarios_service
 
 
 def show_perfil_view(parent_frame, username="bob"):
@@ -19,7 +18,7 @@ def show_perfil_view(parent_frame, username="bob"):
     # Cargar datos del usuario
     try:
         with connect() as cn:
-            usuario = usuarios_repo.get_usuario(cn, username)
+            usuario = usuarios_service.get_usuario(cn, username)
             if usuario is None or usuario.get("cuenta_eliminada"):
                 messagebox.showerror("Error", "El usuario no existe o ha sido eliminado")
                 tk.Label(parent_frame, text="Usuario no encontrado").pack(pady=20)
@@ -103,14 +102,49 @@ def show_perfil_view(parent_frame, username="bob"):
     ttk.Separator(frm_acciones, orient="horizontal").pack(fill=tk.X, pady=10)
     
     # Botón de dar de baja (separado)
+    def on_dar_baja():
+        # Crear una pequeña ventana emergente para pedir la contraseña
+        dialog = tk.Toplevel(parent_frame)
+        dialog.title("Confirmar Baja")
+        dialog.geometry("300x200")
+        
+        tk.Label(dialog, text="Introduce tu contraseña para confirmar:", wraplength=250).pack(pady=10)
+        pass_var = tk.StringVar()
+        entry = tk.Entry(dialog, textvariable=pass_var, show="*")
+        entry.pack(pady=5)
+        
+        def ejecutar_baja():
+            confirmacion = messagebox.askyesno("¡Atención!", "¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.")
+            if confirmacion:
+                try:
+                    from src.services.perfiles.usuarios_service import dar_baja_usuario
+                    from src.db.db_app import connect
+                    from src.ui.login_window import show_login
+                    
+                    with connect() as cn:
+                        dar_baja_usuario(cn, username, pass_var.get())
+                    
+                    messagebox.showinfo("Baja confirmada", "Tu cuenta ha sido eliminada. Gracias por usar Tikitun.")
+                    dialog.destroy()
+                    
+                    # Redirección limpiando la raíz
+                    root = parent_frame.winfo_toplevel()
+                    for widget in root.winfo_children():
+                        widget.destroy()
+                    show_login(root)
+                except Exception as e:
+                    messagebox.showerror("Error", str(e))
+
+        tk.Button(dialog, text="CONFIRMAR ELIMINACIÓN", bg="#F44336", fg="white", command=ejecutar_baja).pack(pady=20)
+
+    # Actualiza el botón que tenías en DISABLED:
     tk.Button(
         frm_acciones,
         text="🗑️ Dar de Baja",
-        state=tk.DISABLED,
+        command=on_dar_baja,
         bg="#F44336",
         fg="white",
-        font=("Arial", 10),
+        font=("Arial", 10, "bold"),
         padx=20,
-        pady=10,
-        disabledforeground="white"
+        pady=10
     ).pack(fill=tk.X, pady=5)
