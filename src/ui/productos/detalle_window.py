@@ -143,13 +143,26 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
     vendedor_info = tk.Frame(vendedor_frame, bg="#f0f0f0")
     vendedor_info.pack(anchor="w")
     
-    tk.Label(
+    username_vendedor = producto.get('username_vendedor', 'desconocido')
+    
+    def on_ver_perfil_vendedor():
+        from src.ui.perfil.perfil_window import show_perfil_view
+        # Buscar el content_frame de la ventana principal
+        main_window = parent.winfo_toplevel()
+        if hasattr(main_window, 'content_frame'):
+            show_perfil_view(main_window.content_frame, username_actual, username_vendedor)
+            win.destroy()
+    
+    vendedor_label = tk.Label(
         vendedor_info,
-        text=f"@{producto.get('username_vendedor', 'desconocido')}",
-        font=("Arial", 11),
+        text=f"@{username_vendedor}",
+        font=("Arial", 11, "underline"),
         fg="blue",
-        bg="#f0f0f0"
-    ).pack(side=tk.LEFT)
+        bg="#f0f0f0",
+        cursor="hand2"
+    )
+    vendedor_label.pack(side=tk.LEFT)
+    vendedor_label.bind("<Button-1>", lambda e: on_ver_perfil_vendedor())
     
     valoracion = producto.get("valoracion_vendedor")
     if valoracion is not None and valoracion > 0:
@@ -240,7 +253,7 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
         ).pack(pady=5)
 
     else:
-        # El comprador puede comprar, hacer contraoferta o añadir a favoritos
+        # El comprador puede comprar, hacer contraoferta
         def on_comprar():
             from src.services.ventas.ventas_service import realizar_compra_directa
             from src.db.db_app import begin_transaction, commit, rollback
@@ -258,19 +271,7 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
             from src.ui.productos.realizar_contraoferta_window import open_realizar_contraoferta
             open_realizar_contraoferta(id_producto, username_actual)
         
-        def on_favorito():
-            from src.services.feed_busqueda_favs.favoritos_service import add_favorito
-            from src.db.db_app import begin_transaction, commit, rollback
-            
-            cn = begin_transaction()
-            try:
-                add_favorito(cn, username_actual, id_producto)
-                commit(cn)
-                messagebox.showinfo("Favorito", "Producto añadido a favoritos.")
-            except Exception as e:
-                rollback(cn)
-                messagebox.showerror("Error", f"Error al añadir a favoritos: {e}")
-        
+
         tk.Button(
             btn_frame,
             text="🛒 Comprar",
@@ -287,13 +288,6 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
             command=on_contraoferta,
             width=12
         ).pack(side=tk.LEFT, padx=5)
-        
-        tk.Button(
-            btn_frame,
-            text="❤️ Favorito",
-            command=on_favorito,
-            width=12
-        ).pack(side=tk.LEFT, padx=5)
     
     # Botón cerrar
     tk.Button(
@@ -304,14 +298,15 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
     ).pack(side=tk.LEFT, padx=5)
 
 
-def show_detalle_view(parent, id_producto: int, username_actual: str, origen: str = "mis_productos"):
+def show_detalle_view(parent, id_producto: int, username_actual: str, origen: str = "mis_productos", profile_user: str = None):
     """Muestra el detalle de un producto en el content_frame (vista embebida).
     
     Args:
         parent: Frame contenedor (content_frame)
         id_producto: ID del producto a mostrar
         username_actual: Usuario que está viendo el producto
-        origen: De dónde se llamó ("mis_productos", "feed", "favoritos")
+        origen: De dónde se llamó ("mis_productos", "feed", "favoritos", "perfil_usuario")
+        profile_user: Usuario del perfil (solo se usa si origen es "perfil_usuario")
     """
     from src.services.productos.productos_service import consultar_producto
     
@@ -323,6 +318,9 @@ def show_detalle_view(parent, id_producto: int, username_actual: str, origen: st
         elif origen == "favoritos":
             from src.ui.favoritos.favoritos_window import show_favoritos_view
             show_favoritos_view(parent, username_actual)
+        elif origen == "perfil_usuario" and profile_user:
+            from src.ui.productos.productos_usuario_window import show_productos_usuario_view
+            show_productos_usuario_view(parent, username_actual, profile_user)
         else:  # mis_productos o default
             from src.ui.productos.mis_productos_window import show_mis_productos_view
             show_mis_productos_view(parent, username_actual)
@@ -456,13 +454,23 @@ def show_detalle_view(parent, id_producto: int, username_actual: str, origen: st
     vendedor_frame.pack(fill=tk.X, pady=(0, 15))
     
     tk.Label(vendedor_frame, text="Vendedor:", font=("Arial", 10, "bold"), bg="#f0f0f0").pack(side=tk.LEFT)
-    tk.Label(
+    
+    username_vendedor = producto.get('username_vendedor', 'desconocido')
+    
+    def on_ver_perfil_vendedor():
+        from src.ui.perfil.perfil_window import show_perfil_view
+        show_perfil_view(parent, username_actual, username_vendedor)
+    
+    vendedor_btn = tk.Label(
         vendedor_frame,
-        text=f"@{producto.get('username_vendedor', 'desconocido')}",
-        font=("Arial", 11),
+        text=f"@{username_vendedor}",
+        font=("Arial", 11, "underline"),
         fg="blue",
-        bg="#f0f0f0"
-    ).pack(side=tk.LEFT, padx=10)
+        bg="#f0f0f0",
+        cursor="hand2"
+    )
+    vendedor_btn.pack(side=tk.LEFT, padx=10)
+    vendedor_btn.bind("<Button-1>", lambda e: on_ver_perfil_vendedor())
     
     valoracion = producto.get("valoracion_vendedor")
     if valoracion and valoracion > 0:
@@ -528,19 +536,6 @@ def show_detalle_view(parent, id_producto: int, username_actual: str, origen: st
             from src.ui.productos.realizar_contraoferta_window import open_realizar_contraoferta
             open_realizar_contraoferta(id_producto, username_actual)
         
-        def on_favorito():
-            from src.services.feed_busqueda_favs.favoritos_service import add_favorito
-            from src.db.db_app import begin_transaction, commit, rollback
-            
-            cn = begin_transaction()
-            try:
-                add_favorito(cn, username_actual, id_producto)
-                commit(cn)
-                messagebox.showinfo("Favorito", "Añadido a favoritos.")
-            except Exception as e:
-                rollback(cn)
-                messagebox.showerror("Error", str(e))
-        
+   
         tk.Button(btn_frame, text="🛒 Comprar", command=on_comprar, bg="#4CAF50", fg="white", width=12).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="💬 Contraoferta", command=on_contraoferta, width=12).pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_frame, text="❤️ Favorito", command=on_favorito, width=12).pack(side=tk.LEFT, padx=5)

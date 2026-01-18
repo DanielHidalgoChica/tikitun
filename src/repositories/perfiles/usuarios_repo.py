@@ -224,7 +224,6 @@ def soft_delete_usuario(cn, username: str) -> None:
             WHERE username = ?
         """, (username,))
         
-        # Opcional: Limpiar categorías preferidas
         cur.execute("DELETE FROM Preferidos WHERE username = ?", (username,))
         
         # Confirmar los cambios en la base de datos
@@ -338,7 +337,7 @@ def verificar_contraseña(cn, username: str, contraseña: str) -> bool:
             return False
         
         contraseña_bd = row[0]
-        # Comparación de texto plano (sin hash, como indicó el usuario)
+        # Comparación de texto plano
         return contraseña_bd == contraseña
     except Exception as e:
         print(f"Error verificando contraseña para {username}: {e}")
