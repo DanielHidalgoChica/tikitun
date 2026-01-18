@@ -175,7 +175,7 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
     btn_frame.pack(pady=20)
     
     if es_vendedor:
-        # El vendedor puede editar o eliminar
+        # El vendedor puede editar, eliminar, promocionar o ver las contraofertas disponibles
         def on_editar():
             from src.ui.productos.editar_window import open_editar_producto
             win.destroy()
@@ -205,6 +205,10 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
             from src.ui.productos.promocionar_window import open_promocionar_producto
             open_promocionar_producto(win, id_producto, username_actual)
         
+        def on_mostrar_contraofertas():
+            from src.ui.productos.contraofertas_window import open_gestionar_contraofertas
+            open_gestionar_contraofertas(win, id_producto)
+        
         tk.Button(
             btn_frame,
             text="✏️ Editar",
@@ -227,13 +231,32 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
             width=12,
             fg="orange"
         ).pack(side=tk.LEFT, padx=5)
+
+        tk.Button(
+            text="📨 Ver contraofertas",
+            command=lambda: on_mostrar_contraofertas(),
+            width=18,
+            font=("Arial", 10, "bold")
+        ).pack(pady=5)
+
     else:
         # El comprador puede comprar, hacer contraoferta o añadir a favoritos
         def on_comprar():
-            messagebox.showinfo("Comprar", "Funcionalidad de compra (RF4.1) pendiente de implementar.")
+            from src.services.ventas.ventas_service import realizar_compra_directa
+            from src.db.db_app import begin_transaction, commit, rollback
+            cn = begin_transaction()
+
+            try:
+                realizar_compra_directa(cn, id_producto, username_actual)
+                commit(cn)
+                messagebox.showinfo("Compra producto", "Producto comprado.")
+            except Exception as e:
+                rollback(cn)
+                messagebox.showerror("Error", f"Error al comprar producto: {e}")
         
         def on_contraoferta():
-            messagebox.showinfo("Contraoferta", "Funcionalidad de contraoferta (RF4.2) pendiente de implementar.")
+            from tikitun.src.ui.productos.realizar_contraoferta_window import open_realizar_contraoferta
+            open_realizar_contraoferta(id_producto, username_actual)
         
         def on_favorito():
             from src.services.feed_busqueda_favs.favoritos_service import add_favorito
@@ -479,15 +502,31 @@ def show_detalle_view(parent, id_producto: int, username_actual: str, origen: st
                 rollback(cn)
                 messagebox.showerror("Error", f"Error: {e}")
         
+        def on_mostrar_contraofertas():
+            from src.ui.productos.contraofertas_window import open_gestionar_contraofertas
+            open_gestionar_contraofertas(parent, id_producto)
+
         tk.Button(btn_frame, text="✏️ Editar", command=on_editar, width=12).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="🚀 Promocionar", command=on_promocionar, width=12, fg="orange").pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="🗑️ Eliminar", command=on_eliminar, width=12, fg="red").pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="📨 Ver contraofertas", command=on_mostrar_contraofertas, width=14, fg="black").pack(side=tk.LEFT, padx=5)
     else:
         def on_comprar():
-            messagebox.showinfo("Comprar", "Funcionalidad de compra (RF4.1) pendiente.")
+            from src.services.ventas.ventas_service import realizar_compra_directa
+            from src.db.db_app import begin_transaction, commit, rollback
+            cn = begin_transaction()
+
+            try:
+                realizar_compra_directa(cn, id_producto, username_actual)
+                commit(cn)
+                messagebox.showinfo("Compra producto", "Producto comprado.")
+            except Exception as e:
+                rollback(cn)
+                messagebox.showerror("Error", f"Error al comprar producto: {e}")
         
         def on_contraoferta():
-            messagebox.showinfo("Contraoferta", "Funcionalidad de contraoferta (RF4.2) pendiente.")
+            from tikitun.src.ui.productos.realizar_contraoferta_window import open_realizar_contraoferta
+            open_realizar_contraoferta(id_producto, username_actual)
         
         def on_favorito():
             from src.services.feed_busqueda_favs.favoritos_service import add_favorito

@@ -56,7 +56,7 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
     if (precio > saldo_comprador):
         raise ValueError("No hay saldo suficiente para realizar la compra")
     
-    propietario = producto['username']
+    propietario = producto['username_vendedor']
     if (username_comprador == propietario):
         raise ValueError("El propietario no puede realizar contraofertas a sus propios productos")
     
@@ -68,7 +68,7 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
         ('id_producto', id_producto),
         ('username' , username_comprador),
         ('recepcion_confirmada' , 0),
-        ('precio_final', precio)
+        ('precio_final', precio),
         ('valoracion', 0)
     ])
     ventas_repo.insert_venta(cn, venta)
@@ -96,7 +96,7 @@ def realizar_contraoferta(cn, id_producto: int, username_comprador: str,
         ValueError: Si oferta no viable
     """
     print(" [SERVICE ventas] realizar_contraoferta()")
-
+    
     # Validación de las restricciones semánticas
     prod = productos_repo.get_producto(cn, id_producto)
     if not prod:
@@ -105,9 +105,9 @@ def realizar_contraoferta(cn, id_producto: int, username_comprador: str,
     comprador = usuarios_repo.get_usuario(cn, username_comprador)
     if not comprador:
         raise ValueError("El usuario no existe")
-    
+
     precio = prod['precio']
-    propietario = prod['username']
+    propietario = prod['username_vendedor']
 
     if (username_comprador == propietario):
         raise ValueError("El propietario no puede realizar contraofertas a sus propios productos")
@@ -152,7 +152,7 @@ def aceptar_contraoferta(cn, id_producto: int, username_comprador: str,
     if not producto:
         raise ValueError("El producto no existe")
     
-    propietario = producto['username']
+    propietario = producto['username_vendedor']
 
     if (username_vendedor != propietario):
         raise ValueError("El vendedor no es el propietario del producto")
@@ -172,7 +172,7 @@ def aceptar_contraoferta(cn, id_producto: int, username_comprador: str,
         ('id_producto', id_producto),
         ('username' , username_comprador),
         ('recepcion_confirmada' , 0),
-        ('precio_final', precio)
+        ('precio_final', precio),
         ('valoracion', 0)
     ])
 
@@ -221,8 +221,6 @@ def confirmar_recepcion(cn, id_producto: int, username_comprador: str) -> None:
         username_comprador: Comprador que confirma
     """
     print(" [SERVICE ventas] confirmar_recepcion()")
-    # TODO: Actualizar estado_recepcion = true
-    # TODO: Transferir saldo al vendedor
 
     ventas_repo.update_estado_recepcion(cn, id_producto, True)
 
@@ -250,8 +248,6 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
     puntuaciones_validas = [0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5]
 
     print(" [SERVICE ventas] puntuar_venta()")
-    # TODO: Validar puntuación en {0, 0.5, 1, ..., 5}
-    # TODO: Actualizar valoracion_media del vendedor
 
     if (puntuacion not in puntuaciones_validas):
         raise ValueError("La puntuación es incorrecta. Las puntuaciones válidas van de 0 a 5 con saltos de 0.5")
@@ -276,3 +272,27 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
     vendedor['valoracion_media']=valoracion_media
     usuarios_repo.update_usuario(cn, vendedor)
 
+def obtener_ventas_usuario(cn, username : str) -> list[dict]:
+    """Devuelve todas las ventas asociadas a productos del usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Comprador
+    
+    Returns:
+        Lista de ventas
+    """
+    return ventas_repo.get_ventas_usuario(cn, username)
+
+def obtener_productos_comprados(cn, username : str) -> list[dict]:
+    """
+    Devuelve los productos comprados por el usuario.
+
+    Args:
+        cn: Conexión a la base de datos
+        username: Comprador
+    
+    Returns:
+        Lista de productos
+    """
+    return ventas_repo.get_productos_comprados(cn, username)
