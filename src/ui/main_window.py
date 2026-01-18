@@ -13,14 +13,14 @@ import os
 from PIL import Image, ImageTk
 
 
-def run_app(username="bob"):
+def setup_main_window(root, username):
     """
-    Ventana principal de TikiTun con menú lateral y vista central.
+    Configura la ventana principal de TikiTun con menú lateral y vista central.
     
     Args:
-        username: Nombre de usuario autenticado (se pasará después del login)
+        root: Ventana Tk existente
+        username: Nombre de usuario autenticado
     """
-    root = tk.Tk()
     root.title("TikiTun")
     root.geometry("900x600")
     root.minsize(800, 500)
@@ -153,5 +153,15 @@ def run_app(username="bob"):
     show_feed_view(content_frame, username)
     btn_feed.config(bg=PRIMARY_COLOR, fg="white")
     active_button["current"] = btn_feed
+
+
+def run_app(username="bob"):
+    """
+    Ventana principal de TikiTun con menú lateral y vista central.
     
+    Args:
+        username: Nombre de usuario autenticado (se pasará después del login)
+    """
+    root = tk.Tk()
+    setup_main_window(root, username)
     root.mainloop()
