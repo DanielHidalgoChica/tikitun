@@ -77,7 +77,16 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
     productos_service.eliminar_producto(cn, id_producto, propietario)
 
     # Eliminar las demás contraofertas
-    contraofertas_repo.delete_contraofertas(cn, id_producto)
+    contraofertas = contraofertas_repo.get_contraofertas(cn, id_producto)
+
+    # Devolver dinero de las contraofertas
+    for c in contraofertas:
+        username = c['username']
+        id_producto = c['id_producto']
+        precio = c['precio']
+
+        rechazar_contraoferta(cn, id_producto, username)
+
 
 
 def realizar_contraoferta(cn, id_producto: int, username_comprador: str, 
@@ -173,9 +182,6 @@ def aceptar_contraoferta(cn, id_producto: int, username_comprador: str,
     contraoferta = contraofertas_repo.get_contraoferta(cn, id_producto, username_comprador)
     precio = contraoferta['precio']
     saldo_comprador = comprador['saldo']
-    
-    # Retirar dinero del comprador.
-    usuarios_service.update_saldo(cn, username_comprador, saldo_comprador-precio)
 
     # Crear registro de venta y eliminar la contraoferta
     venta = dict([
@@ -186,14 +192,22 @@ def aceptar_contraoferta(cn, id_producto: int, username_comprador: str,
         ('valoracion', 0)
     ])
 
+    # Eliminar la contraoferta del usuario
     contraofertas_repo.delete_contraoferta(cn, id_producto, username_comprador)
     ventas_repo.insert_venta(cn, venta)
 
     # Marcar producto como no disponible
     productos_service.eliminar_producto(cn, id_producto, propietario)
 
-    # Eliminar las demás contraofertas
-    contraofertas_repo.delete_contraofertas(cn, id_producto)
+    # Eliminar las demás contraofertas y evolver dinero de las contraofertas
+    contraofertas = contraofertas_repo.get_contraofertas(cn, id_producto)
+
+    for c in contraofertas:
+        username = c['username']
+        id_producto = c['id_producto']
+        precio = c['precio']
+
+        rechazar_contraoferta(cn, id_producto, username)
 
 
 def rechazar_contraoferta(cn, id_producto: int, username_comprador: str) -> None:
