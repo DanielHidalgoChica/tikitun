@@ -4,7 +4,7 @@ from src.db.db_app import connect, begin_transaction, commit, rollback
 from src.services.feed_busqueda_favs.recomendaciones_service import obtener_feed
 from src.services.feed_busqueda_favs.favoritos_service import agregar_favorito
 from src.services.feed_busqueda_favs.busqueda_service import buscar_productos, obtener_categorias_disponibles
-
+from src.ui.theme import *
 from src.ui.productos.detalle_window import show_detalle_view
 
 from io import BytesIO
@@ -34,7 +34,8 @@ def show_feed_view(parent_frame, username="bob"):
     tk.Label(
         parent_frame,
         text="📱 Feed de Recomendaciones",
-        font=("Arial", 16, "bold")
+        font=("Arial", 16, "bold"),
+        fg=PRIMARY_COLOR
     ).pack(pady=10)
 
     # ==================== BARRA DE BÚSQUEDA ====================

@@ -2,7 +2,10 @@ import tkinter as tk
 from tkinter import messagebox
 from src.services.perfiles import usuarios_service
 from src.db.db_app import connect
+from src.ui.theme import *
 import re
+import os
+from PIL import Image, ImageTk
 
 
 def show_login(parent=None) -> tuple[bool, str]:
@@ -12,7 +15,7 @@ def show_login(parent=None) -> tuple[bool, str]:
     if parent is None:
         root = tk.Tk()
         root.title("Iniciar sesión / Crear cuenta")
-        root.geometry("450x600")
+        root.geometry("450x700")
         root.resizable(False, False)
         own_root = True
     else:
@@ -52,7 +55,9 @@ def show_login(parent=None) -> tuple[bool, str]:
         else:
             messagebox.showerror("Error", "Usuario o contraseña incorrectos")
 
-    btn_login = tk.Button(frm_login, text="Iniciar sesión", width=20, command=do_login)
+    btn_login = tk.Button(frm_login, text="Iniciar sesión", width=20, command=do_login,
+                          bg=PRIMARY_COLOR, fg="white", font=("Arial", 10, "bold"), 
+                          relief=tk.RAISED, cursor="hand2")
     btn_login.grid(row=2, column=0, columnspan=2, pady=(6,0))
 
     # Create account frame
@@ -159,9 +164,9 @@ def show_login(parent=None) -> tuple[bool, str]:
         
         # Botón para cerrar
         tk.Button(ventana_politica, text="Cerrar", command=ventana_politica.destroy, 
-                  bg="#4CAF50", fg="white", padx=20, pady=5).pack(pady=10)
+                  bg=PRIMARY_COLOR, fg="white", padx=20, pady=5).pack(pady=10)
     
-    lbl_enlace = tk.Label(frm_politica, text="política de privacidad", fg="blue", cursor="hand2", font=("Arial", 9, "underline"))
+    lbl_enlace = tk.Label(frm_politica, text="política de privacidad", fg=PRIMARY_COLOR, cursor="hand2", font=("Arial", 9, "underline"))
     lbl_enlace.pack(side=tk.LEFT)
     lbl_enlace.bind("<Button-1>", lambda e: mostrar_politica_privacidad())
     
@@ -242,8 +247,33 @@ def show_login(parent=None) -> tuple[bool, str]:
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo crear cuenta: {e}")
 
-    btn_create = tk.Button(frm_create, text="Crear cuenta", width=20, command=do_create)
+    btn_create = tk.Button(frm_create, text="Crear cuenta", width=20, command=do_create,
+                           bg=PRIMARY_COLOR, fg="white", font=("Arial", 10, "bold"),
+                           relief=tk.RAISED, cursor="hand2")
     btn_create.grid(row=11, column=0, columnspan=2, pady=(6,0))
+
+    # ===== LOGO (centrado) =====
+    frm_logo = tk.Frame(root)
+    frm_logo.grid(row=2, column=0, padx=8, pady=20)
+    
+    # Centrar el frame del logo en la ventana
+    root.grid_columnconfigure(0, weight=1)
+    
+    try:
+        logo_path = os.path.join(os.path.dirname(__file__), "../../images/logo.png")
+        if os.path.exists(logo_path):
+            logo_img = Image.open(logo_path)
+            logo_img.thumbnail((80, 80), Image.Resampling.LANCZOS)
+            logo_photo = ImageTk.PhotoImage(logo_img)
+            logo_label = tk.Label(frm_logo, image=logo_photo)
+            logo_label.image = logo_photo  # Mantener referencia
+            logo_label.pack()
+        else:
+            # Fallback a emoji si no existe
+            tk.Label(frm_logo, text="🎵", font=("Arial", 40), fg=PRIMARY_COLOR).pack()
+    except Exception:
+        # Fallback a emoji si hay error
+        tk.Label(frm_logo, text="🎵", font=("Arial", 40), fg=PRIMARY_COLOR).pack()
 
     # Handle window close event
     def on_close():
