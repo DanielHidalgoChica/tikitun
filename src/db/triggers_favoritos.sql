@@ -5,9 +5,11 @@
  * Sistema de triggers que mantiene actualizado el campo num_favs en la tabla Producto.
  * 
  * Triggers implementados:
- * 1. TR_Favorito_Insert: Incrementa num_favs cuando se añade un favorito
- * 2. TR_Favorito_Delete: Decrementa num_favs cuando se elimina un favorito
- * 3. TR_Usuario_SoftDelete: Borra favoritos de usuarios eliminados y ajusta contadores
+ * 1. TR_Favorito_InsertDisponible: Valida que el producto esté disponible
+ * 2. TR_Favorito_InsertUsuarioActivo: Valida que el usuario no está eliminado
+ * 3. TR_Favorito_Insert: Incrementa num_favs cuando se añade un favorito
+ * 4. TR_Favorito_Delete: Decrementa num_favs cuando se elimina un favorito
+ * 5. TR_Usuario_SoftDelete: Borra favoritos de usuarios eliminados y ajusta contadores
  */
 
 -- ============================================================================
@@ -29,15 +31,76 @@ SET num_favs = (
 );
 
 -- ============================================================================
--- TRIGGER 1: TR_Favorito_Insert
+-- TRIGGER 1: TR_Favorito_InsertDisponible
+-- ============================================================================
+-- Valida que el producto esté disponible antes de permitir la adición a favoritos.
+-- Previene race conditions: si otro proceso vende el producto entre la validación
+-- en Python y el INSERT, este trigger lo detiene.
+--
+-- Dispara: BEFORE INSERT ON Favorito
+-- Acción: Lanza error si disponible = 0
+
+CREATE OR REPLACE TRIGGER TR_Favorito_InsertDisponible
+    BEFORE INSERT ON Favorito
+    FOR EACH ROW
+DECLARE
+    disponible_flag Producto.disponible%TYPE;
+BEGIN
+    -- Obtener estado disponible del producto
+    SELECT disponible INTO disponible_flag FROM Producto
+    WHERE id_producto = :NEW.id_producto;
+    
+    -- Validar que está disponible
+    IF disponible_flag = 0 THEN
+        RAISE_APPLICATION_ERROR(-20010, 
+            'No se puede añadir a favoritos un producto no disponible');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(-20011, 'El producto no existe');
+END;
+/
+
+-- ============================================================================
+-- TRIGGER 2: TR_Favorito_InsertUsuarioActivo
+-- ============================================================================
+-- Valida que el usuario que intenta marcar como favorito no tiene cuenta eliminada.
+-- Previene que usuarios eliminados modifiquen sus favoritos.
+--
+-- Dispara: BEFORE INSERT ON Favorito
+-- Acción: Lanza error si cuenta_eliminada = 1
+
+CREATE OR REPLACE TRIGGER TR_Favorito_InsertUsuarioActivo
+    BEFORE INSERT ON Favorito
+    FOR EACH ROW
+DECLARE
+    cuenta_eliminada_flag Usuario.cuenta_eliminada%TYPE;
+BEGIN
+    -- Obtener estado de eliminación del usuario
+    SELECT cuenta_eliminada INTO cuenta_eliminada_flag FROM Usuario
+    WHERE username = :NEW.username;
+    
+    -- Validar que la cuenta está activa
+    IF cuenta_eliminada_flag = 1 THEN
+        RAISE_APPLICATION_ERROR(-20013, 
+            'No puedes realizar esta acción con una cuenta eliminada');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(-20014, 'El usuario no existe');
+END;
+/
+
+-- ============================================================================
+-- TRIGGER 3: TR_Favorito_Insert
 -- ============================================================================
 -- Incrementa num_favs cuando alguien marca un producto como favorito.
 -- 
 -- Dispara: AFTER INSERT ON Favorito
 -- Acción: UPDATE Producto SET num_favs = num_favs + 1
 --
--- Nota: La validación de que el usuario no está eliminado se hace en la app
--- antes de insertar en la tabla Favorito.
+-- Nota: Los triggers BEFORE (1 y 2) garantizan que el usuario y producto
+-- son válidos antes de ejecutarse este trigger.
 
 CREATE OR REPLACE TRIGGER TR_Favorito_Insert
 AFTER INSERT ON Favorito
@@ -50,7 +113,7 @@ END;
 /
 
 -- ============================================================================
--- TRIGGER 2: TR_Favorito_Delete
+-- TRIGGER 4: TR_Favorito_Delete
 -- ============================================================================
 -- Decrementa num_favs cuando alguien quita un producto de favoritos.
 --
@@ -70,7 +133,7 @@ END;
 /
 
 -- ============================================================================
--- TRIGGER 3: TR_Usuario_SoftDelete
+-- TRIGGER 5: TR_Usuario_SoftDelete
 -- ============================================================================
 -- Cuando se marca un usuario como eliminado (soft-delete, cuenta_eliminada = 1),
 -- se eliminan automáticamente todos sus favoritos.

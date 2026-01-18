@@ -41,18 +41,20 @@ CREATE TABLE Chat(
 CREATE TABLE Mensaje(
     id_chat INT NOT NULL,
     fecha TIMESTAMP(6) NOT NULL,
-    username VARCHAR2(128) NOT NULL, --Disparador: el mensaje debe mandarlo alguien del chat
-    texto VARCHAR2(512) NOT NULL, --!QUITAR????????? COMO PUEDO HACER QUE UNO DE DOS NO SEA NULL???? TRIGGER??????
+    username VARCHAR2(128) NOT NULL,
+    texto VARCHAR2(512),
     adjunto BLOB,
     leido INT,
     CONSTRAINT PK_Mensaje PRIMARY KEY (id_chat,fecha),
     CONSTRAINT FK_MensajeEmisor FOREIGN KEY (username) REFERENCES Usuario(username),
-    CONSTRAINT FK_MensajeID_chat FOREIGN KEY (id_chat) REFERENCES Chat(id_chat)
+    CONSTRAINT FK_MensajeID_chat FOREIGN KEY (id_chat) REFERENCES Chat(id_chat),
+    CONSTRAINT NotNull_Texto_Or_Adjunto CHECK (texto IS NOT NULL OR adjunto IS NOT NULL)
 );
 
 CREATE TABLE Favorito(
     id_producto INT,
     username VARCHAR2(128),
+    CONSTRAINT PK_Favorito PRIMARY KEY (id_producto, username),
     CONSTRAINT FK_FavoritoProducto FOREIGN KEY (id_producto) REFERENCES Producto(id_producto),
     CONSTRAINT FK_FavoritoUsuario FOREIGN KEY (username) REFERENCES Usuario(username)
 );
