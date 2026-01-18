@@ -111,9 +111,6 @@ def get_usuario(cn, username: str) -> dict | None:
     Returns:
         Dict con datos del usuario o None si no existe
     """
-    if not username:
-        return None
-    
     cur = cn.cursor()
 
     try:
@@ -180,6 +177,7 @@ def update_usuario(cn, username: str, cambios: dict) -> None:
     cur = cn.cursor()
     try:
         cur.execute(sql, values)
+        cn.commit()  # Commit the transaction to save changes
     finally:
         cur.close()
 
@@ -198,6 +196,7 @@ def update_saldo(cn, username: str, nuevo_saldo: float) -> None:
         SET saldo = ?
         WHERE username = ?
     """, (nuevo_saldo, username))
+    cn.commit()  # Commit the transaction
     cur.close()
 
 
@@ -301,13 +300,15 @@ def update_categorias_preferidas(cn, username: str, categorias: list[str]) -> No
     try:
         # Eliminar categorías previas
         cur.execute("DELETE FROM Preferidos WHERE username = ?", (username,))
-        
+        cn.commit()  # Commit the deletion
+
         # Insertar nuevas categorías
         for cat in categorias:
             cur.execute(
                 "INSERT INTO Preferidos (username, nombre) VALUES (?, ?)",
                 (username, cat)
             )
+        cn.commit()  # Commit the insertion
     finally:
         cur.close()
 
