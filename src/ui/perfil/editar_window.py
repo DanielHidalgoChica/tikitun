@@ -5,7 +5,7 @@ Implementa RF1.3: Modificar perfil de usuario.
 import tkinter as tk
 from tkinter import messagebox, ttk
 import re
-from src.db.db_app import connect, begin_transaction, commit, rollback
+from src.db.db_app import connect
 from src.services.perfiles import usuarios_service
 
 
@@ -35,11 +35,12 @@ def show_editar_perfil_view(parent_frame, username: str):
     # Cargar datos del usuario
     try:
         with connect() as cn:
+            # Cargar datos del usuario
             usuario = usuarios_service.get_usuario(cn, username)
             if not usuario:
                 messagebox.showerror("Error", "Usuario no encontrado")
                 return
-            
+
             categorias_disponibles = usuarios_service.get_categorias_disponibles(cn)
             categorias_preferidas = usuarios_service.get_categorias_preferidas(cn, username)
     except Exception as e:
@@ -159,22 +160,19 @@ def show_editar_perfil_view(parent_frame, username: str):
         }
 
         try:
-            # Llamar a la capa de servicios para validar y guardar los cambios
-            usuarios_service.modificar_perfil(cn, username, cambios)
-            commit(cn)
-            messagebox.showinfo("Éxito", "Perfil actualizado correctamente")
-            
-            # Redirigir a la vista de perfil después de guardar
-            from src.ui.perfil.perfil_window import show_perfil_view
-            show_perfil_view(parent_frame, username)
+            with connect() as cn:
+                # Llamar a la capa de servicios para validar y guardar los cambios
+                usuarios_service.modificar_perfil(cn, username, cambios)
+                messagebox.showinfo("Éxito", "Perfil actualizado correctamente")
+
+                # Redirigir a la vista de perfil después de guardar
+                from src.ui.perfil.perfil_window import show_perfil_view
+                show_perfil_view(parent_frame, username)
         except ValueError as e:
-            rollback(cn)
             messagebox.showerror("Error", str(e))
         except Exception as e:
-            rollback(cn)
-            messagebox.showerror("Error", f"Error inesperado: {e}")
-        finally:
-            cn.close()
+            messagebox.showerror("Error", f"Error cargando datos o guardando cambios: {e}")
+            return
     
     def volver():
         """Vuelve a la vista de perfil sin guardar."""

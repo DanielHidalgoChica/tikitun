@@ -305,7 +305,7 @@ def crear_tab_retirada(parent, username: str, content_frame, saldo_actual: float
                 return
             
             # Verificar contraseña
-            if not usuarios_service.verificar_contraseña(cn, username, contraseña):
+            if not usuarios_service.verificar_credenciales(cn, username, contraseña):
                 rollback(cn)
                 messagebox.showerror("Error", "Contraseña incorrecta")
                 return
