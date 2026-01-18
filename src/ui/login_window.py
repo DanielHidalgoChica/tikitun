@@ -116,9 +116,56 @@ def show_login(parent=None) -> tuple[bool, str]:
     chk_mayoria = tk.Checkbutton(frm_create, text="Confirmo mayoría de edad", variable=mayoria_var)
     chk_mayoria.grid(row=9, column=0, columnspan=2, sticky="w")
 
+    # Frame para el checkbox de política y el enlace
+    frm_politica = tk.Frame(frm_create)
+    frm_politica.grid(row=10, column=0, columnspan=2, sticky="w")
+    
     polit_var = tk.IntVar(value=0)
-    chk_polit = tk.Checkbutton(frm_create, text="Acepto política de privacidad y condiciones", variable=polit_var)
-    chk_polit.grid(row=10, column=0, columnspan=2, sticky="w")
+    chk_polit = tk.Checkbutton(frm_politica, text="Acepto la ", variable=polit_var)
+    chk_polit.pack(side=tk.LEFT)
+    
+    # Enlace clickeable a la política de privacidad
+    def mostrar_politica_privacidad():
+        """Abre una ventana con la política de privacidad."""
+        import os
+        ventana_politica = tk.Toplevel(root)
+        ventana_politica.title("Política de Privacidad - TikiTun")
+        ventana_politica.geometry("700x500")
+        ventana_politica.resizable(True, True)
+        
+        # Frame con scrollbar
+        frame_scroll = tk.Frame(ventana_politica)
+        frame_scroll.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        scrollbar = tk.Scrollbar(frame_scroll)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        texto = tk.Text(frame_scroll, wrap=tk.WORD, yscrollcommand=scrollbar.set, font=("Courier", 10))
+        texto.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.config(command=texto.yview)
+        
+        # Leer el archivo de política de privacidad
+        ruta_politica = os.path.join(os.path.dirname(os.path.dirname(__file__)), "politica_privacidad.txt")
+        try:
+            with open(ruta_politica, "r", encoding="utf-8") as f:
+                contenido = f.read()
+            texto.insert(tk.END, contenido)
+        except FileNotFoundError:
+            texto.insert(tk.END, "Error: No se pudo encontrar el archivo de política de privacidad.")
+        except Exception as e:
+            texto.insert(tk.END, f"Error al cargar la política de privacidad: {e}")
+        
+        texto.config(state=tk.DISABLED)  # Solo lectura
+        
+        # Botón para cerrar
+        tk.Button(ventana_politica, text="Cerrar", command=ventana_politica.destroy, 
+                  bg="#4CAF50", fg="white", padx=20, pady=5).pack(pady=10)
+    
+    lbl_enlace = tk.Label(frm_politica, text="política de privacidad", fg="blue", cursor="hand2", font=("Arial", 9, "underline"))
+    lbl_enlace.pack(side=tk.LEFT)
+    lbl_enlace.bind("<Button-1>", lambda e: mostrar_politica_privacidad())
+    
+    tk.Label(frm_politica, text=" y condiciones").pack(side=tk.LEFT)
 
     def do_create():
         u = new_user.get().strip()
