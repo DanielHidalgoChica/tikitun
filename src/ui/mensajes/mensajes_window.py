@@ -148,9 +148,12 @@ def abrir_nuevo_chat(parent_frame, username):
 
         try:
             cn = begin_transaction()
-            mensajes_service.crear_conversacion(cn, username, id_producto)
+            creado = mensajes_service.crear_conversacion(cn, username, id_producto)
             commit(cn)
-            messagebox.showinfo("OK", "Chat creado")
+            if creado:
+                messagebox.showinfo("OK", "Chat creado")
+            else:
+                messagebox.showinfo("Error", "Chat no creado")
             win.destroy()
             
             show_mensajes_view(parent_frame, username)  # recarga
