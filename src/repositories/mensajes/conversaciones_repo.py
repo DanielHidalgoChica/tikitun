@@ -21,38 +21,53 @@ def puede_crear_conversacion(cn, username: str, id_producto: int) -> bool:
     Comprueba si un usuario puede crear una conversación sobre un producto.
 
     Reglas:
+    - El producto debe existir y estar disponible
+    - El usuario no debe tener la cuenta eliminada
     - No se puede si el producto pertenece al propio usuario
     - No se puede si ya existe una conversación entre ese usuario y ese producto
     """
     sql = """
     SELECT
-        p.username AS vendedor,
-        COUNT(c.id_chat) AS chats_existentes
+        p.username        AS vendedor,
+        COUNT(c.id_chat)  AS chats_existentes,
+        p.disponible      AS disponible,
+        u.cuenta_eliminada AS cuenta_eliminada
     FROM Producto p
+    JOIN Usuario u
+      ON u.username = :1
     LEFT JOIN Chat c 
-        ON c.id_producto = p.id_producto
-       AND c.username = :1
-    WHERE p.id_producto = :2
-    GROUP BY p.username
+      ON c.id_producto = p.id_producto
+     AND c.username = :2
+    WHERE p.id_producto = :3
+    GROUP BY p.username, p.disponible, u.cuenta_eliminada
     """
+
     print(" [REPO chat] puede_crear_conversacion()")
     cur = cn.cursor()
-    cur.execute(sql, (username, id_producto))
+    cur.execute(sql, (username, username, id_producto))
     row = cur.fetchone()
     cur.close()
 
+    # Si no hay fila → o no existe el producto o no está disponible
     if not row:
-        raise ValueError("El producto no existe")
+        raise ValueError("El producto no existe o no está disponible")
 
-    vendedor, chats = row
+    vendedor, chats, disponible, cuenta_eliminada = row
+
+    if cuenta_eliminada == 1:
+        return False   # usuario eliminado
+
+    if disponible == 0:
+        return False   # producto no disponible
 
     if vendedor == username:
         return False   # es tu propio producto
 
     if chats > 0:
         return False   # ya hay chat creado
-    print("true")
+
     return True
+
 
 def crear_conversacion(cn, username: str, id_producto: int) -> None:
     """
