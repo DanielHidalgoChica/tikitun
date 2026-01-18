@@ -13,7 +13,7 @@ Requisitos Funcionales implementados:
 
 from src.db.db_app import savepoint
 from src.repositories.ventas import ventas_repo, contraofertas_repo
-from src.services.productos import productos_service
+from src.services.productos import productos_service, consulta_service
 from src.services.perfiles import usuarios_service
 
 
@@ -225,10 +225,10 @@ def confirmar_recepcion(cn, id_producto: int, username_comprador: str) -> None:
     ventas_repo.update_estado_recepcion(cn, id_producto, 1)
 
     venta = ventas_repo.get_venta(cn, id_producto)
-    producto = productos_service.consultar_producto(cn, id_producto)
+    producto = consulta_service.consultar_producto(cn, id_producto)
     vendedor = usuarios_service.get_usuario(cn, producto['username_vendedor'])
 
-    usuarios_service.update_saldo(cn, vendedor, vendedor['saldo']+venta['precio_final'])
+    usuarios_service.update_saldo(cn, vendedor['username'], vendedor['saldo']+venta['precio_final'])
 
 
 def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
@@ -256,8 +256,8 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
     ventas_repo.update_puntuacion_venta(cn, id_producto, puntuacion)
     
     # Actualizar valoración media del vendedor
-    producto = productos_service.consultar_producto(cn, id_producto)
-    username_vendedor = producto['username']
+    producto = consulta_service.consultar_producto(cn, id_producto)
+    username_vendedor = producto['username_vendedor']
     ventas_vendedor = ventas_repo.get_ventas_usuario(cn, username_vendedor)
 
     vendedor = usuarios_service.get_usuario(cn, username_vendedor)
@@ -270,7 +270,6 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
         valoracion_media = ((num_ventas*vendedor['valoracion_media'])+puntuacion)/(num_ventas+1)
     
     vendedor['valoracion_media']=valoracion_media
-    usuarios_service.update_saldo(cn, vendedor)
 
 def obtener_ventas_usuario(cn, username : str) -> list[dict]:
     """Devuelve todas las ventas asociadas a productos del usuario.
