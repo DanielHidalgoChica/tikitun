@@ -53,6 +53,7 @@ def agregar_favorito(cn, username: str, id_producto: int) -> None:
         raise ValueError("No puedes marcar tus propios productos como favoritos")
     
     # RS: No duplicar favoritos
+    # Nota: Ahora también protegido por PK_Favorito UNIQUE constraint en BD
     if favoritos_repo.is_favorito(cn, username, id_producto):
         raise ValueError("El producto ya está en favoritos")
     
