@@ -62,7 +62,7 @@ BEGIN
     END IF;
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
-        RAISE_APPLICATION_ERROR(-20052, 'El producto no existe');
+        RAISE_APPLICATION_ERROR(-20052, 'El producto no existe o no está disponible');
 END;
 /
 
