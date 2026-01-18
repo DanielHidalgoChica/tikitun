@@ -13,7 +13,7 @@ Requisitos Funcionales implementados:
 
 from src.db.db_app import savepoint
 from src.repositories.ventas import ventas_repo, contraofertas_repo
-from src.repositories.productos import productos_repo
+from src.repositories.productos import productos_repo, get_productos_usuario
 from src.repositories.perfiles import usuarios_repo
 
 
@@ -296,3 +296,11 @@ def obtener_productos_comprados(cn, username : str) -> list[dict]:
         Lista de productos
     """
     return ventas_repo.get_productos_comprados(cn, username)
+
+def eliminar_contraofertas(cn, username : str):
+    productos = get_productos_usuario(cn, username)
+
+    id_productos = [prod["id_producto"] for prod in productos]
+
+    for id in id_productos:
+        contraofertas_repo.delete_contraoferta(cn, id, username)

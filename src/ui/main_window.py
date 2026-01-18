@@ -116,7 +116,7 @@ def run_app(username="bob"):
     btn_crear = create_menu_button(sidebar, "Publicar", "➕", lambda: show_publicar_view(content_frame, username))
     btn_crear.pack(pady=5, padx=12)
 
-    btn_crear = create_menu_button(sidebar, "Productos comprados", "📦", lambda: show_productos_comprados_view(content_frame, username))
+    btn_crear = create_menu_button(sidebar, "Confirmar productos", "📦", lambda: show_productos_comprados_view(content_frame, username))
     btn_crear.pack(pady=5, padx=12)
     
     # Developer button: abre diálogo para inicializar la BD

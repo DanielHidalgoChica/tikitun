@@ -21,8 +21,6 @@ def insert_venta(cn, venta: dict) -> None:
                 venta['username'], venta['recepcion_confirmada'], venta['precio_final'], venta['valoracion']))
     cur.close()
 
-    pass
-
 
 def get_venta(cn, id_producto: int) -> dict | None:
     """Obtiene una venta por producto.
