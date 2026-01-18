@@ -108,15 +108,23 @@ def crear_tarjeta_producto(parent, producto: dict, username: str, content_frame)
     try:
         with connect() as cn:
             ventas = obtener_ventas_usuario(cn, username)
+            id_producto = producto["id_producto"]
             venta = next((v for v in ventas if v["id_producto"] == id_producto), None)
     except Exception as e:
         messagebox.showerror("Error", f"No se pudieron cargar los productos: {e}")
     
-    completada = venta['recepcion_confirmada']
+    if not venta:
+        messagebox.showerror(
+            "Error",
+            f"No se encontró información de la venta para el producto {id_producto}"
+        )
+        return
+
+    completada = venta["recepcion_confirmada"]
     # Frame de la tarjeta
     card = tk.Frame(
         parent,
-        bg="#f9f9f9" if not completada else "#ffebee",
+        bg="#f9f9f9" if completada==0 else "#ffebee",
         relief=tk.RAISED,
         borderwidth=1,
         padx=15,
@@ -137,11 +145,11 @@ def crear_tarjeta_producto(parent, producto: dict, username: str, content_frame)
         text=producto.get("titulo", "Sin título"),
         font=("Arial", 12, "bold"),
         bg=card.cget("bg"),
-        fg="#333" if not completada else "#999"
+        fg="#333" if completada==0 else "#999"
     ).pack(side=tk.LEFT)
     
     # Badge de no disponible
-    if completada:
+    if completada==1:
         tk.Label(
             titulo_frame,
             text=" (Venta completada)",
@@ -160,7 +168,7 @@ def crear_tarjeta_producto(parent, producto: dict, username: str, content_frame)
         text=f"{precio:.2f}€",
         font=("Arial", 11, "bold"),
         bg=card.cget("bg"),
-        fg="#4CAF50" if not completada else "#999"
+        fg="#4CAF50" if completada==0 else "#999"
     ).pack(side=tk.LEFT)
     
     tk.Label(
@@ -180,7 +188,7 @@ def crear_tarjeta_producto(parent, producto: dict, username: str, content_frame)
     ).pack(side=tk.LEFT)
     
     # Botones (solo si disponible)
-    if not completada:
+    if completada==0:
         btn_frame = tk.Frame(card, bg=card.cget("bg"))
         btn_frame.pack(side=tk.RIGHT)
         
