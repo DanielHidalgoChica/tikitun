@@ -7,7 +7,10 @@
  * 
  * Triggers implementados:
  * 1. TR_Vendido_Insert: Evita que se inserten ventas en las que el comprador es el dueño del producto.
- * 2. TR_Favorito_Delete: Decrementa num_favs cuando se elimina un favorito
+ * 2. TR_Contraoferta_Insertar: Evita que se inserten contraofertas en las que el comprador es el dueño
+ * del producto.
+ * 3. TR_Update_Contraofertas: Elimina las contraofertas no válidas asociadas a un producto cuando
+ * se actualiza un producto en venta.
  */
 
 -- ============================================================================
@@ -78,5 +81,21 @@ EXCEPTION
 END;
 /
 
--- TODO: AÑADIR TRIGGER PARA ELIMINAR CONTRAOFERTAS SI SE MODIFICA EL PRECIO DEL PRODUCTO
--- Y LOS PRECIOS DE LAS CONTRAOFERTAS SON SUPERIORES O IGUALES
+-- ============================================================================
+-- TRIGGER 3: TR_Update_Contraofertas
+-- ============================================================================
+-- Elimina las contraofertas no válidas asociadas a un producto cuando
+-- se actualiza un producto en venta
+-- 
+-- Dispara: AFTER UPDATE OF PRODUCTO
+-- Acción: Eliminar las contraofertas cuyo precio sea superior o igual al nuevo precio
+CREATE OR REPLACE TRIGGER TR_Update_Contraofertas
+    AFTER
+    UPDATE OF precio
+    ON Producto 
+    FOR EACH ROW
+BEGIN
+    DELETE FROM Contraoferta
+    WHERE id_producto = :new.id_producto
+    AND precio >= : new.precio
+END;
