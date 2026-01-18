@@ -1,3 +1,4 @@
+-- RS1.11: Un usuario no puede eliminar su cuenta si tiene ventas activas en curso.
 -- Trigger para validar antes de eliminar lógicamente un usuario
 -- Se activa cuando se intenta marcar cuenta_eliminada = 1
 CREATE OR REPLACE TRIGGER trg_check_user_soft_deletion
@@ -32,6 +33,7 @@ BEGIN
 END;
 /
 
+-- RS1.9: La cantidad a transferir debe estar comprendida entre 0 y el saldo disponible.
 -- Trigger para validar que el saldo no sea negativo al actualizar
 CREATE OR REPLACE TRIGGER trg_check_saldo_positivo
 BEFORE UPDATE OF saldo ON Usuario
@@ -43,6 +45,7 @@ BEGIN
 END;
 /
 
+-- RS1.2, RS1.3: El correo electrónico debe tener formato válido y ser único.
 -- Trigger para validar el formato del correo electrónico
 CREATE OR REPLACE TRIGGER trg_check_email_format
 BEFORE INSERT OR UPDATE OF correo ON Usuario
@@ -54,6 +57,7 @@ BEGIN
 END;
 /
 
+-- RS1.17, RS1.18: El rango de interés debe ser positivo.
 -- Trigger para validar que el rango de búsqueda sea positivo
 CREATE OR REPLACE TRIGGER trg_check_rango_positivo
 BEFORE INSERT OR UPDATE OF rango ON Usuario
@@ -93,6 +97,7 @@ BEGIN
 END;
 /
 
+-- RS1.6, RS1.7: Un usuario no puede tener menos de 1 ni más de 6 categorías de preferencia.
 -- Trigger para validar el número de categorías preferidas (máximo 6)
 CREATE OR REPLACE TRIGGER trg_check_num_categorias
 AFTER INSERT ON Preferidos
@@ -110,6 +115,7 @@ BEGIN
 END;
 /
 
+-- RS1.12 a RS1.16: Ninguna operación de gestión de perfil podrá ejecutarse si el usuario ha sido eliminado.
 -- Trigger para evitar modificar usuarios eliminados
 CREATE OR REPLACE TRIGGER trg_check_cuenta_eliminada
 BEFORE UPDATE ON Usuario
