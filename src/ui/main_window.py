@@ -145,10 +145,6 @@ def run_app(username="bob"):
     btn_confirmar = create_menu_button(sidebar, "Confirmar productos", "📦", lambda: show_productos_comprados_view(content_frame, username))
     btn_confirmar.pack(pady=5, padx=12)
     
-    # Reemplazar caracteres de control por un emoji para que se muestre correctamente
-    btn_dev = create_menu_button(sidebar, "Dev", "🛠", on_developer_init)
-    btn_dev.pack(pady=20, padx=10)
-    
     # ===== ÁREA DE CONTENIDO =====
     content_frame = tk.Frame(main_container, bg=BG_PRIMARY)
     content_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
