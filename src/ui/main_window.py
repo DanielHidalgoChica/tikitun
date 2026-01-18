@@ -145,27 +145,6 @@ def run_app(username="bob"):
     btn_confirmar = create_menu_button(sidebar, "Confirmar productos", "📦", lambda: show_productos_comprados_view(content_frame, username))
     btn_confirmar.pack(pady=5, padx=12)
     
-    # Developer button: abre diálogo para inicializar la BD
-    def on_developer_init():
-        """Muestra confirmación y llama a initialize_database (DROP + CREATE, sin datos)."""
-        if not messagebox.askyesno(
-            "Inicializar BD",
-            "¿Deseas reinicializar la base de datos?\n\nEsto BORRARÁ todas las tablas existentes y las volverá a crear vacías."
-        ):
-            return
-
-        try:
-            # drop_first=True (default) + solo init.sql (default)
-            result = db_app.initialize_database()
-            dropped = len(result.get("dropped_tables", []))
-            stmts = result["statements_executed"]
-            message = f"Inicialización completada.\n\nTablas eliminadas: {dropped}\nSentencias ejecutadas: {stmts}"
-            messagebox.showinfo("Éxito", message)
-        except FileNotFoundError as e:
-            messagebox.showerror("Error", f"Fichero SQL no encontrado: {e}")
-        except Exception as e:
-            messagebox.showerror("Error", f"Error al inicializar la BD: {e}")
-
     # Reemplazar caracteres de control por un emoji para que se muestre correctamente
     btn_dev = create_menu_button(sidebar, "Dev", "🛠", on_developer_init)
     btn_dev.pack(pady=20, padx=10)
