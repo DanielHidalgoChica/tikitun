@@ -224,8 +224,6 @@ def rechazar_contraoferta(cn, id_producto: int, username_comprador: str) -> None
     contraofertas_repo.delete_contraoferta(cn, id_producto, username_comprador)
     usuarios_service.update_saldo(cn, username_comprador, comprador['saldo']+contraoferta['precio'])
 
-    
-
 def consultar_contraofertas(cn, id_producto: int) -> list[dict]:
     """RF4.4: Obtiene todas las contraofertas de un producto.
     
@@ -302,7 +300,7 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
         valoracion_media = ((num_ventas*vendedor['valoracion_media'])+puntuacion)/(num_ventas+1)
     
     vendedor['valoracion_media']=valoracion_media
-    usuarios_service.modificar_perfil(cn, username_vendedor, vendedor)
+    usuarios_service.update_valoracion(cn, username_vendedor, vendedor['valoracion_media'])
 
 def obtener_ventas_usuario(cn, username : str) -> list[dict]:
     """Devuelve todas las ventas asociadas a productos del usuario.
