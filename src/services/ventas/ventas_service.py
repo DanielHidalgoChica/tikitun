@@ -58,7 +58,7 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
     
     propietario = producto['username_vendedor']
     if (username_comprador == propietario):
-        raise ValueError("El propietario no puede realizar contraofertas a sus propios productos")
+        raise ValueError("El propietario no puede comprar sus propios productos")
     
     # Retirar dinero del comprador.
     usuarios_service.update_saldo(cn, username_comprador, saldo_comprador-precio)
@@ -108,6 +108,10 @@ def realizar_contraoferta(cn, id_producto: int, username_comprador: str,
 
     precio = prod['precio']
     propietario = prod['username_vendedor']
+    saldo_comprador = comprador['saldo']
+
+    if (precio > saldo_comprador):
+        raise ValueError("No hay saldo suficiente para realizar la compra")
 
     if (username_comprador == propietario):
         raise ValueError("El propietario no puede realizar contraofertas a sus propios productos")
@@ -115,6 +119,9 @@ def realizar_contraoferta(cn, id_producto: int, username_comprador: str,
     if ((precio_oferta >= precio) or (precio_oferta < 0)):
         raise ValueError("El precio de la contraoferta es incorrecto")
     
+    # Retirar dinero del comprador.
+    usuarios_service.update_saldo(cn, username_comprador, saldo_comprador-precio_oferta)
+
     # Crear la contraoferta
     contraoferta = dict([
         ('id_producto', id_producto),
@@ -192,7 +199,30 @@ def rechazar_contraoferta(cn, id_producto: int, username_comprador: str) -> None
         username_comprador: Comprador de la contraoferta
     """
     print(" [SERVICE ventas] rechazar_contraoferta()")
+    
+    # Validación restricciones semánticas
+    comprador = usuarios_service.get_usuario(cn, username_comprador)
+    if not comprador:
+        raise ValueError("El usuario comprador no existe")
+
+    producto = productos_service.consultar_producto(cn, id_producto)
+    if not producto:
+        raise ValueError("El producto no existe")
+    
+    propietario = producto['username_vendedor']
+
+    if (propietario != propietario):
+        raise ValueError("El vendedor no es el propietario del producto")
+    
+    if (username_comprador == propietario):
+        raise ValueError("El propietario no puede realizar contraofertas a sus propios productos")
+    
+    contraoferta = contraofertas_repo.get_contraoferta(cn, id_producto, username_comprador)
+    precio = contraoferta['precio']
+    saldo_comprador = comprador['saldo']
+
     contraofertas_repo.delete_contraoferta(cn, id_producto, username_comprador)
+    usuarios_service.update_saldo(cn, username_comprador, comprador['saldo']+contraoferta['precio'])
 
 def consultar_contraofertas(cn, id_producto: int) -> list[dict]:
     """RF4.4: Obtiene todas las contraofertas de un producto.
@@ -270,6 +300,7 @@ def puntuar_venta(cn, id_producto: int, puntuacion: float) -> None:
         valoracion_media = ((num_ventas*vendedor['valoracion_media'])+puntuacion)/(num_ventas+1)
     
     vendedor['valoracion_media']=valoracion_media
+    usuarios_service.update_valoracion(cn, username_vendedor, vendedor['valoracion_media'])
 
 def obtener_ventas_usuario(cn, username : str) -> list[dict]:
     """Devuelve todas las ventas asociadas a productos del usuario.
