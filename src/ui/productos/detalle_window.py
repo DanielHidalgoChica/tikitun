@@ -271,6 +271,21 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
             from src.ui.productos.realizar_contraoferta_window import open_realizar_contraoferta
             open_realizar_contraoferta(id_producto, username_actual)
         
+        def on_abrir_chat():
+            from src.services.mensajes.mensajes_service import crear_conversacion
+            from src.db.db_app import begin_transaction, commit, rollback
+            cn = begin_transaction()
+            try:
+                cn = begin_transaction()
+                creado = crear_conversacion(cn, username_actual, id_producto)
+                commit(cn)
+                if creado:
+                    messagebox.showinfo("OK", "Chat creado")
+                else:
+                    messagebox.showinfo("Error", "Chat no creado")
+            except Exception as ex:
+                rollback(cn)
+                messagebox.showerror("Error", str(ex))
 
         tk.Button(
             btn_frame,
@@ -288,6 +303,13 @@ def show_detalle_producto(parent, id_producto: int, username_actual: str):
             command=on_contraoferta,
             width=12
         ).pack(side=tk.LEFT, padx=5)
+
+        tk.Button(
+            btn_frame,
+            text="💬 Abrir Chat",
+            command=on_abrir_chat,
+            width=12
+        ).pack(side=tk.RIGHT, padx=10)
     
     # Botón cerrar
     tk.Button(
@@ -536,6 +558,22 @@ def show_detalle_view(parent, id_producto: int, username_actual: str, origen: st
             from src.ui.productos.realizar_contraoferta_window import open_realizar_contraoferta
             open_realizar_contraoferta(id_producto, username_actual)
         
-   
+        def on_abrir_chat():
+            from src.services.mensajes.mensajes_service import crear_conversacion
+            from src.db.db_app import begin_transaction, commit, rollback
+            cn = begin_transaction()
+            try:
+                cn = begin_transaction()
+                creado = crear_conversacion(cn, username_actual, id_producto)
+                commit(cn)
+                if creado:
+                    messagebox.showinfo("OK", "Chat creado")
+                else:
+                    messagebox.showinfo("Error", "Chat no creado")
+            except Exception as ex:
+                rollback(cn)
+                messagebox.showerror("Error", str(ex))
+
         tk.Button(btn_frame, text="🛒 Comprar", command=on_comprar, bg="#4CAF50", fg="white", width=12).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="💬 Contraoferta", command=on_contraoferta, width=12).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="💬 Abrir Chat", command=on_abrir_chat, width=12).pack(side=tk.LEFT, padx=5)
