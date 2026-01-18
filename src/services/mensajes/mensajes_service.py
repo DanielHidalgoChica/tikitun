@@ -34,7 +34,6 @@ def enviar_mensaje(cn, msj: dict) -> None:
     print("Notificación enviada por correo a ", receptor)
     pass
 
-
 def listar_conversaciones_inicio(cn, username: str) -> list[dict]:
     """Obtiene los chats que se mostraran al inicio.
     
@@ -138,13 +137,3 @@ def crear_conversacion(cn, username: str, id_producto: int) -> bool:
         return False
     pass
 
-def archivar_conversacion(cn, id_chat: int) -> None:
-    """RF5.5: Archiva una conversación cuando se completa la venta.
-    
-    Args:
-        cn: Conexión a la base de datos
-        id_producto: Producto de la conversación
-    """
-    print(" [SERVICE mensajes] archivar_conversacion()")
-    # TODO: conversaciones_repo.set_archivada(cn, id_producto, True)
-    pass

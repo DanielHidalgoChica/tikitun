@@ -2,7 +2,7 @@
 Repositorio de acceso a datos de conversaciones.
 Responsable: Aitor de la Iglesia
 
-Operaciones sobre la tabla CONVERSACION.
+Operaciones sobre la tabla Chat.
 """
 
 def _get_next_id_chat(cn) -> int:
@@ -100,19 +100,6 @@ def get_conversaciones_usuario(cn, username: str) -> list[dict]:
         raise
     cur.close()
     return rows
-
-
-def set_archivada(cn, id_producto: int, archivada: bool) -> None:
-    """Marca una conversación como archivada.
-    
-    Args:
-        cn: Conexión a la base de datos
-        id_producto: Producto de la conversación
-        archivada: True para archivar
-    """
-    print("   [REPO conversaciones] set_archivada()", id_producto, archivada)
-    # TODO: UPDATE CONVERSACION SET archivada = ? WHERE id_producto = ?
-    pass
 
 def get_receptor_mensaje(cn, id_chat: int, emisor: str) -> str:
     """
