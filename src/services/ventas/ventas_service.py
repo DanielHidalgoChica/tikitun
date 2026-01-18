@@ -282,7 +282,7 @@ def obtener_ventas_usuario(cn, username : str) -> list[dict]:
     Returns:
         Lista de ventas
     """
-    return ventas_repo.get_ventas_usuario(username)
+    return ventas_repo.get_ventas_usuario(cn, username)
 
 def obtener_productos_comprados(cn, username : str) -> list[dict]:
     """
