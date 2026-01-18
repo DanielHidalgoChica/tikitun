@@ -4,23 +4,24 @@ from src.db.db_app import connect
 from src.services.perfiles import usuarios_service
 
 
-def show_perfil_view(parent_frame, username, current_user=None):
+def show_perfil_view(parent_frame, current_user, profile_user=None):
     """
     Muestra la vista de gestión de perfil (RF1.2).
     
     Args:
         parent_frame: Frame padre donde se muestra la vista
-        username: Usuario del perfil a consultar
-        current_user: Usuario actualmente logueado (si es None, se asume que es el mismo que username)
+        current_user: Usuario actualmente logueado
+        profile_user: Usuario del perfil a consultar (si es None, se muestra el perfil del current_user)
     
     Consulta:
     - Información del perfil del usuario
     """
-    # Si no se especifica current_user, asumimos que es el propio usuario
-    if current_user is None:
-        current_user = username
+    # Si no se especifica profile_user, mostramos el perfil del usuario actual
+    if profile_user is None:
+        profile_user = current_user
     
-    es_mi_perfil = (username == current_user)
+    username = profile_user  # Para mantener compatibilidad con el resto del código
+    es_mi_perfil = (profile_user == current_user)
     # Limpiar el frame
     for widget in parent_frame.winfo_children():
         widget.destroy()
