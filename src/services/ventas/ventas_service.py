@@ -76,6 +76,9 @@ def realizar_compra_directa(cn, id_producto: int, username_comprador: str) -> No
     # Marcar producto como no disponible
     productos_service.eliminar_producto(cn, id_producto, propietario)
 
+    # Eliminar las demás contraofertas
+    contraofertas_repo.delete_contraofertas(cn, id_producto)
+
 
 def realizar_contraoferta(cn, id_producto: int, username_comprador: str, 
                          precio_oferta: float) -> None:
@@ -188,6 +191,9 @@ def aceptar_contraoferta(cn, id_producto: int, username_comprador: str,
 
     # Marcar producto como no disponible
     productos_service.eliminar_producto(cn, id_producto, propietario)
+
+    # Eliminar las demás contraofertas
+    contraofertas_repo.delete_contraofertas(cn, id_producto)
 
 
 def rechazar_contraoferta(cn, id_producto: int, username_comprador: str) -> None:
