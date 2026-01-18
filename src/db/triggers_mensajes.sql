@@ -1,0 +1,3 @@
+
+CREATE OR REPLACE TRIGGER TR_Archivado_Al_Finalizar
+AFTER UPDATE ON 

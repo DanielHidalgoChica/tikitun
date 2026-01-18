@@ -149,9 +149,10 @@ def abrir_nuevo_chat(parent_frame, username):
         try:
             cn = begin_transaction()
             mensajes_service.crear_conversacion(cn, username, id_producto)
+            commit(cn)
             messagebox.showinfo("OK", "Chat creado")
             win.destroy()
-            commit(cn)
+            
             show_mensajes_view(parent_frame, username)  # recarga
         except Exception as ex:
             rollback(cn)
@@ -160,7 +161,7 @@ def abrir_nuevo_chat(parent_frame, username):
     tk.Button(win, text="Crear", command=crear_chat).pack(pady=12)
 
 
-def show_mensajes_view(parent_frame, username="bob"):
+def show_mensajes_view(parent_frame, username):
     """
     Muestra la vista de gestión de mensajes en el frame principal.
     
@@ -380,12 +381,12 @@ def show_mensajes_view(parent_frame, username="bob"):
                 rollback(cn)
             messagebox.showerror("Error", str(ex))
 
-    btn_send = tk.Button(bottom, text="Enviar", width=8, command=enviar_mensaje)
+    btn_send = tk.Button(bottom, text="Enviar", width=8, command=lambda: enviar_mensaje(username))
     btn_send.pack(side=tk.RIGHT, padx=6)
 
     entry_msg.bind("<Return>", lambda e: enviar_mensaje(username))
 
-def show_historico_view(parent_frame, username="bob"):
+def show_historico_view(parent_frame, username):
     """
     Muestra una vista de los chats archivados
     """

@@ -39,7 +39,7 @@ INSERT INTO Usuario VALUES (
 
 
 INSERT INTO Producto VALUES (
-  1,
+  4,
   'alice',
   'Electrónica',
   'Auriculares Bluetooth',

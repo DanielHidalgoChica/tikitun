@@ -31,13 +31,13 @@ def puede_crear_conversacion(cn, username: str, id_producto: int) -> bool:
     FROM Producto p
     LEFT JOIN Chat c 
         ON c.id_producto = p.id_producto
-       AND c.username = :username
-    WHERE p.id_producto = :id_producto
+       AND c.username = :1
+    WHERE p.id_producto = :2
     GROUP BY p.username
     """
-
+    print(" [REPO chat] puede_crear_conversacion()")
     cur = cn.cursor()
-    cur.execute(sql, {"username": username, "id_producto": id_producto})
+    cur.execute(sql, (username, id_producto))
     row = cur.fetchone()
     cur.close()
 
@@ -51,13 +51,14 @@ def puede_crear_conversacion(cn, username: str, id_producto: int) -> bool:
 
     if chats > 0:
         return False   # ya hay chat creado
-
+    print("true")
     return True
 
 def crear_conversacion(cn, username: str, id_producto: int) -> None:
     """
     Crea un nuevo chat
     """
+    print(" [REPO chat] crear_conversacion()")
     cur = cn.cursor()
     cur.execute("""
                 INSERT INTO Chat (id_chat, id_producto, username, archivado)

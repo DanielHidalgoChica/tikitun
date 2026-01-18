@@ -54,6 +54,10 @@ def listar_conversaciones_inicio(cn, username: str) -> list[dict]:
         print(chat)
         if chat['archivado'] == 0:
             last = mensajes_repo.ultimo_mensaje(cn, chat['id_chat'])
+            if last == None:
+                last = {}
+                last['texto'] = "Sin mensajes"
+                print("Sin mensajes")
             otro = chat['vendedor'] if chat['comprador'] == username else chat['comprador']
             out.append({
                 'id_chat': chat['id_chat'],
@@ -123,10 +127,15 @@ def buscar_mensajes(cn, username: str, filtros: dict) -> list[dict]:
     print(" [SERVICE mensajes] buscar_mensajes()", username, filtros)
     return mensajes_repo.search_mensajes(cn, username, filtros)
 
-def crear_conversacion(cn, username: str, id_producto: int) -> None:
+def crear_conversacion(cn, username: str, id_producto: int) -> bool:
     # Si no existe ya el chat Y si el producto no es del usuario
+    print(" [SERVICE mensajes] consultar_conversaciones_inicio()")
     if conversaciones_repo.puede_crear_conversacion(cn, username, id_producto):
+        print(" [SERVICE mensajes] consultar_conversaciones_inicio() creado")
         conversaciones_repo.crear_conversacion(cn, username, id_producto)
+        return True
+    else: 
+        return False
     pass
 
 def archivar_conversacion(cn, id_chat: int) -> None:
