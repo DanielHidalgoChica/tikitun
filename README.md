@@ -35,6 +35,7 @@ The database implements **PL/SQL triggers** that ensure consistency:
 * Automatic update of the favorites counter
 * Archiving of conversations upon completed sales
 * Data cleanup upon account deletion
+* And many more features
 
 ---
 
