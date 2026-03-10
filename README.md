@@ -1,4 +1,5 @@
-# 🛒 TikiTún
+# <img width="40" height="40" alt="logo" src="https://github.com/user-attachments/assets/04d602e4-f292-4850-bd7b-3204df87fb36" /> TikiTún 
+
 
 Desktop application for **peer-to-peer product buying and selling**, developed as a practical assignment for the **Information Systems Design and Development** course at the University of Granada.
 
