@@ -1,124 +1,123 @@
 # 🛒 TikiTún
 
-Aplicación de escritorio para **compraventa de productos entre particulares**, desarrollada como práctica de la asignatura **Diseño y Desarrollo de Sistemas de Información** en la Universidad de Granada.
+Desktop application for **peer-to-peer product buying and selling**, developed as a practical assignment for the **Information Systems Design and Development** course at the University of Granada.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![Oracle](https://img.shields.io/badge/Database-Oracle-red?logo=oracle)
 ![Tkinter](https://img.shields.io/badge/GUI-Tkinter-green)
+![License](https://img.shields.io/badge/license-AGPL--v3-blue)
 
 ---
 
-## 📋 Descripción
+## 📋 Description
 
-TikiTún es un sistema de información multiusuario que gestiona el ciclo completo de una transacción: publicación de productos, búsqueda con recomendaciones personalizadas, negociación entre usuarios, y confirmación de venta con valoraciones.
-
----
-
-## ✨ Funcionalidades Destacadas
-
-### 📍 Sistema de Recomendaciones
-El feed filtra productos según la **distancia entre comprador y vendedor**, calculando si la suma de sus rangos de disponibilidad cubre la distancia geográfica entre ambos. Los productos se ordenan por:
-1. Coincidencia con categorías preferidas del usuario
-2. Grado de promoción (decae 0.1 por día)
-3. Número de usuarios que tenga ese producto en "favoritos"
-
-### 🤝 Sistema de Contraofertas
-Los compradores pueden proponer precios alternativos. El vendedor visualiza todas las ofertas recibidas y puede aceptar o rechazar cada una, automatizando la transferencia de fondos si acepta.
-
-### 🚀 Promoción de Productos
-Los vendedores pueden pagar para aumentar la visibilidad de sus productos. El coste es proporcional al precio del artículo y el grado de promoción **decae linealmente** con el tiempo.
-
-### 🔥 Triggers para Integridad de Datos
-La base de datos implementa **disparadores PL/SQL** que garantizan la consistencia:
-- Actualización automática del contador de favoritos
-- Archivado de conversaciones al completar ventas
-- Limpieza de datos al eliminar cuentas
-
+TikiTún is a multi-user information system that manages the complete lifecycle of a transaction: product listing, search with personalized recommendations, user negotiation, and sale confirmation with reviews.
 
 ---
 
-## 🏗️ Arquitectura
+## ✨ Key Features
 
-El proyecto sigue una **arquitectura en capas** con separación clara de responsabilidades:
+### 📍 Recommendation System
+The feed filters products based on the **distance between buyer and seller**, calculating if the sum of their availability ranges covers the geographical distance between them. Products are sorted by:
+1. Match with the user's preferred categories
+2. Promotion level (decays by 0.1 per day)
+3. Number of users who have favorited the product
 
-```
+### 🤝 Counteroffer System
+Buyers can propose alternative prices. The seller views all received offers and can accept or reject each one, automating the fund transfer upon acceptance.
+
+### 🚀 Product Promotion
+Sellers can pay to increase the visibility of their products. The cost is proportional to the item's price, and the promotion level **decays linearly** over time.
+
+### 🔥 Data Integrity Triggers
+The database implements **PL/SQL triggers** that ensure consistency:
+* Automatic update of the favorites counter
+* Archiving of conversations upon completed sales
+* Data cleanup upon account deletion
+
+---
+
+## 🏗️ Architecture
+
+The project follows a **layered architecture** with a clear separation of concerns:
+
+```text
 src/
-├── app.py                  # Punto de entrada
-├── db/                     # Conexión ODBC y scripts SQL
+├── app.py                  # Entry point
+├── db/                     # ODBC Connection and SQL scripts
 │   ├── init.sql            # DDL + Triggers
-│   └── seed_test_data.sql  # Datos de prueba
-├── repositories/           # Patrón Repository (acceso a datos)
+│   └── seed_test_data.sql  # Test data
+├── repositories/           # Repository Pattern (data access)
 │   ├── perfiles/
 │   ├── productos/
 │   ├── mensajes/
 │   ├── ventas/
 │   └── feed_busqueda_favs/
-├── services/               # Lógica de negocio
-└── ui/                     # Interfaz Tkinter
+├── services/               # Business logic
+└── ui/                     # Tkinter Interface
 ```
 
-### Subsistemas
+### Subsystems
 
-| Módulo | Descripción |
+| Module | Description |
 |--------|-------------|
-| 👤 **Perfiles** | Registro, autenticación, preferencias y monedero |
-| 📦 **Productos** | CRUD de artículos, imágenes y promociones |
-| 🔍 **Feed y Búsqueda** | Recomendaciones, búsqueda filtrada y favoritos |
-| 💳 **Ventas** | Compras, contraofertas y valoraciones |
-| 💬 **Mensajería** | Chat vinculado a productos |
+| 👤 **Profiles** | Registration, authentication, preferences, and wallet |
+| 📦 **Products** | Item CRUD, images, and promotions |
+| 🔍 **Feed & Search** | Recommendations, filtered search, and favorites |
+| 💳 **Sales** | Purchases, counteroffers, and reviews |
+| 💬 **Messaging** | Product-linked chat |
 
 ---
 
-## 🛠️ Stack Tecnológico
+## 🛠️ Tech Stack
 
-| Componente | Tecnología |
+| Component | Technology |
 |------------|------------|
-| Lenguaje | Python 3.10+ |
-| Base de Datos | Oracle |
-| Conexión BD | pyodbc |
-| Interfaz | Tkinter |
+| Language | Python 3.10+ |
+| Database | Oracle |
+| DB Connection | pyodbc |
+| Interface | Tkinter |
 
 ---
 
-## 🚀 Instalación
+## 🚀 Installation
 
-### 0. Configurar Oracle Instant Client (Linux)
+### 0. Configure Oracle Instant Client (Linux)
 
-> ⚠️ Solo necesario la primera vez en el sistema
+> ⚠️ Only required the first time on the system
 
-1. **Instalar dependencias del sistema:**
+1. **Install system dependencies:**
 ```bash
 sudo apt install python3 python3-pip python3-venv python3-tk unixodbc unixodbc-dev odbcinst libaio1t64 libnsl2
 ```
 
-2. **Descargar Oracle Instant Client:**
-   - Ir a [Oracle ODBC Downloads](https://www.oracle.com/es/database/technologies/releasenote-odbc-ic.html)
-   - Descargar **Basic** y **ODBC** (ambos `.zip`)
+2. **Download Oracle Instant Client:**
+   - Go to [Oracle ODBC Downloads](https://www.oracle.com/es/database/technologies/releasenote-odbc-ic.html)
+   - Download **Basic** and **ODBC** (both `.zip`)
 
-3. **Instalar en `/opt/oracle`:**
+3. **Install in `/opt/oracle`:**
 ```bash
 sudo mkdir -p /opt/oracle
 sudo mv instantclient-*.zip /opt/oracle/
 cd /opt/oracle
 sudo unzip instantclient-basic-*.zip
-sudo unzip instantclient-odbc-*.zip   # Descomprimir en el mismo nivel
+sudo unzip instantclient-odbc-*.zip   # Unzip at the same level
 ```
 
-4. **Configurar ODBC:**
+4. **Configure ODBC:**
 ```bash
 sudo /opt/oracle/instantclient_23_26/odbc_update_ini.sh /
 ```
 
-5. **Fix para `libaio.so.1`** (si aparece como "not found"):
+5. **Fix for `libaio.so.1`** (if it appears as "not found"):
 ```bash
 sudo ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /opt/oracle/instantclient_23_26/libaio.so.1
 ```
 
-
-### 1. Clonar e instalar
+### 1. Clone and install
 
 ```bash
-git clone https://github.com/tu-usuario/tikitun.git
+git clone [https://github.com/your-username/tikitun.git](https://github.com/your-username/tikitun.git)
 cd tikitun
 ```
 
@@ -128,52 +127,52 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Configurar credenciales
+### 2. Configure credentials
 
 ```bash
 cp .env.example .env
 ```
 
-Editar `.env` con tus credenciales:
+Edit `.env` with your credentials:
 ```env
 ORACLE_HOST=oracle0.ugr.es
 ORACLE_PORT=1521
 ORACLE_SERVICE=practbd
 ORACLE_USER=x00000000
-ORACLE_PASSWORD=tu_clave
+ORACLE_PASSWORD=your_password
 ```
 
-### 3. Inicializar base de datos
+### 3. Initialize the database
 
-Ejecutar en tu cliente SQL de Oracle:
+Execute in your Oracle SQL client:
 ```sql
--- 1. Crear tablas y triggers
+-- 1. Create tables and triggers
 @src/db/init.sql
 
--- 2. (Opcional) Cargar datos de prueba
+-- 2. (Optional) Load test data
 @src/db/seed_test_data.sql
 ```
 
-### 4. Ejecutar
+### 4. Run
 
 ```bash
 ./run_tiki.sh
 ```
 
-> El script configura automáticamente las variables de entorno de Oracle, activa el entorno virtual e instala dependencias si es necesario.
+> The script automatically configures the Oracle environment variables, activates the virtual environment, and installs dependencies if necessary.
 
 ---
 
-## 👥 Autores
+## 👥 Authors
 
-| Nombre | Subsistema |
+| Name | Subsystem |
 |--------|------------|
-| Aitor de la Iglesia García | Mensajería |
-| Daniel Hidalgo Chica | Feed, Búsquedas y Favoritos |
-| Elsa Rodríguez Macmichael | Gestión de Perfiles |
-| Juan Manuel Fernández García | Gestión de Ventas |
-| Roberto González Lugo | Gestión de Productos |
+| Aitor de la Iglesia García | Messaging |
+| Daniel Hidalgo Chica | Feed, Search & Favorites |
+| Elsa Rodríguez Macmichael | Profile Management |
+| Juan Manuel Fernández García | Sales Management |
+| Roberto González Lugo | Product Management |
 
 ---
 
-**Universidad de Granada** — DDSI, Curso 2024/2025
+**University of Granada** — DDSI, Academic Year 2024/2025
