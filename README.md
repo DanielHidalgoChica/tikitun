@@ -116,17 +116,11 @@ sudo /opt/oracle/instantclient_23_26/odbc_update_ini.sh /
 sudo ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /opt/oracle/instantclient_23_26/libaio.so.1
 ```
 
-### 1. Clone and install
+### 1. Clone
 
 ```bash
 git clone https://github.com/DanielHidalgoChica/tikitun.git
 cd tikitun
-```
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
 ```
 
 ### 2. Configure credentials
