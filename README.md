@@ -84,7 +84,7 @@ src/
 
 ## 🚀 Installation
 
-### 0. Configure Oracle Instant Client (Linux)
+### 0. Configure Oracle Instant Client (Instructions for Linux Ubuntu 24.04)
 
 > ⚠️ Only required the first time on the system
 
