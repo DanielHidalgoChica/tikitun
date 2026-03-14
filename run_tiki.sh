@@ -12,7 +12,7 @@ fi
 
 # Activar entorno virtual e instalar dependencias
 source .venv/bin/activate
-pip install -q -r requirements.txt
+pip install -r requirements.txt
 
 # Ejecutar aplicación
 exec python3 -m src.app
