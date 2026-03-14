@@ -119,7 +119,7 @@ sudo ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /opt/oracle/instantclient_23
 ### 1. Clone and install
 
 ```bash
-git clone [https://github.com/your-username/tikitun.git](https://github.com/your-username/tikitun.git)
+git clone https://github.com/DanielHidalgoChica/tikitun.git
 cd tikitun
 ```
 
