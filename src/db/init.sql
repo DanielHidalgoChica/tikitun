@@ -87,9 +87,9 @@ CREATE TABLE Vendido(
 );
 
 -- Categorías maestras del sistema
-INSERT INTO Categoria VALUES ('Vehículos');
+INSERT INTO Categoria VALUES ('Vehiculos');
 INSERT INTO Categoria VALUES ('Moda');
-INSERT INTO Categoria VALUES ('Tecnología');
+INSERT INTO Categoria VALUES ('Tecnologia');
 INSERT INTO Categoria VALUES ('Deportes');
 INSERT INTO Categoria VALUES ('Hogar');
 INSERT INTO Categoria VALUES ('Libros');

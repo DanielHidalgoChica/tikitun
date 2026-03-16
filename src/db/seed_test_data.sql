@@ -2,22 +2,22 @@
 -- SCRIPT DE DATOS DE PRUEBA PARA TIKITUN
 -- =====================================================
 -- Este script llena la base de datos con datos realistas
--- para pruebas. Ejecutar DESPUÉS de init.sql
+-- para pruebas. Ejecutar DESPUES de init.sql
 -- =====================================================
 -- NOTA: Adaptado a los triggers y restricciones:
---   - Títulos ≤ 80 caracteres (RS2.5)
+--   - Titulos ≤ 80 caracteres (RS2.5)
 --   - Descripciones ≤ 500 caracteres (RS2.6)
---   - num_favs = 0 (los triggers lo incrementan automáticamente)
---   - Contraofertas solo de usuarios que NO son dueños del producto
---   - Usuarios eliminados se crean DESPUÉS de sus operaciones
+--   - num_favs = 0 (los triggers lo incrementan automaticamente)
+--   - Contraofertas solo de usuarios que NO son duenos del producto
+--   - Usuarios eliminados se crean DESPUES de sus operaciones
 --   - No hay chats reflexivos (comprador ≠ vendedor)
 -- =====================================================
 
 -- =====================================================
--- USUARIOS (15 usuarios con contraseñas conocidas)
+-- USUARIOS (15 usuarios con contrasenas conocidas)
 -- =====================================================
--- NOTA: Las contraseñas cumplen requisitos (8-15 chars, mayús, minús, especiales)
--- Para login usar: usuario / contraseña en texto plano
+-- NOTA: Las contrasenas cumplen requisitos (8-15 chars, mayus, minus, especiales)
+-- Para login usar: usuario / contrasena en texto plano
 
 -- Usuario: admin / Admin@123
 INSERT INTO Usuario VALUES (
@@ -37,7 +37,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Usuario VALUES (
   'juan',
   'juan@gmail.com',
-  'Juan García Pérez',
+  'Juan Garcia Perez',
   'Juan#2025',
   40.4530,
   -3.6883,
@@ -51,7 +51,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Usuario VALUES (
   'maria',
   'maria@gmail.com',
-  'María López Fernández',
+  'Maria Lopez Fernandez',
   'Maria\$456',
   41.3851,
   2.1734,
@@ -65,7 +65,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Usuario VALUES (
   'carlos',
   'carlos@outlook.com',
-  'Carlos Martínez Ruiz',
+  'Carlos Martinez Ruiz',
   'Carlos!789',
   37.3891,
   -5.9845,
@@ -79,7 +79,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Usuario VALUES (
   'ana',
   'ana@yahoo.es',
-  'Ana Sánchez Torres',
+  'Ana Sanchez Torres',
   'Ana@Pass1',
   39.4699,
   -0.3763,
@@ -93,7 +93,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Usuario VALUES (
   'pedro',
   'pedro@hotmail.com',
-  'Pedro Hernández Gómez',
+  'Pedro Hernandez Gomez',
   'Pedro#321',
   43.2630,
   -2.9350,
@@ -107,7 +107,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Usuario VALUES (
   'laura',
   'laura@gmail.com',
-  'Laura Díaz Moreno',
+  'Laura Diaz Moreno',
   'Laura\$2025',
   36.7213,
   -4.4214,
@@ -121,7 +121,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Usuario VALUES (
   'david',
   'david@gmail.com',
-  'David Jiménez Navarro',
+  'David Jimenez Navarro',
   'David!Pass',
   41.6488,
   -0.8891,
@@ -149,7 +149,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Usuario VALUES (
   'miguel',
   'miguel@gmail.com',
-  'Miguel Álvarez Prieto',
+  'Miguel Alvarez Prieto',
   'Miguel#55',
   28.4636,
   -16.2518,
@@ -163,7 +163,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Usuario VALUES (
   'sofia',
   'sofia@icloud.com',
-  'Sofía Muñoz Ortega',
+  'Sofia Munoz Ortega',
   'Sofia\$123',
   37.9922,
   -1.1307,
@@ -177,7 +177,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Usuario VALUES (
   'pablo',
   'pablo@gmail.com',
-  'Pablo Gutiérrez Serrano',
+  'Pablo Gutierrez Serrano',
   'Pablo!2025',
   39.8628,
   -4.0273,
@@ -191,7 +191,7 @@ INSERT INTO Usuario VALUES (
 INSERT INTO Usuario VALUES (
   'lucia',
   'lucia@yahoo.es',
-  'Lucía Vega Ramos',
+  'Lucia Vega Ramos',
   'Lucia@Pass',
   40.9701,
   -5.6635,
@@ -233,64 +233,64 @@ INSERT INTO Usuario VALUES (
 -- PRODUCTOS (40+ productos variados)
 -- =====================================================
 -- NOTA: 
---   - Títulos ≤ 80 caracteres
---   - num_favs = 0 (los triggers lo incrementarán)
+--   - Titulos ≤ 80 caracteres
+--   - num_favs = 0 (los triggers lo incrementaran)
 --   - promocion entre 0 y 1
 
--- === TECNOLOGÍA ===
-INSERT INTO Producto VALUES (101, 'juan', 'Tecnología', 'iPhone 14 Pro Max 256GB', 'iPhone 14 Pro Max 256GB, color morado oscuro. Estado impecable, con caja original y todos los accesorios.', 899.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (102, 'maria', 'Tecnología', 'MacBook Air M2 8GB 256GB SSD', 'MacBook Air con chip M2, 8GB RAM, 256GB SSD. Color medianoche. Comprado hace 6 meses.', 1050.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (103, 'carlos', 'Tecnología', 'PlayStation 5 con 2 mandos', 'PS5 edición disco con 2 mandos y 3 juegos. Poco uso, perfecta para gaming.', 450.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (104, 'ana', 'Tecnología', 'Samsung Galaxy S23 Ultra 512GB', 'Galaxy S23 Ultra 512GB negro. Incluye funda y protector de pantalla.', 780.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (105, 'pedro', 'Tecnología', 'Nintendo Switch OLED blanca', 'Switch OLED blanca con 5 juegos físicos y funda de transporte.', 280.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (106, 'laura', 'Tecnología', 'iPad Pro 12.9 con Magic Keyboard', 'iPad Pro 2022 con Magic Keyboard y Apple Pencil 2. Ideal para diseño.', 1200.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (107, 'david', 'Tecnología', 'Auriculares Sony WH-1000XM5', 'Los mejores auriculares con cancelación de ruido. Negros, como nuevos.', 280.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (108, 'elena', 'Tecnología', 'Monitor Gaming 27 pulgadas 144Hz', 'Monitor curvo Samsung Odyssey G5. Resolución 2K, 1ms respuesta.', 220.00, NULL, 0, 0, 1);
+-- === TECNOLOGIA ===
+INSERT INTO Producto VALUES (101, 'juan', 'Tecnologia', 'iPhone 14 Pro Max 256GB', 'iPhone 14 Pro Max 256GB, color morado oscuro. Estado impecable, con caja original y todos los accesorios.', 899.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (102, 'maria', 'Tecnologia', 'MacBook Air M2 8GB 256GB SSD', 'MacBook Air con chip M2, 8GB RAM, 256GB SSD. Color medianoche. Comprado hace 6 meses.', 1050.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (103, 'carlos', 'Tecnologia', 'PlayStation 5 con 2 mandos', 'PS5 edicion disco con 2 mandos y 3 juegos. Poco uso, perfecta para gaming.', 450.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (104, 'ana', 'Tecnologia', 'Samsung Galaxy S23 Ultra 512GB', 'Galaxy S23 Ultra 512GB negro. Incluye funda y protector de pantalla.', 780.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (105, 'pedro', 'Tecnologia', 'Nintendo Switch OLED blanca', 'Switch OLED blanca con 5 juegos fisicos y funda de transporte.', 280.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (106, 'laura', 'Tecnologia', 'iPad Pro 12.9 con Magic Keyboard', 'iPad Pro 2022 con Magic Keyboard y Apple Pencil 2. Ideal para diseno.', 1200.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (107, 'david', 'Tecnologia', 'Auriculares Sony WH-1000XM5', 'Los mejores auriculares con cancelacion de ruido. Negros, como nuevos.', 280.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (108, 'elena', 'Tecnologia', 'Monitor Gaming 27 pulgadas 144Hz', 'Monitor curvo Samsung Odyssey G5. Resolucion 2K, 1ms respuesta.', 220.00, NULL, 0, 0, 1);
 
 -- === MODA ===
-INSERT INTO Producto VALUES (201, 'maria', 'Moda', 'Bolso Louis Vuitton Neverfull MM', 'Bolso LV original con ticket de compra. Tamaño MM, canvas monogram.', 950.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (201, 'maria', 'Moda', 'Bolso Louis Vuitton Neverfull MM', 'Bolso LV original con ticket de compra. Tamano MM, canvas monogram.', 950.00, NULL, 0, 0, 1);
 INSERT INTO Producto VALUES (202, 'ana', 'Moda', 'Nike Air Jordan 1 Retro Chicago', 'Jordan 1 Retro High OG Chicago. Talla 43, deadstock con caja.', 320.00, NULL, 0, 0, 1);
 INSERT INTO Producto VALUES (203, 'laura', 'Moda', 'Vestido Zara largo fiesta verde', 'Vestido largo de fiesta, color verde esmeralda. Talla M, etiqueta puesta.', 45.00, NULL, 0, 0, 1);
 INSERT INTO Producto VALUES (204, 'sofia', 'Moda', 'Reloj Casio G-Shock GA-2100', 'G-Shock GA-2100 CasiOak negro. Resistente al agua 200m.', 85.00, NULL, 0, 0, 1);
 INSERT INTO Producto VALUES (205, 'lucia', 'Moda', 'Chaqueta North Face plumas 700', 'Chaqueta de plumas 700 fill power. Talla L, color azul marino.', 180.00, NULL, 0, 0, 1);
 INSERT INTO Producto VALUES (206, 'elena', 'Moda', 'Gafas Ray-Ban Aviator polarizadas', 'Ray-Ban originales con cristales polarizados. Montura dorada.', 95.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (207, 'maria', 'Moda', 'Sudadera Champion vintage años 90', 'Sudadera Champion años 90, logo bordado. Talla XL, perfecta oversize.', 55.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (207, 'maria', 'Moda', 'Sudadera Champion vintage anos 90', 'Sudadera Champion anos 90, logo bordado. Talla XL, perfecta oversize.', 55.00, NULL, 0, 0, 1);
 
 -- === DEPORTES ===
-INSERT INTO Producto VALUES (301, 'carlos', 'Deportes', 'Bicicleta montaña Specialized 29', 'Specialized Rockhopper 29. Cuadro aluminio, frenos hidráulicos.', 650.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (301, 'carlos', 'Deportes', 'Bicicleta montana Specialized 29', 'Specialized Rockhopper 29. Cuadro aluminio, frenos hidraulicos.', 650.00, NULL, 0, 0, 1);
 INSERT INTO Producto VALUES (302, 'pedro', 'Deportes', 'Raqueta tenis Wilson Pro Staff', 'Raqueta profesional Roger Federer. Incluye funda y 3 overgrips.', 120.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (303, 'david', 'Deportes', 'Balón fútbol oficial LaLiga 23/24', 'Balón Puma Orbita oficial temporada 23/24. Sin usar.', 35.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (303, 'david', 'Deportes', 'Balon futbol oficial LaLiga 23/24', 'Balon Puma Orbita oficial temporada 23/24. Sin usar.', 35.00, NULL, 0, 0, 1);
 INSERT INTO Producto VALUES (304, 'miguel', 'Deportes', 'Tabla surf Channel Islands 6.2', 'Shortboard Channel Islands. Incluye quillas FCS y funda.', 380.00, NULL, 0, 0, 1);
 INSERT INTO Producto VALUES (305, 'pablo', 'Deportes', 'Pesas ajustables Bowflex 40kg', 'Set de mancuernas ajustables Bowflex. De 2 a 20kg cada una.', 250.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (306, 'juan', 'Deportes', 'Cinta de correr BH Fitness plegable', 'Cinta plegable con inclinación automática. Poco uso, como nueva.', 450.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (307, 'ana', 'Deportes', 'Patines Rollerblade Zetrablade 42', 'Patines Rollerblade Zetrablade talla 42. Perfectos para iniciación.', 75.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (306, 'juan', 'Deportes', 'Cinta de correr BH Fitness plegable', 'Cinta plegable con inclinacion automatica. Poco uso, como nueva.', 450.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (307, 'ana', 'Deportes', 'Patines Rollerblade Zetrablade 42', 'Patines Rollerblade Zetrablade talla 42. Perfectos para iniciacion.', 75.00, NULL, 0, 0, 1);
 
 -- === HOGAR ===
-INSERT INTO Producto VALUES (401, 'laura', 'Hogar', 'Sofá 3 plazas IKEA KIVIK gris', 'Sofá KIVIK gris oscuro. 2 años, perfecto estado. Fundas lavables.', 350.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (401, 'laura', 'Hogar', 'Sofa 3 plazas IKEA KIVIK gris', 'Sofa KIVIK gris oscuro. 2 anos, perfecto estado. Fundas lavables.', 350.00, NULL, 0, 0, 1);
 INSERT INTO Producto VALUES (402, 'elena', 'Hogar', 'Robot aspirador Roomba i7+', 'Roomba con base autovaciado. Mapeo inteligente, control por app.', 420.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (403, 'sofia', 'Hogar', 'Cafetera Nespresso Vertuo Plus', 'Cafetera Vertuo Plus con espumador de leche. 50 cápsulas incluidas.', 95.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (404, 'lucia', 'Hogar', 'Mesa comedor extensible roble', 'Mesa roble macizo 140-220cm. 6-10 comensales. Estilo nórdico.', 280.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (405, 'pablo', 'Hogar', 'Colchón viscoelástico Emma 150x190', 'Colchón Emma Original. 2 años con funda protectora siempre.', 200.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (406, 'miguel', 'Hogar', 'Lámpara pie diseño Arco', 'Lámpara Arco estilo Castiglioni. Base mármol, arco cromado.', 120.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (407, 'carlos', 'Hogar', 'Thermomix TM6 con Cook-Key', 'Thermomix último modelo con Cook-Key. Recetario completo incluido.', 950.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (403, 'sofia', 'Hogar', 'Cafetera Nespresso Vertuo Plus', 'Cafetera Vertuo Plus con espumador de leche. 50 capsulas incluidas.', 95.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (404, 'lucia', 'Hogar', 'Mesa comedor extensible roble', 'Mesa roble macizo 140-220cm. 6-10 comensales. Estilo nordico.', 280.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (405, 'pablo', 'Hogar', 'Colchon viscoelastico Emma 150x190', 'Colchon Emma Original. 2 anos con funda protectora siempre.', 200.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (406, 'miguel', 'Hogar', 'Lampara pie diseno Arco', 'Lampara Arco estilo Castiglioni. Base marmol, arco cromado.', 120.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (407, 'carlos', 'Hogar', 'Thermomix TM6 con Cook-Key', 'Thermomix ultimo modelo con Cook-Key. Recetario completo incluido.', 950.00, NULL, 0, 0, 1);
 
 -- === LIBROS ===
-INSERT INTO Producto VALUES (501, 'juan', 'Libros', 'Colección Harry Potter 7 libros', '7 libros tapa dura edición especial 20 aniversario. Como nuevos.', 85.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (502, 'maria', 'Libros', 'Kindle Paperwhite 2023 16GB', 'Kindle último modelo con luz cálida ajustable. 16GB, sin publicidad.', 140.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (503, 'david', 'Libros', 'Lote 20 novelas bestsellers', 'Novelas variadas: thriller, romance, ciencia ficción. Buen estado.', 40.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (504, 'elena', 'Libros', 'Enciclopedia Espasa 100 tomos', '100 tomos encuadernación lujo. Edición 1990, perfecto estado.', 300.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (505, 'lucia', 'Libros', 'Libros universidad Ingeniería', 'Lote cálculo, física, álgebra. Autores: Stewart, Serway, Grossman.', 60.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (506, 'pedro', 'Libros', 'Cómics Marvel vintage 50 unidades', 'Colección años 80-90. Spiderman, X-Men, Vengadores. 50 ejemplares.', 150.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (501, 'juan', 'Libros', 'Coleccion Harry Potter 7 libros', '7 libros tapa dura edicion especial 20 aniversario. Como nuevos.', 85.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (502, 'maria', 'Libros', 'Kindle Paperwhite 2023 16GB', 'Kindle ultimo modelo con luz calida ajustable. 16GB, sin publicidad.', 140.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (503, 'david', 'Libros', 'Lote 20 novelas bestsellers', 'Novelas variadas: thriller, romance, ciencia ficcion. Buen estado.', 40.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (504, 'elena', 'Libros', 'Enciclopedia Espasa 100 tomos', '100 tomos encuadernacion lujo. Edicion 1990, perfecto estado.', 300.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (505, 'lucia', 'Libros', 'Libros universidad Ingenieria', 'Lote calculo, fisica, algebra. Autores: Stewart, Serway, Grossman.', 60.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (506, 'pedro', 'Libros', 'Comics Marvel vintage 50 unidades', 'Coleccion anos 80-90. Spiderman, X-Men, Vengadores. 50 ejemplares.', 150.00, NULL, 0, 0, 1);
 
--- === VEHÍCULOS ===
-INSERT INTO Producto VALUES (601, 'carlos', 'Vehículos', 'Vespa Primavera 125 azul cielo', 'Vespa 2020, 8000km. Color azul cielo, maletero incluido.', 2800.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (602, 'ana', 'Vehículos', 'Bicicleta eléctrica Xiaomi plegable', 'E-bike Xiaomi Mi Smart. 25km/h, autonomía 45km. Plegable.', 550.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (603, 'pablo', 'Vehículos', 'Patinete eléctrico Xiaomi Pro 2', 'Patinete eléctrico 25km/h. Batería nueva, ruedas antipinchazos.', 320.00, NULL, 0, 0, 1);
-INSERT INTO Producto VALUES (604, 'miguel', 'Vehículos', 'Casco moto Shoei NXR2 talla M', 'Casco integral Shoei NXR2 talla M. Homologado ECE 22.06.', 380.00, NULL, 0, 0, 1);
+-- === VEHICULOS ===
+INSERT INTO Producto VALUES (601, 'carlos', 'Vehiculos', 'Vespa Primavera 125 azul cielo', 'Vespa 2020, 8000km. Color azul cielo, maletero incluido.', 2800.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (602, 'ana', 'Vehiculos', 'Bicicleta electrica Xiaomi plegable', 'E-bike Xiaomi Mi Smart. 25km/h, autonomia 45km. Plegable.', 550.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (603, 'pablo', 'Vehiculos', 'Patinete electrico Xiaomi Pro 2', 'Patinete electrico 25km/h. Bateria nueva, ruedas antipinchazos.', 320.00, NULL, 0, 0, 1);
+INSERT INTO Producto VALUES (604, 'miguel', 'Vehiculos', 'Casco moto Shoei NXR2 talla M', 'Casco integral Shoei NXR2 talla M. Homologado ECE 22.06.', 380.00, NULL, 0, 0, 1);
 
 -- === PRODUCTOS NO DISPONIBLES (vendidos) ===
-INSERT INTO Producto VALUES (701, 'juan', 'Tecnología', 'AirPods Pro 2 - VENDIDO', 'AirPods Pro segunda generación. Ya no disponibles.', 200.00, NULL, 0, 0, 0);
-INSERT INTO Producto VALUES (702, 'maria', 'Moda', 'Bolso Gucci GG Marmont - VENDIDO', 'Bolso GG Marmont pequeño. Vendido.', 800.00, NULL, 0, 0, 0);
+INSERT INTO Producto VALUES (701, 'juan', 'Tecnologia', 'AirPods Pro 2 - VENDIDO', 'AirPods Pro segunda generacion. Ya no disponibles.', 200.00, NULL, 0, 0, 0);
+INSERT INTO Producto VALUES (702, 'maria', 'Moda', 'Bolso Gucci GG Marmont - VENDIDO', 'Bolso GG Marmont pequeno. Vendido.', 800.00, NULL, 0, 0, 0);
 
 -- =====================================================
 -- FAVORITOS (los triggers incrementan num_favs)
@@ -334,27 +334,27 @@ INSERT INTO Chat VALUES (110, 601, 'pablo', 0);
 -- MENSAJES
 -- =====================================================
 INSERT INTO Mensaje VALUES (101, TIMESTAMP '2025-01-10 10:00:00', 'maria', 'Hola! Sigue disponible el iPhone?', NULL, 1);
-INSERT INTO Mensaje VALUES (101, TIMESTAMP '2025-01-10 10:15:00', 'juan', 'Sí! Está en perfecto estado', NULL, 1);
-INSERT INTO Mensaje VALUES (101, TIMESTAMP '2025-01-10 10:16:00', 'maria', 'Harías algún descuento si quedamos hoy?', NULL, 1);
-INSERT INTO Mensaje VALUES (101, TIMESTAMP '2025-01-10 10:20:00', 'juan', 'Podría dejártelo en 850', NULL, 0);
+INSERT INTO Mensaje VALUES (101, TIMESTAMP '2025-01-10 10:15:00', 'juan', 'Si! Esta en perfecto estado', NULL, 1);
+INSERT INTO Mensaje VALUES (101, TIMESTAMP '2025-01-10 10:16:00', 'maria', 'Harias algun descuento si quedamos hoy?', NULL, 1);
+INSERT INTO Mensaje VALUES (101, TIMESTAMP '2025-01-10 10:20:00', 'juan', 'Podria dejartelo en 850', NULL, 0);
 
 INSERT INTO Mensaje VALUES (102, TIMESTAMP '2025-01-10 11:00:00', 'carlos', 'Buenas, aceptas 800 por el iPhone?', NULL, 1);
-INSERT INTO Mensaje VALUES (102, TIMESTAMP '2025-01-10 12:30:00', 'juan', 'Lo mínimo sería 850, lo siento', NULL, 0);
+INSERT INTO Mensaje VALUES (102, TIMESTAMP '2025-01-10 12:30:00', 'juan', 'Lo minimo seria 850, lo siento', NULL, 0);
 
-INSERT INTO Mensaje VALUES (103, TIMESTAMP '2025-01-11 09:00:00', 'juan', 'Buenos días! El MacBook tiene algún rasguño?', NULL, 1);
+INSERT INTO Mensaje VALUES (103, TIMESTAMP '2025-01-11 09:00:00', 'juan', 'Buenos dias! El MacBook tiene algun rasguno?', NULL, 1);
 INSERT INTO Mensaje VALUES (103, TIMESTAMP '2025-01-11 09:05:00', 'maria', 'Ninguno, lo he usado siempre con funda', NULL, 1);
 INSERT INTO Mensaje VALUES (103, TIMESTAMP '2025-01-11 09:06:00', 'juan', 'Genial! Podemos quedar este finde?', NULL, 1);
-INSERT INTO Mensaje VALUES (103, TIMESTAMP '2025-01-11 09:10:00', 'maria', 'El sábado me viene bien, mañana o tarde?', NULL, 0);
+INSERT INTO Mensaje VALUES (103, TIMESTAMP '2025-01-11 09:10:00', 'maria', 'El sabado me viene bien, manana o tarde?', NULL, 0);
 
 INSERT INTO Mensaje VALUES (104, TIMESTAMP '2025-01-12 14:00:00', 'ana', 'Hola! El bolso es original 100%?', NULL, 1);
-INSERT INTO Mensaje VALUES (104, TIMESTAMP '2025-01-12 14:02:00', 'maria', 'Sí, tengo ticket de El Corte Inglés', NULL, 1);
+INSERT INTO Mensaje VALUES (104, TIMESTAMP '2025-01-12 14:02:00', 'maria', 'Si, tengo ticket de El Corte Ingles', NULL, 1);
 INSERT INTO Mensaje VALUES (104, TIMESTAMP '2025-01-12 14:03:00', 'ana', 'Perfecto, me interesa mucho', NULL, 0);
 
-INSERT INTO Mensaje VALUES (106, TIMESTAMP '2025-01-13 18:00:00', 'miguel', 'Qué talla es el cuadro de la bici?', NULL, 1);
+INSERT INTO Mensaje VALUES (106, TIMESTAMP '2025-01-13 18:00:00', 'miguel', 'Que talla es el cuadro de la bici?', NULL, 1);
 INSERT INTO Mensaje VALUES (106, TIMESTAMP '2025-01-13 18:30:00', 'carlos', 'Es talla L, para personas de 175-185cm', NULL, 1);
 INSERT INTO Mensaje VALUES (106, TIMESTAMP '2025-01-13 18:31:00', 'miguel', 'Me queda perfecto, la compro!', NULL, 0);
 
-INSERT INTO Mensaje VALUES (107, TIMESTAMP '2025-01-14 20:00:00', 'david', 'Qué juegos incluye la PS5?', NULL, 1);
+INSERT INTO Mensaje VALUES (107, TIMESTAMP '2025-01-14 20:00:00', 'david', 'Que juegos incluye la PS5?', NULL, 1);
 INSERT INTO Mensaje VALUES (107, TIMESTAMP '2025-01-14 20:05:00', 'carlos', 'FIFA 24, Spider-Man 2 y God of War Ragnarok', NULL, 0);
 
 -- =====================================================
@@ -369,13 +369,13 @@ INSERT INTO Contraoferta VALUES (401, 'maria', 300.00);
 INSERT INTO Contraoferta VALUES (603, 'juan', 280.00);
 
 -- =====================================================
--- PREFERENCIAS DE CATEGORÍAS
+-- PREFERENCIAS DE CATEGORIAS
 -- =====================================================
-INSERT INTO Preferidos VALUES ('juan', 'Tecnología');
+INSERT INTO Preferidos VALUES ('juan', 'Tecnologia');
 INSERT INTO Preferidos VALUES ('juan', 'Deportes');
 INSERT INTO Preferidos VALUES ('maria', 'Moda');
-INSERT INTO Preferidos VALUES ('maria', 'Tecnología');
-INSERT INTO Preferidos VALUES ('carlos', 'Vehículos');
+INSERT INTO Preferidos VALUES ('maria', 'Tecnologia');
+INSERT INTO Preferidos VALUES ('carlos', 'Vehiculos');
 INSERT INTO Preferidos VALUES ('carlos', 'Deportes');
 INSERT INTO Preferidos VALUES ('ana', 'Moda');
 INSERT INTO Preferidos VALUES ('ana', 'Hogar');
@@ -383,22 +383,22 @@ INSERT INTO Preferidos VALUES ('pedro', 'Deportes');
 INSERT INTO Preferidos VALUES ('pedro', 'Libros');
 INSERT INTO Preferidos VALUES ('laura', 'Hogar');
 INSERT INTO Preferidos VALUES ('laura', 'Moda');
-INSERT INTO Preferidos VALUES ('david', 'Tecnología');
+INSERT INTO Preferidos VALUES ('david', 'Tecnologia');
 INSERT INTO Preferidos VALUES ('david', 'Libros');
 INSERT INTO Preferidos VALUES ('elena', 'Libros');
 INSERT INTO Preferidos VALUES ('elena', 'Hogar');
 INSERT INTO Preferidos VALUES ('miguel', 'Deportes');
-INSERT INTO Preferidos VALUES ('miguel', 'Vehículos');
+INSERT INTO Preferidos VALUES ('miguel', 'Vehiculos');
 INSERT INTO Preferidos VALUES ('sofia', 'Moda');
 INSERT INTO Preferidos VALUES ('sofia', 'Hogar');
 INSERT INTO Preferidos VALUES ('pablo', 'Deportes');
-INSERT INTO Preferidos VALUES ('pablo', 'Vehículos');
+INSERT INTO Preferidos VALUES ('pablo', 'Vehiculos');
 INSERT INTO Preferidos VALUES ('lucia', 'Libros');
 INSERT INTO Preferidos VALUES ('lucia', 'Hogar');
-INSERT INTO Preferidos VALUES ('test', 'Tecnología');
+INSERT INTO Preferidos VALUES ('test', 'Tecnologia');
 INSERT INTO Preferidos VALUES ('test', 'Moda');
-INSERT INTO Preferidos VALUES ('admin', 'Tecnología');
-INSERT INTO Preferidos VALUES ('admin', 'Vehículos');
+INSERT INTO Preferidos VALUES ('admin', 'Tecnologia');
+INSERT INTO Preferidos VALUES ('admin', 'Vehiculos');
 INSERT INTO Preferidos VALUES ('deleted_user', 'Hogar');
 
 -- =====================================================
@@ -417,9 +417,9 @@ COMMIT;
 -- =====================================================
 -- RESUMEN DE CREDENCIALES PARA TESTING
 -- =====================================================
--- Todas las contraseñas cumplen: 8-15 chars, mayús, minús, especiales
+-- Todas las contrasenas cumplen: 8-15 chars, mayus, minus, especiales
 -- 
--- | Usuario  | Contraseña  | Saldo    | Descripción          |
+-- | Usuario  | Contrasena  | Saldo    | Descripcion          |
 -- |----------|-------------|----------|----------------------|
 -- | admin    | Admin@123   | 10000.00 | Administrador        |
 -- | juan     | Juan#2025   | 350.00   | Usuario vendedor     |

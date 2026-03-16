@@ -44,6 +44,9 @@ The database implements **PL/SQL triggers** that ensure consistency:
 The project follows a **layered architecture** with a clear separation of concerns:
 
 ```text
+scripts/
+└── init_db.py              # Inicialización del esquema por pyodbc
+
 src/
 ├── app.py                  # Entry point
 ├── db/                     # ODBC Connection and SQL scripts
@@ -140,13 +143,11 @@ ORACLE_PASSWORD=your_password
 
 ### 3. Initialize the database
 
-Execute in your Oracle SQL client:
-```sql
--- 1. Create tables and triggers
-@src/db/init.sql
-
--- 2. (Optional) Load test data
-@src/db/seed_test_data.sql
+Use the Python initializer (no SQL Developer or sqlplus required):
+```bash
+python scripts/init_db.py
+# optional test data
+python scripts/init_db.py --with-seed
 ```
 
 ### 4. Run
@@ -155,7 +156,13 @@ Execute in your Oracle SQL client:
 ./run_tiki.sh
 ```
 
-> The script automatically configures the Oracle environment variables, activates the virtual environment, and installs dependencies if necessary.
+> The script configures Oracle environment variables, activates the virtual environment, installs dependencies, and launches the app.
+>
+> You can also initialize the database in the same flow:
+> ```bash
+> ./run_tiki.sh --init-db
+> ./run_tiki.sh --init-db --with-seed
+> ```
 
 ---
 
