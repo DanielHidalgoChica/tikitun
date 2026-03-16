@@ -38,7 +38,7 @@ The database implements **PL/SQL triggers** that ensure consistency:
 * And many more features
 
 ---
-## Usage examples
+## 📹 Usage examples
 
 **👥 User creation, login and posting of a product**
 
