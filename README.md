@@ -40,7 +40,7 @@ The database implements **PL/SQL triggers** that ensure consistency:
 ---
 ## Usage examples
 
-**User creation, login and posting of a product**
+**👥 User creation, login and posting of a product**
 
 <div style="text-align: center; width: 100%;">
   <img src="https://github.com/user-attachments/assets/76dd2813-2813-41a9-b957-cf782064c05c" alt="login_post_prod_ULTRA" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
