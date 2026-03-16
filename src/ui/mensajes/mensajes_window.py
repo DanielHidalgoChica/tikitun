@@ -269,7 +269,6 @@ def show_mensajes_view(parent_frame, username):
                         mensajes = mensajes_service.consultar_conversacion(cn, id_chat, user)
                         commit(cn)
                         messages_frame.current_chat_id = id_chat
-                        print('guarda')
                         # Recarga automática: re-renderiza la vista
                         render_mensajes(messages_frame, mensajes, user)
                     except Exception as ex:
@@ -371,7 +370,6 @@ def show_mensajes_view(parent_frame, username):
             commit(cn)
             mensajes = mensajes_service.consultar_conversacion(cn, id_chat, user)
             commit(cn)
-            print('guarda')
             # Recarga automática: re-renderiza la vista
             # Reset UI
             entry_msg.delete(0, tk.END)
@@ -475,7 +473,6 @@ def show_historico_view(parent_frame, username):
                         mensajes = mensajes_service.consultar_conversacion(cn, id_chat, user)
                         commit(cn)
                         messages_frame.current_chat_id = id_chat
-                        print('guarda')
                         # Recarga automática: re-renderiza la vista
                         render_mensajes(messages_frame, mensajes, user)
                     except Exception as ex:
