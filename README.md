@@ -113,7 +113,7 @@ sudo unzip instantclient-sqlplus-*.zip # Unzip at the same level
 sudo /opt/oracle/instantclient_23_26/odbc_update_ini.sh /
 ```
 
-5. **Fix for `libaio.so.1`** (if it appears as "not found"):
+5. **Fix for `libaio.so.1`** (if it appears as "not found" when running `run_tiki.sh`):
 ```bash
 sudo ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /opt/oracle/instantclient_23_26/libaio.so.1
 ```
