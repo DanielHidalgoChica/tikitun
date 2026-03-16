@@ -95,7 +95,7 @@ sudo apt install python3 python3-pip python3-venv python3-tk unixodbc unixodbc-d
 
 2. **Download Oracle Instant Client:**
    - Go to [Oracle ODBC Downloads](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html)
-   - Download **Basic** and **ODBC** (both `.zip`)
+   - Download **Basic**, **ODBC** and **SQL*Plus** (all of them on `.zip`)
 
 3. **Install in `/opt/oracle`:**
 ```bash
@@ -103,7 +103,8 @@ sudo mkdir -p /opt/oracle
 sudo mv instantclient-*.zip /opt/oracle/
 cd /opt/oracle
 sudo unzip instantclient-basic-*.zip
-sudo unzip instantclient-odbc-*.zip   # Unzip at the same level
+sudo unzip instantclient-odbc-*.zip   
+sudo unzip instantclient-sqlplus-*.zip # Unzip at the same level
 ```
 
 4. **Configure ODBC:**
