@@ -44,13 +44,11 @@ The database implements **PL/SQL triggers** that ensure consistency:
 The project follows a **layered architecture** with a clear separation of concerns:
 
 ```text
-scripts/
-└── init_db.py              # Inicialización del esquema por pyodbc
-
 src/
 ├── app.py                  # Entry point
-├── db/                     # ODBC Connection and SQL scripts
+├── db/                     # ODBC connection + Oracle SQL scripts
 │   ├── init.sql            # DDL + Triggers
+│   ├── drop_all.sql        # Drop previous objects
 │   └── seed_test_data.sql  # Test data
 ├── repositories/           # Repository Pattern (data access)
 │   ├── perfiles/
@@ -80,7 +78,7 @@ src/
 |------------|------------|
 | Language | Python 3.10+ |
 | Database | Oracle |
-| DB Connection | pyodbc |
+| DB Connection | pyodbc + sqlplus (schema initialization) |
 | Interface | Tkinter |
 
 ---
@@ -142,28 +140,20 @@ ORACLE_USER=x00000000
 ORACLE_PASSWORD=your_password
 ```
 
-### 3. Initialize the database
+### 3. Run (with or without DB initialization)
 
-Use the Python initializer (no SQL Developer or sqlplus required):
-```bash
-python scripts/init_db.py
-# optional test data
-python scripts/init_db.py --with-seed
-```
-
-### 4. Run
-
+Normal startup:
 ```bash
 ./run_tiki.sh
 ```
 
-> The script configures Oracle environment variables, activates the virtual environment, installs dependencies, and launches the app.
->
-> You can also initialize the database in the same flow:
-> ```bash
-> ./run_tiki.sh --init-db
-> ./run_tiki.sh --init-db --with-seed
-> ```
+Initialize database + launch app (single command):
+```bash
+./run_tiki.sh --init-db
+./run_tiki.sh --init-db --with-seed
+```
+
+> `run_tiki.sh` now handles the full flow: environment setup, dependency install, optional Oracle schema initialization through `sqlplus`, and app startup.
 
 ---
 
