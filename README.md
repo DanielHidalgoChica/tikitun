@@ -38,6 +38,9 @@ The database implements **PL/SQL triggers** that ensure consistency:
 * And many more features
 
 ---
+## Usage examples
+
+---
 
 ## 🏗️ Architecture
 
@@ -152,6 +155,7 @@ Initialize database + launch app (single command):
 ./run_tiki.sh --init-db
 ./run_tiki.sh --init-db --with-seed
 ```
+It's necessary to be connected to the UGR's VPN for the database connection to work.
 
 > `run_tiki.sh` now handles the full flow: environment setup, dependency install, optional Oracle schema initialization through `sqlplus`, and app startup.
 
