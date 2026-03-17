@@ -40,21 +40,21 @@ The database implements **PL/SQL triggers** that ensure consistency:
 ---
 ## 📹 Usage examples
 
-## 👥 User creation, login and posting of a product**
+## 👥 User creation, login and posting of a product
 
 <div style="text-align: center; width: 100%;">
   <img src="https://github.com/user-attachments/assets/76dd2813-2813-41a9-b957-cf782064c05c" alt="login_post_prod" width=1080>
 </div>
 
 
-## 🛍️ Buying Proccess Pt. 1: Adding a product to our favourites, proposing a counteroffer and sending a message**
+## 🛍️ Buying Proccess Pt. 1: Adding a product to our favourites, proposing a counteroffer and sending a message
 
 <div style="text-align: center; width: 100%;">
   <img src="https://github.com/user-attachments/assets/54d894a1-acd8-4990-881f-d9b027a2b059" alt="offer_msg" width=1080>
 </div>
 
 
-## 🛍️ Buying Process Pt. 2: Accepting the offer and selling the product**
+## 🛍️ Buying Process Pt. 2: Accepting the offer and selling the product
 
 <div style="text-align: center; width: 100%;">
   <img src="https://github.com/user-attachments/assets/f059cb9c-bfd4-45b9-8ae7-c68da50736ef" alt="offer_msg" width=1080>
