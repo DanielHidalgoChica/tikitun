@@ -51,11 +51,15 @@ The database implements **PL/SQL triggers** that ensure consistency:
 **Buying Proccess Pt. 1: Adding a product to our favourites, proposing a counteroffer and sending a message**
 
 <div style="text-align: center; width: 100%;">
-  <img src="https://github.com/user-attachments/assets/07a6325b-15e1-48bb-8e11-750438fa5c97" alt="offer_msg" width=1080>
+  <img src="https://github.com/user-attachments/assets/54d894a1-acd8-4990-881f-d9b027a2b059" alt="offer_msg" width=1080>
 </div>
 
 
 **Buying Process Pt. 2: Accepting the offer and selling the product**
+
+<div style="text-align: center; width: 100%;">
+  <img src="https://github.com/user-attachments/assets/f059cb9c-bfd4-45b9-8ae7-c68da50736ef" alt="offer_msg" width=1080>
+</div>
 
 
 ## 🏗️ Architecture
