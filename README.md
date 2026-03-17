@@ -43,10 +43,19 @@ The database implements **PL/SQL triggers** that ensure consistency:
 **👥 User creation, login and posting of a product**
 
 <div style="text-align: center; width: 100%;">
-  <img src="https://github.com/user-attachments/assets/76dd2813-2813-41a9-b957-cf782064c05c" alt="login_post_prod_ULTRA" width=1080>
+  <img src="https://github.com/user-attachments/assets/76dd2813-2813-41a9-b957-cf782064c05c" alt="login_post_prod" width=1080>
 </div>
 
 ---
+
+**Buying Proccess Pt. 1: Adding a product to our favourites, proposing a counteroffer and sending a message**
+
+<div style="text-align: center; width: 100%;">
+  <img src="https://github.com/user-attachments/assets/07a6325b-15e1-48bb-8e11-750438fa5c97" alt="offer_msg" width=1080>
+</div>
+
+
+**Buying Process Pt. 2: Accepting the offer and selling the product**
 
 
 ## 🏗️ Architecture
