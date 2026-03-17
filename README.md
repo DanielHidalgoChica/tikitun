@@ -185,7 +185,7 @@ It's necessary to be connected to the UGR's VPN for the database connection to w
 | Name | Subsystem |
 |--------|------------|
 | Aitor de la Iglesia García | Messaging |
-| Daniel Hidalgo Chica | Feed, Search & Favorites |
+| Daniel Hidalgo Chica | Feed, Search & Favorites (+ Platform Setup and Demo) |
 | Elsa Rodríguez Macmichael | Profile Management |
 | Juan Manuel Fernández García | Sales Management |
 | Roberto González Lugo | Product Management |
