@@ -47,7 +47,7 @@ The database implements **PL/SQL triggers** that ensure consistency:
 </div>
 
 
-## 🛍️ Buying Proccess Pt. 1: Adding a product to our favourites, proposing a counteroffer and sending a message
+## 🛍️ Buying Proccess Pt. 1: Adding a product to our favourites, making a counteroffer and sending a message
 
 <div style="text-align: center; width: 100%;">
   <img src="https://github.com/user-attachments/assets/54d894a1-acd8-4990-881f-d9b027a2b059" alt="offer_msg" width=1080>
